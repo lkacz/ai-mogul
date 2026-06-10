@@ -50,6 +50,24 @@ Each facility is its own scene: garage → startup office → colo cage → hype
 the gigawatt Factory with its glowing core that pulses faster as you approach AGI.
 Milestones rain confetti on everyone.
 
+## Minigames at key moments 🎮
+
+Short skill games appear at pivotal moments — each one teaches a real ML/infra concept and
+ends with a "📚 The real thing" note:
+
+- **🎚️ Learning-Rate Rider** (launching a frontier run) — ride the LR just under a moving
+  stability ceiling: warmup → cruise → decay. Push too hard and the loss goes NaN. Up to +12%
+  effective compute for that run.
+- **🧹 Dedup Frenzy** (acquiring a dataset) — zap SEO spam, duplicates and PII before they hit
+  the corpus, without deleting Shakespeare. Permanent data-quality bonus.
+- **📟 Node Hunt** (cluster outage at 3 AM) — one of 16 nodes is stalling the all-reduce; find
+  it by bisection with 5 diagnostics and win back 90% of the lost progress.
+- **🍭 RLHF Rater** (researching RLHF) — judge answer pairs and meet the real failure modes:
+  sycophancy, hallucination, verbosity, non-haiku haikus.
+
+All skippable, all rate-limited, all rewards capped so the idle balance holds. The ticker also
+drops real, checkable facts about scaling laws, MFU, PUE and friends.
+
 ## How to play
 
 - **Lab** — watch your lab live; allocate compute between training, inference (revenue) and research; do gigs early.
