@@ -8,6 +8,7 @@ import { GPU_BY_ID, gpuPrice } from '../core/state.js';
 import * as E from '../core/engine.js';
 import { fmtMoney, fmtNum, fmtFlops, fmtFlop, fmtPower, fmtDur, fmtPct, fmtDate, clamp, log10 } from '../core/util.js';
 import { game, toast, showModal, closeModal, set, setBar, bar, esc, renderAll, switchTab } from './ui.js';
+import { initScene } from './scene.js';
 
 export const ACTIONS = {};
 export const INPUTS = {};
@@ -29,7 +30,6 @@ const labTab = {
   id: 'lab', label: '🏠 Lab',
   sig: (s, sel) => [s.phase, s.runs.length, s.models.length, s.news.length, sel.deployed?.id, quoteIdx].join('|'),
   build(s, sel) {
-    const dots = Math.min(sel.gpuCount, 160);
     const runsHtml = s.runs.length ? s.runs.map(r => {
       return `<div class="run-card">
         <div class="row" style="justify-content:space-between">
@@ -52,7 +52,14 @@ const labTab = {
       <div class="bar-label"><span id="lab-adopt"></span><span id="lab-served"></span></div>`
       : `<div class="muted">No model deployed. Train one, then deploy it from the Models tab. Revenue = min(market adoption, serving capacity).</div>`;
 
-    return `<div class="grid2">
+    return `<div class="card scene-card">
+      <canvas id="scene-canvas" class="scene-canvas" title="This is your lab, live. Click the people."></canvas>
+      <div class="row" style="justify-content:space-between; margin-top:7px; flex-wrap:wrap">
+        <span><b>${FACILITY_EMOJI[s.phase]} ${esc(sel.fac.name)}</b> <span class="faint">— ${esc(sel.fac.desc)}</span></span>
+        <span class="faint">👆 click the people (and the cat)</span>
+      </div>
+    </div>
+    <div class="grid2">
       <div>
         <div class="card">
           <div class="row" style="gap:14px">
@@ -62,13 +69,6 @@ const labTab = {
               <div class="muted" style="font-style:italic; margin-top:3px">“${esc(MARIO_QUOTES[quoteIdx])}”</div>
             </div>
           </div>
-        </div>
-        <div class="card facility-art">
-          <div class="femoji">${FACILITY_EMOJI[s.phase]}</div>
-          <div><b>${esc(sel.fac.name)}</b></div>
-          <div class="faint">${esc(sel.fac.desc)}</div>
-          <div class="gpu-grid">${'<span class="gpu-dot"></span>'.repeat(dots)}</div>
-          ${sel.gpuCount > dots ? `<div class="faint">+ ${fmtNum(sel.gpuCount - dots)} more accelerators</div>` : ''}
         </div>
         <div class="card">
           <h3>Side hustle</h3>
@@ -108,6 +108,9 @@ const labTab = {
         </div>
       </div>
     </div>`;
+  },
+  afterBuild() {
+    initScene(document.getElementById('scene-canvas'));
   },
   update(s, sel) {
     // gig button cooldown

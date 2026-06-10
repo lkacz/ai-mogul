@@ -112,3 +112,4 @@ check('fractional steps are stable', () => {
 console.log('─'.repeat(50));
 if (failures) { console.log(`❌ ${failures} failure(s)`); process.exit(1); }
 console.log('✅ SMOKE PASS');
+process.exit(0);  // module-level intervals (quote rotation) would keep node alive

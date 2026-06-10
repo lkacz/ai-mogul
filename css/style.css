@@ -128,6 +128,14 @@ label.chk { display: flex; gap: 6px; align-items: center; cursor: pointer; font-
 .agi-banner .cap-big { font-size: 26px; font-weight: 800; color: var(--purple); }
 .buff-chip { display: inline-block; background: #2a2440; border: 1px solid #4b3f78; color: #c4b5fd; border-radius: 14px; padding: 2px 9px; font-size: 11px; margin: 2px 3px 0 0; }
 
+/* ── Pixel scene ────────────────────────── */
+.scene-card { padding: 9px; }
+.scene-canvas {
+  width: 100%; display: block; border-radius: 8px;
+  background: #0a0d14; image-rendering: pixelated; cursor: pointer;
+  border: 1px solid var(--border);
+}
+
 /* ── Facility art ───────────────────────── */
 .facility-art { text-align: center; padding: 6px 0 2px; }
 .facility-art .femoji { font-size: 46px; filter: drop-shadow(0 0 14px rgba(34,211,238,.25)); }

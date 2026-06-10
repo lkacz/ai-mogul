@@ -39,9 +39,20 @@ The numbers are compressed for playability, but the *mechanics* are the real thi
 Capability is a log-scale index of effective training compute: ~12 is a GPT-2-era model,
 ~28 the ChatGPT moment, ~38 GPT-4-era, 100 = AGI.
 
+## The lab is alive 🕹️
+
+The Lab tab renders your facility as a living pixel-art scene, drawn procedurally on canvas
+(no sprite assets, zero dependencies): Mario Damodei wanders the garage among GPU shelves and
+pizza boxes; hired scientists, engineers, ops and sales walk around and work at standing desks;
+racks blink with LEDs that track your real GPU count and training activity; monitors show the
+live loss curve of the current run. Click anyone — including the cat — for a quip.
+Each facility is its own scene: garage → startup office → colo cage → hyperscale hall →
+the gigawatt Factory with its glowing core that pulses faster as you approach AGI.
+Milestones rain confetti on everyone.
+
 ## How to play
 
-- **Lab** — allocate compute between training, inference (revenue) and research; do gigs early.
+- **Lab** — watch your lab live; allocate compute between training, inference (revenue) and research; do gigs early.
 - **Training** — pick parameters & tokens, watch the predicted capability, hit start.
 - **Hardware** — buy GPUs (GTX 1070 → H100 → B200 → your own custom silicon); mind power & slots; upgrade the facility: garage → office → colo → hyperscale DC → 6 GW AI factory.
 - **Research** — 32 real techniques across 4 eras, from BPE tokenization to recursive self-improvement.
@@ -54,7 +65,7 @@ Capability is a log-scale index of effective training compute: ~12 is a GPT-2-er
 
 ```
 js/core/   pure simulation (no DOM): balance, engine, state, catalogs
-js/ui/     rendering + input
+js/ui/     rendering + input (scene.js = procedural pixel-art lab scene)
 test/      bot.mjs     — scripted full playthrough, asserts AGI is reachable & paced
            smoke.mjs   — imports everything under a DOM stub, builds all tabs
            browser.mjs — boots the real game in headless Chrome/Edge via playwright-core

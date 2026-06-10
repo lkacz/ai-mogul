@@ -7,6 +7,7 @@ import { MILESTONE_BY_ID, rewardText } from './core/milestones.js';
 import { fmtMoney, fmtNum, fmtDur, fmtDate, fmtFlop } from './core/util.js';
 import { game, renderAll, initDispatch, toast, showModal, closeModal } from './ui/ui.js';
 import { ACTIONS } from './ui/tabs.js';
+import { celebrate } from './ui/scene.js';
 
 // ── Load / new game ───────────────────────────────────────────────
 function load() {
@@ -62,6 +63,7 @@ let winShown = false;
 function maybeShowWin() {
   if (!s.won || winShown || s.wonShown) return;
   winShown = true; s.wonShown = true;
+  celebrate();
   const st = s.stats;
   showModal(`<h2>🌟 AGI ACHIEVED</h2>
     <p>${fmtDate(s.simHours)}. The final checkpoint loads. It asks Mario how his day was —
@@ -135,7 +137,10 @@ function pumpMilestoneToasts() {
   if (!s.lastMilestone) return;
   const m = MILESTONE_BY_ID[s.lastMilestone];
   s.lastMilestone = null;
-  if (m) toast(`🏁 <b>${m.name}</b>${m.reward ? '<br><span class="small">' + rewardText(m.reward) + '</span>' : ''}`, 'mile');
+  if (m) {
+    toast(`🏁 <b>${m.name}</b>${m.reward ? '<br><span class="small">' + rewardText(m.reward) + '</span>' : ''}`, 'mile');
+    celebrate();
+  }
 }
 
 // ── Game loop ─────────────────────────────────────────────────────
