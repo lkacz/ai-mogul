@@ -37,6 +37,8 @@ export const EVENTS = [
         const rate = sel.trainRate / Math.max(1, s.runs.length);
         r.physDone = Math.max(0, r.physDone - rate * 3600 * lostH);
       }
+      // offer the Node Hunt minigame (consumed by the UI if the player is around)
+      if (s.runs.length) s.lastIncident = { lostH, realAt: Date.now() };
       return lostH;
     },
     text: (s, h) => h <= 1
@@ -63,6 +65,22 @@ export const EVENTS = [
   { id: 'enterprise', weight: 5, minPhase: 1,
     apply: (s) => { const amt = scaledMoney(s, 3000); s.money += amt; return amt; },
     text: (s, amt) => `🤝 An enterprise signs an annual API contract upfront: +${fmtMoney(amt)}.` },
+];
+
+// Real, checkable facts — surfaced occasionally in the news ticker.
+export const FACTS = [
+  '💡 Real fact: GPT-3 (2020) trained on ~300B tokens with ~3.1e23 FLOPs — about 10,000× more compute than GPT-1 two years earlier.',
+  '💡 Real fact: the Chinchilla paper (2022) showed most large models were undertrained — compute-optimal is ~20 tokens per parameter.',
+  '💡 Real fact: "MFU" (model FLOPs utilization) above 50% is excellent; naive training code often idles GPUs below 20%.',
+  '💡 Real fact: training Adam keeps ~16–18 bytes of state per parameter — VRAM, not FLOPs, often caps model size.',
+  '💡 Real fact: algorithmic efficiency for image models doubled roughly every 16 months (OpenAI, 2020) — progress isn\'t just hardware.',
+  '💡 Real fact: a single H100 draws ~700W — a 100k-GPU cluster needs its own power-plant-scale substation.',
+  '💡 Real fact: PUE (power usage effectiveness) of 1.1 means 10% overhead for cooling; the global average is ~1.5.',
+  '💡 Real fact: FlashAttention computes exact attention faster by minimizing memory reads — IO, not math, was the bottleneck.',
+  '💡 Real fact: deduplicating training data measurably reduces memorization and improves loss (Lee et al., 2021).',
+  '💡 Real fact: in synchronous training, one slow GPU ("straggler") stalls all of them — finding it is literal binary search.',
+  '💡 Real fact: RLHF tunes models against a reward model trained from human preference pairs — typical failure mode: sycophancy.',
+  '💡 Real fact: frontier training runs take months; a mid-run loss spike can mean restarting from a checkpoint days back.',
 ];
 
 export const NEWS_FLAVOR = [

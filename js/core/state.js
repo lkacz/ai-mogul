@@ -25,6 +25,7 @@ export function defaultState() {
     alloc: { train: 0.7, inf: 0.2, res: 0.1 },  // compute allocation
     staff: { engineer: 0, researcher: 0, ops: 0, sales: 0 },
     dataTier: 0,
+    dataQBonus: {},    // dataset id -> quality multiplier from Dedup Frenzy
     research: [],                                // completed research ids
     funding: [],                                 // taken round ids
     lastFundingH: -1e9,                          // sim-hour the last round closed
@@ -48,6 +49,7 @@ export function defaultState() {
       runsStarted: 0, apiRevenue: 0, gigRevenue: 0, spent: 0,
       flops: 0, tokens: 0, papers: 0, openSourced: 0,
       peakMoney: BAL.START_MONEY, elecSpent: 0,
+      lrBest: 0, dedupBest: 0, nodesFixed: 0, minigames: 0, rlhfRated: 0,
     },
   };
 }
@@ -119,7 +121,7 @@ export function selectors(s) {
 
   // economy
   const ds = DATASETS[s.dataTier];
-  const dataQ = ds.quality * fx.dataQ;
+  const dataQ = ds.quality * fx.dataQ * ((s.dataQBonus && s.dataQBonus[ds.id]) || 1);
 
   const deployed = s.models.find(m => m.deployed) || null;
   let price = 0, capacity = 0, potential = 0, revenue = 0, served = 0;

@@ -8,6 +8,7 @@ import { fmtMoney, fmtNum, fmtDur, fmtDate, fmtFlop } from './core/util.js';
 import { game, renderAll, initDispatch, toast, showModal, closeModal } from './ui/ui.js';
 import { ACTIONS } from './ui/tabs.js';
 import { celebrate } from './ui/scene.js';
+import { offerNodeHunt } from './ui/minigames.js';
 
 // ── Load / new game ───────────────────────────────────────────────
 function load() {
@@ -132,6 +133,19 @@ ACTIONS.resetGo = () => {
   closeModal(); renderAll(); showIntro();
 };
 
+// ── Outage incidents → Node Hunt minigame ────────────────────────
+function pumpIncidents() {
+  const inc = s.lastIncident;
+  if (!inc) return;
+  s.lastIncident = null;
+  // only interrupt a player who's actually here (not offline catch-up)
+  if (document.hidden) return;
+  if (!document.getElementById('modal-root').classList.contains('hidden')) return;
+  if (Date.now() - (inc.realAt || 0) > 90 * 1000) return;
+  if (!s.runs.length) return;
+  offerNodeHunt(inc);
+}
+
 // ── Milestone toasts ──────────────────────────────────────────────
 function pumpMilestoneToasts() {
   if (!s.lastMilestone) return;
@@ -162,6 +176,7 @@ setInterval(() => {
     }
   }
   pumpMilestoneToasts();
+  pumpIncidents();
   maybeShowWin();
   if (s.phase !== lastPhase) { lastPhase = s.phase; renderAll(); }
 }, 50);
@@ -172,6 +187,7 @@ window.addEventListener('beforeunload', save);
 document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
 
 // ── Boot ──────────────────────────────────────────────────────────
+window.AIMOGUL = game;   // debug/test handle
 initDispatch();
 renderAll();
 if (fresh) showIntro();

@@ -9,9 +9,11 @@ import * as E from '../core/engine.js';
 import { fmtMoney, fmtNum, fmtFlops, fmtFlop, fmtPower, fmtDur, fmtPct, fmtDate, clamp, log10 } from '../core/util.js';
 import { game, toast, showModal, closeModal, set, setBar, bar, esc, renderAll, switchTab } from './ui.js';
 import { initScene } from './scene.js';
+import { mgHandlers, offerLrGame, offerDedup, playRlhf } from './minigames.js';
 
 export const ACTIONS = {};
 export const INPUTS = {};
+Object.assign(ACTIONS, mgHandlers);
 
 const FACILITY_EMOJI = ['🏠', '🏢', '🗄️', '🏭', '🌆'];
 
@@ -286,9 +288,17 @@ INPUTS.trAuto = (v, el) => {
 };
 INPUTS.autoRetrain = (v, el) => { game.s.autoRetrain = el.checked; };
 INPUTS.autoDeploy = (v, el) => { game.s.autoDeploy = el.checked; };
+let lrOfferCooldown = 0;
 ACTIONS.startRun = () => {
   const { N, D } = trainEstimates(game.s, game.sel);
-  doAction(E.startRun, Math.round(N), Math.round(D));
+  const projected = capabilityFor(trainCompute(N, D), game.sel.algoEff, game.sel.dataQ, N, D);
+  const r = doAction(E.startRun, Math.round(N), Math.round(D));
+  // frontier launches earn a Learning-Rate Rider offer (rate-limited)
+  if (r.ok && projected > game.s.bestCap && Date.now() > lrOfferCooldown) {
+    lrOfferCooldown = Date.now() + 4 * 60 * 1000;
+    const run = game.s.runs[game.s.runs.length - 1];
+    if (run) offerLrGame(run.id);
+  }
 };
 ACTIONS.suggestRun = () => {
   const sug = E.suggestRun(game.s);
@@ -474,7 +484,13 @@ const resTab = {
     }
   },
 };
-ACTIONS.research = (id) => doAction(E.buyResearch, id);
+ACTIONS.research = (id) => {
+  const r = doAction(E.buyResearch, id);
+  if (r.ok && id === 'rlhf' && !game.s.stats.rlhfRated) {
+    game.s.stats.rlhfRated = 1;
+    playRlhf();                 // one-shot: train the reward model yourself
+  }
+};
 
 // ════════════════════════ COMPANY ════════════════════════
 const coTab = {
@@ -565,7 +581,13 @@ const coTab = {
 };
 ACTIONS.hire = (arg) => { const { id, n } = JSON.parse(arg); doAction(E.hire, id, n); };
 ACTIONS.fire = (arg) => { const { id, n } = JSON.parse(arg); doAction(E.fire, id, n); };
-ACTIONS.buyData = (id) => doAction(E.buyDataset, id);
+ACTIONS.buyData = (id) => {
+  const r = doAction(E.buyDataset, id);
+  if (r.ok) {
+    const d = DATASETS.find(x => x.id === id);
+    offerDedup(id, d.name);     // Dedup Frenzy: clean the new corpus
+  }
+};
 ACTIONS.fund = (id) => doAction(E.takeFunding, id);
 ACTIONS.paper = () => doAction(E.publishPaper);
 

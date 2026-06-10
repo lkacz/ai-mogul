@@ -60,12 +60,37 @@ await check('speed up to 25×', async () => {
   await page.click('.speed-btn:has-text("25×")');
 });
 
-await check('start a training run', async () => {
+await check('start a training run → LR minigame offered', async () => {
   await page.click('[data-act=tab][data-arg=train]');
   await page.waitForSelector('[data-act=startRun]');
   await page.click('[data-act=suggestRun]');
   await page.click('[data-act=startRun]');
+  await page.waitForSelector('[data-act=mgPlayLr]', { timeout: 4000 });
+  const txt = await page.textContent('#modal-root .modal');
+  if (!/learning rate/i.test(txt)) throw new Error('LR offer lacks lesson text');
+  await page.click('[data-act=mgSkipLr]');
   await page.waitForSelector('.run-card', { timeout: 4000 });
+});
+
+await check('dataset purchase → Dedup Frenzy plays to completion', async () => {
+  await page.evaluate(() => { window.AIMOGUL.s.money = 1e6; });
+  await page.click('[data-act=tab][data-arg=co]');
+  await page.click('[data-act=buyData][data-arg=curated]');
+  await page.waitForSelector('[data-act=mgPlayDedup]', { timeout: 4000 });
+  await page.click('[data-act=mgPlayDedup]');
+  await page.waitForSelector('#mg-dd', { timeout: 4000 });
+  // zap a few cards mid-air, then wait for the finish modal
+  for (let i = 0; i < 14; i++) {
+    await page.waitForTimeout(900);
+    const box = await page.locator('#mg-dd').boundingBox();
+    await page.mouse.click(box.x + box.width * (0.15 + (i % 5) * 0.17), box.y + box.height * 0.45);
+  }
+  await page.waitForSelector('[data-act=mgClose]', { timeout: 30000 });
+  const txt = await page.textContent('#modal-root .modal');
+  if (!txt.includes('quality')) throw new Error('dedup finish modal missing');
+  const bonus = await page.evaluate(() => window.AIMOGUL.s.dataQBonus.curated);
+  if (!(bonus >= 1)) throw new Error('dataQBonus not applied: ' + bonus);
+  await page.click('[data-act=mgClose]');
 });
 
 await check('gig button works', async () => {

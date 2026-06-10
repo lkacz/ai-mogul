@@ -5,7 +5,7 @@ import { BAL, capabilityFor, trainCompute, optimalTokens } from './balance.js';
 import { GPUS, FACILITIES, DATASETS, FUNDING, RIVAL_ASYMPTOTE } from './data.js';
 import { RESEARCH_BY_ID } from './research.js';
 import { MILESTONES, MILESTONE_BY_ID } from './milestones.js';
-import { EVENTS } from './events.js';
+import { EVENTS, NEWS_FLAVOR, FACTS } from './events.js';
 import { selectors, GPU_BY_ID, DATASET_BY_ID, STAFF_BY_ID, gpuPrice } from './state.js';
 import { clamp, uid, fmtNum } from './util.js';
 
@@ -59,8 +59,12 @@ export function step(s, hours = 1) {
       r.cap + r.rate * (1 - r.cap / RIVAL_ASYMPTOTE) * hours);
   }
 
-  // 5. Random events
+  // 5. Random events + ambient news/facts
   if (Math.random() < BAL.EVENT_CHANCE_PER_H * hours) fireEvent(s, sel);
+  if (Math.random() < 0.002 * hours) {
+    const pool = Math.random() < 0.5 ? NEWS_FLAVOR : FACTS;
+    pushNews(s, pool[(Math.random() * pool.length) | 0]);
+  }
 
   // 6. Expire buffs
   s.buffs = s.buffs.filter(b => b.untilH > s.simHours);
@@ -73,7 +77,8 @@ export function step(s, hours = 1) {
 
 function finalizeRun(s, sel, r) {
   const noise = 0.97 + Math.random() * 0.06;
-  const cap = capabilityFor(r.physNeed, sel.algoEff, r.dataQ, r.N, r.D) * noise;
+  // lrBonus: earned in the Learning-Rate Rider minigame at launch
+  const cap = capabilityFor(r.physNeed * (r.lrBonus || 1), sel.algoEff, r.dataQ, r.N, r.D) * noise;
   const model = {
     id: uid(), name: r.name, N: r.N, D: r.D, cap,
     physC: r.physNeed, deployed: false, trainedH: s.simHours,
@@ -316,6 +321,17 @@ export function takeFunding(s, id) {
   s.rep = Math.min(100, s.rep + f.rep);
   pushNews(s, `💰 ${f.name} closed: +${fmtNum(f.amount)} in the bank.`);
   return ok(`${f.name} closed!`);
+}
+
+// Node Hunt minigame: give back a fraction of outage-lost training progress
+export function restoreOutage(s, lostH, frac) {
+  const sel = selectors(s);
+  if (!s.runs.length || sel.trainRate <= 0) return;
+  const perRun = sel.trainRate / s.runs.length;
+  for (const r of s.runs) {
+    const rate = Math.min(perRun, r.N * sel.ppRate);
+    r.physDone = Math.min(r.physNeed * 0.999, r.physDone + rate * 3600 * lostH * frac);
+  }
 }
 
 export function setAlloc(s, key, value) {
