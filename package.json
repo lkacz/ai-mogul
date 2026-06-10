@@ -1,0 +1,15 @@
+{
+  "name": "ai-mogul",
+  "version": "1.0.0",
+  "description": "AI Mogul — a realistic browser simulation game: from a garage GPU to a gigawatt AI factory chasing AGI.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node test/smoke.mjs && node test/bot.mjs",
+    "test:browser": "node test/browser.mjs",
+    "serve": "npx http-server -p 8080 -c-1"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.60.0"
+  }
+}

@@ -1,0 +1,111 @@
+// Static catalogs: hardware, facilities, datasets, staff, funding rounds, rivals.
+
+export const GPUS = [
+  { id: 'gtx1070', name: 'GTX 1070 (used)', tflops: 6.5, watts: 150, vram: 8,
+    price: 140, phase: 0,
+    desc: 'eBay special. No tensor cores, but it trains tiny transformers.' },
+  { id: 'rtx3060', name: 'RTX 3060 12GB', tflops: 25, watts: 170, vram: 12,
+    price: 320, phase: 0,
+    desc: 'Budget tensor cores. The honest workhorse of garage ML.' },
+  { id: 'rtx4090', name: 'RTX 4090', tflops: 165, watts: 450, vram: 24,
+    price: 1800, phase: 0,
+    desc: 'Consumer flagship. Melts power connectors and benchmarks alike.' },
+  { id: 'a100', name: 'A100 80GB', tflops: 312, watts: 400, vram: 80,
+    price: 9500, phase: 1,
+    desc: 'The chip that trained the GPT-3 generation. NVLink, HBM2e.' },
+  { id: 'h100', name: 'H100 SXM', tflops: 990, watts: 700, vram: 80,
+    price: 28000, phase: 1,
+    desc: 'Hopper. FP8 transformer engine. The currency of the AI boom.' },
+  { id: 'b200', name: 'B200 Blackwell', tflops: 2250, watts: 1000, vram: 192,
+    price: 42000, phase: 2,
+    desc: 'Dual-die monster. Liquid cooling strongly recommended.' },
+  { id: 'vr300', name: 'Rubin R300', tflops: 8000, watts: 1400, vram: 288,
+    price: 70000, phase: 3,
+    desc: 'Next-gen accelerator with HBM4. Allocations sell out years ahead.' },
+  { id: 'mx1', name: 'Mogul MX-1 (custom)', tflops: 15000, watts: 900, vram: 512,
+    price: 55000, phase: 3, research: 'customSilicon',
+    desc: 'Your own training silicon. Designed in-house, fabbed at 2nm. Best perf/watt in the world.' },
+];
+
+export const FACILITIES = [
+  { id: 'garage', name: 'Garage', cost: 0, slots: 8, powerW: 3000, staffMax: 1,
+    pue: 1.0, elecPrice: 0.16, upkeep: 0,
+    desc: 'A breaker box rated for 3 kW, a folding table, and a dream.',
+    story: 'San Mateo, January 2025. Mario Damodei quits his big-lab job with $1,500 and a gaming PC. The plan: train language models until something works.' },
+  { id: 'office', name: 'Startup Office', cost: 30e3, slots: 64, powerW: 60e3, staffMax: 12,
+    pue: 1.55, elecPrice: 0.14, upkeep: 15,
+    desc: 'A leased office with a server closet, 60 kW of power and questionable airflow (PUE 1.55).',
+    story: 'The garage breaker finally trips for the last time. Mario signs a lease, mounts a rack, and hires the first believers. The whiteboard says: "SCALE IS ALL YOU NEED."' },
+  { id: 'colo', name: 'Colo Datacenter Suite', cost: 600e3, slots: 1200, powerW: 1.2e6, staffMax: 80,
+    pue: 1.35, elecPrice: 0.10, upkeep: 350,
+    desc: 'A leased cage in a colocation facility. 1.2 MW critical load, real cooling (PUE 1.35), remote hands.',
+    story: 'Racks on racks. Mario stops naming the servers — there are too many now. Investors start calling *him*.' },
+  { id: 'dc', name: 'Hyperscale Datacenter', cost: 30e6, slots: 60e3, powerW: 60e6, staffMax: 1200,
+    pue: 1.2, elecPrice: 0.06, upkeep: 12e3,
+    desc: 'Your own building: 60 MW, evaporative cooling (PUE 1.20), dedicated substation, wholesale power.',
+    story: 'A former warehouse outside Columbus, Ohio. Cheap land, cheap power, fiber on three routes. The control room has a wall of dashboards and one framed photo of the garage.' },
+  { id: 'factory', name: 'AI Factory Campus', cost: 2.5e9, slots: 6e6, powerW: 6e9, staffMax: 20000,
+    pue: 1.08, elecPrice: 0.035, upkeep: 400e3,
+    desc: 'A gigawatt-class campus: 6 GW, on-site generation, direct-to-chip liquid cooling (PUE 1.08).',
+    story: 'They call it the Factory. Six gigawatts behind its own gas turbines and a solar field you can see from orbit. Inside, one job: turn electricity into intelligence.' },
+];
+
+export const DATASETS = [
+  { id: 'scrape', name: 'Public Web Scrape', cost: 0, tokens: 8e9, quality: 1.0,
+    desc: 'A Common Crawl slice, deduplicated on Mario\'s NAS. 8B tokens of the raw internet.' },
+  { id: 'curated', name: 'Curated Web + Books', cost: 2500, tokens: 150e9, quality: 1.12,
+    desc: 'Filtered web text, public-domain books, Wikipedia. Cleaner data, better loss.' },
+  { id: 'licensed', name: 'Licensed Corpora + Code', cost: 120e3, tokens: 3e12, quality: 1.25,
+    desc: 'Licensed publishers, news archives, and a mountain of permissively-licensed code.' },
+  { id: 'multimodal', name: 'Multimodal Library', cost: 8e6, tokens: 40e12, quality: 1.38,
+    desc: 'Text, images, audio, video — licensed at scale. The model learns about the world, not just the web.' },
+  { id: 'synthetic', name: 'Synthetic Data Engine', cost: 250e6, tokens: 1e16, quality: 1.55,
+    research: 'synthData',
+    desc: 'Your own models generate, verify and grade training data. The data wall falls.' },
+];
+
+export const STAFF = [
+  { id: 'engineer', name: 'ML Engineer', wage: 55,
+    desc: 'Optimizes kernels and pipelines: +0.4% MFU each (diminishing cap).' },
+  { id: 'researcher', name: 'Research Scientist', wage: 95,
+    desc: 'Generates 1.2 research points per hour each.' },
+  { id: 'ops', name: 'Infra / DC Ops', wage: 45,
+    desc: 'Keeps the fleet alive: −1.5% electricity cost each (max −45%).' },
+  { id: 'sales', name: 'GTM & Sales', wage: 50,
+    desc: 'Sells the API: +4% demand each.' },
+];
+
+// gapDays: investors want to see sustained traction — each round only opens
+// this many sim-days after the previous one closed.
+export const FUNDING = [
+  { id: 'seed', name: 'Seed Round', amount: 500e3, reqCap: 12, reqRep: 8, rep: 8, gapDays: 0,
+    desc: 'A famous angel saw your demo. Term sheet on a napkin.' },
+  { id: 'seriesA', name: 'Series A', amount: 20e6, reqCap: 25, reqRep: 20, rep: 10, gapDays: 60,
+    desc: 'A real venture round. The partners want to see scaling curves.' },
+  { id: 'seriesB', name: 'Series B', amount: 300e6, reqCap: 40, reqRep: 40, rep: 10, gapDays: 120,
+    desc: 'Growth capital for serious compute. Your data room is mostly loss curves.' },
+  { id: 'seriesC', name: 'Series C', amount: 5e9, reqCap: 55, reqRep: 60, rep: 10, gapDays: 180,
+    desc: 'Sovereign funds and hyperscalers fight for allocation. You pick the quiet ones.' },
+  { id: 'sovereign', name: 'Sovereign Megaround', amount: 80e9, reqCap: 70, reqRep: 78, rep: 12, gapDays: 270,
+    desc: 'Nation-state capital for the Factory. The term sheet has a foreword.' },
+];
+
+export const RIVALS = [
+  { id: 'openbrain', name: 'OpenBrain', start: 14, rate: 0.0060 },
+  { id: 'cogito', name: 'DeepCogito', start: 10, rate: 0.0045 },
+  { id: 'macrosoft', name: 'Macrosoft AI', start: 8, rate: 0.0035 },
+];
+export const RIVAL_ASYMPTOTE = 97; // rivals stall just short of AGI — the last leg is yours to win
+
+export const MARIO_QUOTES = [
+  'Scaling laws don\'t care about your feelings. They just hold.',
+  'Every loss curve is a story. Mine mostly start with "the run crashed at 3am".',
+  'Compute, data, algorithms. Everything else is commentary.',
+  'My brother runs a lab too. We don\'t talk about benchmarks at Thanksgiving.',
+  'The bitter lesson: general methods + more compute win. Every time.',
+  'I don\'t mine crypto. I mine gradients.',
+  'PUE of 1.0 just means the waste heat is in the room with you.',
+  'An H100 is just a GTX 1070 that believed in itself.',
+  'Chinchilla says 20 tokens per parameter. Chinchilla is usually right.',
+  'AGI timeline? Ask my burn rate.',
+];

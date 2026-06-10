@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Mogul — from garage to AGI</title>
+  <meta name="description" content="A realistic browser simulation game: start training language models on a garage PC and scale Mario Damodei's lab into a gigawatt AI factory chasing AGI.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="topbar">
+    <div class="logo">🧠 AI&nbsp;MOGUL</div>
+    <div class="hdr-chip" id="hdr-phase">Garage</div>
+    <div class="hdr-chip" id="hdr-date">Jan 6, 2025</div>
+    <div class="spacer"></div>
+    <div id="hdr-money">$1,500</div>
+    <div id="speed-controls"></div>
+    <button class="icon-btn" id="btn-settings" data-act="settings" title="Settings / Save">⚙️</button>
+  </header>
+
+  <div id="layout">
+    <aside id="sidebar"></aside>
+    <main id="main">
+      <nav id="tabs"></nav>
+      <div id="tab-content"></div>
+    </main>
+  </div>
+
+  <footer id="ticker"><span id="ticker-icon">📰</span><span id="ticker-text"></span></footer>
+
+  <div id="modal-root" class="hidden"></div>
+  <div id="toast-root"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
