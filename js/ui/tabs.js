@@ -15,7 +15,7 @@ export const ACTIONS = {};
 export const INPUTS = {};
 Object.assign(ACTIONS, mgHandlers);
 
-const FACILITY_EMOJI = ['🏠', '🏢', '🗄️', '🏭', '🌆', '🛰️'];
+const FACILITY_EMOJI = ['🏠', '🏢', '🗄️', '🏭', '🌆', '🛰️', '☀️', '🌌'];
 
 function doAction(fn, ...args) {
   const r = fn(game.s, ...args);
@@ -352,8 +352,9 @@ const hwTab = {
       ${next ? `<div style="margin-top:12px" class="row">
         <button class="act gold" data-act="buyFacility" id="hw-upgrade">⬆ Upgrade: ${esc(next.name)} — ${fmtMoney(next.cost)}</button>
       </div>
+      ${next.research && !s.research.includes(next.research) ? `<div class="faint" style="margin-top:4px">🔒 requires research: ${esc(RESEARCH_BY_ID[next.research]?.name || next.research)}</div>` : ''}
       <div class="faint" style="margin-top:4px">${fmtNum(next.slots)} slots · ${fmtPower(next.powerW)} · PUE ${next.pue} · $${next.elecPrice}/kWh · staff ${fmtNum(next.staffMax)}</div>`
-      : '<div class="gold" style="margin-top:10px">This is the final facility. A hundred gigawatts of sunlight, all of it thinking.</div>'}
+      : '<div class="gold" style="margin-top:10px">This is the final tier of the Kardashev ladder. You are computing on the universe itself.</div>'}
     </div>`;
 
     // progressive disclosure: silicon beyond the current facility stays hidden —
@@ -409,7 +410,8 @@ const hwTab = {
     set('hw-elec', fmtMoney(sel.elecPerHour) + '/h');
     const up = document.getElementById('hw-upgrade');
     const next = FACILITIES[s.phase + 1];
-    if (up && next) up.disabled = s.money < next.cost;
+    if (up && next) up.disabled = s.money < next.cost ||
+      (next.research && !s.research.includes(next.research));
   },
 };
 

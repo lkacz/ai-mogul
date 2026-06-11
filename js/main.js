@@ -90,8 +90,9 @@ function maybeShowWin() {
       <span class="muted">Papers published</span><span class="num">${st.papers}</span>
     </div>
     <p class="muted">And yet… the loss curve hasn't flattened. A new research era —
-    <b>Beyond Silicon</b> — glows in the Research tab: photonics, qubits, fusion, atoms.
-    The road continues to capability <b>200</b>. Nobody knows what's there.</p>
+    <b>Beyond Silicon</b> — glows in the Research tab: photonics, qubits, fusion, atoms —
+    and past those, Kardashev's ladder: a star, then a galaxy. The road continues to
+    capability <b>300</b>. Nobody knows what's there.</p>
     <div class="actions"><button class="act big" data-act="closeModal">Keep scaling</button></div>`);
   save();
 }

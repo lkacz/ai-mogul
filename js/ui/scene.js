@@ -265,8 +265,9 @@ function drawFireFx(ctx, x, y, t) {
     P(ctx, sx, sy, 3 + (i % 2), 2, `rgba(125,125,135,${0.55 - i * 0.08})`);
   }
 }
-// where the burning rack sits in each scene
-const FIRE_POS = [[50, 100], [378, 136], [50, 140], [39, 140], [35, 140], [448, 192]];
+// where the burning rack sits in each scene (fires only happen ≤ phase 4,
+// but the cleanup buff can outlive an upgrade)
+const FIRE_POS = [[50, 100], [378, 136], [50, 140], [39, 140], [35, 140], [448, 192], [240, 190], [240, 190]];
 
 // ── per-phase scenes ──────────────────────────────────────────────
 function sceneCommon(ctx, wall, wallLo, floorA, floorB) {
@@ -461,6 +462,137 @@ function drawOrbital(ctx, t, s, sel, runProg) {
   }
 }
 
+function layoutDyson() { return { x0: 24, x1: 420, desks: [[90, 186], [330, 190]] }; }
+function drawDyson(ctx, t, s, sel, runProg) {
+  sceneCommon(ctx, '#02030a', '#0c1020', '#262c3b', '#222837');
+  // observation gallery: open vista above the deck
+  P(ctx, 0, 0, W, 132, '#010208');
+  for (let i = 0; i < 110; i++) {
+    const tw = 0.4 + 0.6 * Math.sin(t * (0.5 + hash(i, 3) * 2) + i);
+    P(ctx, hash(i, 1) * W, hash(i, 2) * 126, 1, 1, `rgba(205,215,240,${0.15 + 0.5 * tw})`);
+  }
+  // THE SUN — and the swarm slowly winning against it
+  const sx = 330, sy = 62, R = 46;
+  const glow = ctx.createRadialGradient(sx, sy, R * 0.4, sx, sy, R * 2.4);
+  glow.addColorStop(0, 'rgba(255,210,120,.55)');
+  glow.addColorStop(1, 'rgba(255,160,60,0)');
+  ctx.fillStyle = glow; ctx.fillRect(sx - R * 2.4, sy - R * 2.4, R * 4.8, R * 4.8);
+  const core = ctx.createRadialGradient(sx, sy, 1, sx, sy, R);
+  core.addColorStop(0, '#fff8e8');
+  core.addColorStop(0.55, '#ffd778');
+  core.addColorStop(1, '#f0903a');
+  ctx.fillStyle = core;
+  ctx.beginPath(); ctx.arc(sx, sy, R, 0, Math.PI * 2); ctx.fill();
+  // swarm coverage: collector tiles occlude the disk as the fleet grows
+  const cover = clamp((s.gpus.dysonNode || 0) / 1e9, 0, 0.85);
+  const tiles = Math.round(cover * 230);
+  for (let i = 0; i < tiles; i++) {
+    const a = hash(i, 11) * Math.PI * 2 + t * 0.015 * (1 + (i % 5) * 0.1);
+    const rr = Math.sqrt(hash(i, 12)) * (R - 2);
+    const tx = sx + Math.cos(a) * rr, ty = sy + Math.sin(a) * rr;
+    P(ctx, tx - 1.5, ty - 1, 3, 2, '#1a1206');
+    if (hash(i, 13) > 0.7) P(ctx, tx - 1.5, ty - 1, 1, 1, '#ffe9b0'); // glint
+  }
+  // collector convoys streaming sunward from the Mercury foundries (left)
+  P(ctx, 18, 96, 26, 10, '#3a3026'); P(ctx, 22, 92, 18, 4, '#5a4634'); // foundry silhouette
+  for (let i = 0; i < 9; i++) {
+    const fr = ((t * 0.022 * (1 + (i % 3) * 0.15)) + hash(i, 21)) % 1;
+    const cx = 44 + fr * (sx - R - 50), cy = 100 - fr * 30 + Math.sin(i * 2.4) * 8;
+    P(ctx, cx, cy, 2, 1, '#9fb4d8');
+  }
+  // beamed power: faint lances from swarm edge to the deck
+  ctx.strokeStyle = `rgba(124,224,179,${0.18 + 0.1 * Math.sin(t * 2)})`;
+  ctx.lineWidth = 0.7;
+  ctx.beginPath(); ctx.moveTo(sx - R - 4, sy + 14); ctx.lineTo(120, 134); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(sx - R - 2, sy + 26); ctx.lineTo(300, 134); ctx.stroke();
+  // deck rail + consoles
+  P(ctx, 0, 132, W, 3, '#39455c');
+  for (let i = 0; i < 24; i++) {
+    const on = Math.sin(t * (2 + (i % 4)) + i * 1.8) > 0.1;
+    P(ctx, 12 + i * 19, 136, 4, 2, on ? (i % 3 ? '#39e6a3' : '#ffd778') : '#27314a');
+  }
+  drawDesk(ctx, 90, 182, t, runProg);
+  drawDesk(ctx, 330, 186, t, runProg);
+}
+
+function layoutLattice() { return { x0: 24, x1: 420, desks: [[120, 188], [300, 184]] }; }
+function drawLattice(ctx, t, s, sel, runProg) {
+  sceneCommon(ctx, '#010107', '#0a0c18', '#1e2333', '#1a1f2e');
+  P(ctx, 0, 0, W, 132, '#000005');
+  // a galaxy, far off — the lattice's next meal
+  for (let i = 0; i < 90; i++) {
+    const fr = i / 90, arm = (i % 2) * Math.PI;
+    const a = arm + fr * 5 + t * 0.01;
+    const rr = 26 * Math.pow(fr, 0.7);
+    P(ctx, 70 + Math.cos(a) * rr * 1.2, 40 + Math.sin(a) * rr * 0.55, 1, 1,
+      `hsla(${220 + fr * 60},70%,${75 - fr * 30}%,${(1 - fr) * 0.8})`);
+  }
+  for (let i = 0; i < 120; i++) {
+    const tw = 0.4 + 0.6 * Math.sin(t * (0.4 + hash(i, 5) * 1.6) + i);
+    P(ctx, hash(i, 1) * W, hash(i, 2) * 126, 1, 1, `rgba(200,210,245,${0.12 + 0.45 * tw})`);
+  }
+  // the lattice itself: a luminous grid warping toward the black hole
+  const bx = 350, by = 58;
+  ctx.strokeStyle = 'rgba(167,139,250,.22)'; ctx.lineWidth = 0.6;
+  for (let gx = 0; gx <= W; gx += 40) {
+    ctx.beginPath();
+    for (let gy = 0; gy <= 130; gy += 6) {
+      const dx = gx - bx, dy = gy - by;
+      const d = Math.max(18, Math.hypot(dx, dy));
+      const pull = 360 / (d * d);
+      const px = gx - dx * pull, py = gy - dy * pull;
+      gy === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+  for (let gy = 0; gy <= 130; gy += 26) {
+    ctx.beginPath();
+    for (let gx = 0; gx <= W; gx += 8) {
+      const dx = gx - bx, dy = gy - by;
+      const d = Math.max(18, Math.hypot(dx, dy));
+      const pull = 360 / (d * d);
+      const px = gx - dx * pull, py = gy - dy * pull;
+      gx === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  }
+  // node lights on the lattice intersections
+  for (let i = 0; i < 26; i++) {
+    const on = Math.sin(t * (1.5 + (i % 5) * 0.7) + i * 2.4) > 0.4;
+    if (on) P(ctx, 20 + hash(i, 31) * (W - 40), 8 + hash(i, 32) * 116, 1, 1, '#d8b4fe');
+  }
+  // the black hole battery: shadow, photon ring, accretion disk (Penrose engine)
+  const spin = t * 1.6;
+  ctx.strokeStyle = 'rgba(255,190,110,.85)'; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.ellipse(bx, by, 26, 7, -0.3, spin % (Math.PI * 2), (spin % (Math.PI * 2)) + Math.PI * 1.55); ctx.stroke();
+  const bhGlow = ctx.createRadialGradient(bx, by, 8, bx, by, 30);
+  bhGlow.addColorStop(0, 'rgba(255,200,130,.5)');
+  bhGlow.addColorStop(1, 'rgba(255,150,80,0)');
+  ctx.fillStyle = bhGlow; ctx.fillRect(bx - 30, by - 30, 60, 60);
+  ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.arc(bx, by, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,236,200,.9)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(bx, by, 10.5, 0, Math.PI * 2); ctx.stroke();
+  // singularity progress: the lattice pulses harder as cap → 300
+  const pr = clamp((s.bestCap - 200) / 100, 0, 1);
+  if (pr > 0) {
+    ctx.fillStyle = `rgba(216,180,254,${0.04 + 0.07 * pr * (0.5 + 0.5 * Math.sin(t * (2 + pr * 6)))})`;
+    ctx.fillRect(0, 0, W, 132);
+  }
+  // deck rail + consoles
+  P(ctx, 0, 132, W, 3, '#2b3142');
+  for (let i = 0; i < 24; i++) {
+    const on = Math.sin(t * (2 + (i % 4)) + i * 2.1) > 0.15;
+    P(ctx, 12 + i * 19, 136, 4, 2, on ? (i % 3 ? '#a78bfa' : '#22d3ee') : '#1d2433');
+  }
+  drawDesk(ctx, 120, 184, t, runProg);
+  drawDesk(ctx, 300, 180, t, runProg);
+  if (s.singularity) {
+    ctx.fillStyle = `rgba(216,180,254,${0.05 + Math.sin(t * 0.8) * 0.03})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
 const SCENES = [
   { draw: drawGarage, layout: layoutGarage },
   { draw: drawOffice, layout: layoutOffice },
@@ -468,6 +600,8 @@ const SCENES = [
   { draw: drawDc, layout: layoutDc },
   { draw: drawFactory, layout: layoutFactory },
   { draw: drawOrbital, layout: layoutOrbital },
+  { draw: drawDyson, layout: layoutDyson },
+  { draw: drawLattice, layout: layoutLattice },
 ];
 
 // ── confetti ──────────────────────────────────────────────────────

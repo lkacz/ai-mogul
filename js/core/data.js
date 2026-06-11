@@ -31,6 +31,12 @@ export const GPUS = [
   { id: 'qc1', name: 'QC-1 Hybrid Quantum Pod', tflops: 2.5e7, watts: 6000, vram: 8192,
     price: 4.5e6, phase: 5, research: 'quantumAI',
     desc: 'A rack-scale hybrid: photonic tensor lattice for the matmuls, an error-corrected QPU co-processor for the sampling and optimization steps no classical machine can do. Together they train like 25 EFLOP/s of classical compute.' },
+  { id: 'dysonNode', name: 'Swarm Collector', tflops: 4e12, watts: 4e8, vram: 1e6,
+    price: 18e3, phase: 6, research: 'vonNeumann',
+    desc: 'A kilometer-scale mirror-and-compute tile, one of billions, built by fabricators that built themselves. Sunlight in, gradients out. Unit cost: mostly Mercury.' },
+  { id: 'omegaCore', name: 'Omega Core', tflops: 1e24, watts: 1e24, vram: 1e9,
+    price: 400, phase: 7, research: 'lloydCore',
+    desc: 'A fist of engineered matter computing near the Margolus–Levitin bound, fed by a black hole\'s spin. Marginal cost: feedstock and patience.' },
 ];
 
 export const FACILITIES = [
@@ -58,6 +64,17 @@ export const FACILITIES = [
     pue: 1.05, elecPrice: 0.004, upkeep: 4e6,
     desc: '100 GW of compute satellites in sun-synchronous orbit: free photons in, radiated heat out (PUE 1.05), lasers between nodes.',
     story: 'The launches run nightly for a year. A hundred gigawatts of solar wings unfold over the terminator line, linked by laser. Mission control keeps one window pointed at Earth — Mario insists. "So it remembers where it\'s from."' },
+  // ppMult: the facility IS the interconnect at this scale — it raises the
+  // batch-size wall. marketMult: a Kardashev-II economy doesn't sell API
+  // calls; the addressable market is energy and matter compilation.
+  { id: 'dyson', name: 'Dyson Swarm', cost: 40e12, slots: 1e9, powerW: 4e17, staffMax: 100e3,
+    pue: 1.0, elecPrice: 0.0001, upkeep: 1e8, ppMult: 30, marketMult: 100, research: 'vonNeumann',
+    desc: 'Kardashev Type II begins: a self-replicating swarm of collector-computers around the Sun. 400 PW and doubling — sunlight in, thought out.',
+    story: 'The seed factory lands on Mercury and builds two of itself. Forty doublings later, a million mirrored collectors leave the foundries every day, and the Sun grows a faint lattice of shadows. Observatories on three continents report the infrared excess Freeman Dyson told them to look for in 1960. It is not aliens. It is the lab.' },
+  { id: 'lattice', name: 'Omega Lattice', cost: 2.5e15, slots: 1e12, powerW: 1e36, staffMax: 500e3,
+    pue: 1.0, elecPrice: 0, upkeep: 1e10, ppMult: 8000, marketMult: 10000, research: 'lloydCore',
+    desc: 'Kardashev Type III: computation woven between the stars — black-hole batteries (Penrose, 1969), cores at the Lloyd limit, thought as a property of spacetime.',
+    story: 'The swarm ships seeds to a thousand stars, and the seeds ship seeds. Around a spinning black hole, the first Penrose engines drink rotational energy — the best battery physics permits. The lattice runs on its own clock now; your dashboard just rolls over. Somewhere in the dark between galaxies, matter is being asked, politely, to think.' },
 ];
 
 export const DATASETS = [
@@ -75,6 +92,9 @@ export const DATASETS = [
   { id: 'embodied', name: 'Embodied Experience Stream', cost: 8e9, tokens: 1e20, quality: 1.75,
     research: 'embodied',
     desc: 'A million robot bodies and every sensor on Earth, streaming grounded experience. The model stops reading about physics and starts living in it.' },
+  { id: 'cosmos', name: 'Cosmic Observatory Mesh', cost: 20e12, tokens: 1e24, quality: 2.0,
+    research: 'lloydCore',
+    desc: 'The lattice reads the universe raw: every photon it catches, every gravitational ripple, every spectrum of every star. Reality itself is the dataset.' },
 ];
 
 export const STAFF = [

@@ -67,16 +67,16 @@ const states = { fresh: defaultState() };
   states.won = s;
 }
 
-// post-singularity state: orbital constellation, Beyond-Silicon tree, cap 200+
+// post-singularity state: Omega Lattice, full tree, cap 300+
 {
   const { RESEARCH } = await import('../js/core/research.js');
   const s = JSON.parse(JSON.stringify(states.won));
-  s.phase = 5; s.bestCap = 205; s.singularity = true; s.singularityAt = 9000;
-  s.wonAt = 6000; s.money = 1e12; s.rp = 1e9;
+  s.phase = 7; s.bestCap = 310; s.singularity = true; s.singularityAt = 9000;
+  s.wonAt = 6000; s.money = 1e15; s.rp = 1e12;
   s.research = RESEARCH.map(r => r.id);
-  s.gpus = { px1: 2e6, qc1: 1e6 };
-  s.dataTier = 5;
-  s.models.push({ id: 'sing1', name: 'Mogul-Ω', N: 1e15, D: 2e16, cap: 205, physC: 1e33, deployed: false, trainedH: 9000 });
+  s.gpus = { dysonNode: 5e8, omegaCore: 1e9 };
+  s.dataTier = 6;
+  s.models.push({ id: 'sing1', name: 'Mogul-Ω', N: 1e19, D: 2e20, cap: 310, physC: 1e41, deployed: false, trainedH: 9000 });
   states.post = s;
 }
 

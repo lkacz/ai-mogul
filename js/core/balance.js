@@ -14,7 +14,7 @@ export const BAL = {
   CAP_BASE: 15.3,
   CAP_SLOPE: 6.0,
   AGI_CAP: 100,
-  SINGULARITY_CAP: 200,       // the true ending — the intelligence explosion
+  SINGULARITY_CAP: 300,       // the true ending — fed by a star, then a galaxy
 
   CHINCHILLA_RATIO: 20,       // optimal tokens per parameter
   CHIN_SIGMA: 0.45,           // tolerance (in log10 of D/D*) before quality degrades
@@ -139,7 +139,10 @@ export const CAP_TIERS = [
   [140, 'Civilization-scale intellect'],
   [160, 'Planetary mind'],
   [180, 'Beyond human comprehension'],
-  [200, 'The Singularity'],
+  [200, 'Star-fed mind — Kardashev II'],
+  [240, 'Galactic intellect — Kardashev III'],
+  [270, 'Computing at the Lloyd limit'],
+  [300, 'The Singularity'],
 ];
 
 export function capTier(cap) {

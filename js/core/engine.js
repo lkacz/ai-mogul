@@ -227,6 +227,9 @@ export function sellGpu(s, id, n = 1) {
 export function buyFacility(s, phaseIdx) {
   if (phaseIdx !== s.phase + 1) return err('Upgrade one tier at a time.');
   const f = FACILITIES[phaseIdx]; if (!f) return err('No such facility.');
+  if (f.research && !s.research.includes(f.research)) {
+    return err(`Requires research: ${RESEARCH_BY_ID[f.research]?.name || f.research}.`);
+  }
   if (s.money < f.cost) return err('Not enough cash.');
   s.money -= f.cost; s.stats.spent += f.cost;
   s.phase = phaseIdx;
@@ -456,11 +459,14 @@ export function suggestRun(s) {
   // If the whole fleet is usable: C = 120·N² = rate·t → N = sqrt(rate·t/120)
   let N = Math.sqrt(Math.max(1e14, sel.trainRate * tSec) / 120);
   // If the batch-size limit binds (N·pp < fleet rate), the rate is N·pp:
-  // 120·N² = N·pp·t → N = pp·t/120
+  // 120·N² = N·pp·t → N = pp·t/120. Frontier configs deliberately overshoot
+  // the target duration — but never past a half-year at the batch limit,
+  // so the suggestion always clears the time wall.
   if (N * sel.ppRate < sel.trainRate) {
     N = Math.max(N, sel.ppRate * tSec / 120);
   }
-  N = Math.min(N, sel.maxParams, sel.dataset.tokens / BAL.CHINCHILLA_RATIO);
+  N = Math.min(N, sel.maxParams, sel.dataset.tokens / BAL.CHINCHILLA_RATIO,
+    sel.ppRate * 0.5 * 8760 * 3600 / 120);
   N = Math.max(1e6, N);
   const D = Math.min(optimalTokens(N), sel.dataset.tokens);
   return { N, D };

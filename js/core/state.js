@@ -148,7 +148,8 @@ export function selectors(s) {
       BAL.RIVAL_FACTOR_MIN, BAL.RIVAL_FACTOR_MAX);
     // enterprises buy from labs they trust — integrity 70 is exactly neutral
     const trust = 1 + ((s.integrity ?? BAL.INTEGRITY_START) - BAL.INTEGRITY_START) * BAL.INTEGRITY_DEMAND_K;
-    potential = Math.min(BAL.DEMAND_HARDCAP,
+    // a Kardashev-II+ economy outgrows the API market: facilities can raise the TAM
+    potential = Math.min(BAL.DEMAND_HARDCAP * (fac.marketMult || 1),
       BAL.DEMAND_BASE * Math.pow(10, deployed.cap / BAL.DEMAND_DIV) *
       (1 + s.rep / BAL.REP_DEMAND_DIV) * fx.demandMult * demandBuff * rivalFactor * trust);
     revenue = Math.min(s.adoption, capacity);            // $/s
@@ -173,7 +174,9 @@ export function selectors(s) {
     Math.sqrt(Math.max(0, resFlops)) * BAL.RP_COMPUTE_COEF) * fx.rpMult * morale;
 
   const maxRuns = 1 + fx.maxRuns;
-  const ppRate = BAL.PP_BASE * fx.ppMult;  // max useful FLOP/s per model param
+  // batch-size wall: research raises it — and at Dyson/Lattice scale the
+  // facility itself is the interconnect
+  const ppRate = BAL.PP_BASE * fx.ppMult * (fac.ppMult || 1);
 
   return {
     fac, fx, algoEff, selfImprove, superImprove, flops, watts, vramGB, gpuCount, mfu,

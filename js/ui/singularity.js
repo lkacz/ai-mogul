@@ -24,7 +24,7 @@ const CAPTION_SETS = {
 };
 const BASE_CAPTIONS = [
   { t0: 0.8,  t1: 3.6,  text: 'The final training run converges.' },
-  { t0: 3.0,  t1: 5.6,  text: 'Capability 200. The model improves itself faster than it can report.' },
+  { t0: 3.0,  t1: 5.6,  text: 'Capability 300. Star-fed, it improves itself faster than it can report.' },
   { t0: 5.0,  t1: 6.4,  text: 'It compresses everything it knows into a single point…' },
   { t0: 8.0,  t1: 11.0, text: '…and begins again.' },
 ];

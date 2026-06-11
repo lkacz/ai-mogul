@@ -27,6 +27,7 @@ export function fmtMoney(x, dp = 2) {
 const FLOPS_SUF = ['', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y', 'R', 'Q'];
 export function fmtFlops(x) {
   if (!isFinite(x) || x <= 0) return '0 FLOP/s';
+  if (x >= 1e33) return x.toExponential(2) + ' FLOP/s';   // beyond quetta: science notation
   let tier = clamp(Math.floor(Math.log10(x) / 3), 0, FLOPS_SUF.length - 1);
   const v = x / Math.pow(10, tier * 3);
   return v.toFixed(v < 10 ? 2 : v < 100 ? 1 : 0) + ' ' + FLOPS_SUF[tier] + 'FLOP/s';
@@ -47,6 +48,12 @@ export const fmtP = (n) => fmtNum(n, 2);          // bare big-number, used for p
 export const fmtTok = (n) => fmtNum(n, 2) + ' tokens';
 
 export function fmtPower(watts) {
+  // past ~stellar scale, suns are the only unit that means anything
+  // (one sun = 3.8e26 W, the Sun's luminosity)
+  if (watts >= 1e26) return fmtNum(watts / 3.8e26) + ' suns ☀';
+  if (watts >= 1e18) return (watts / 1e18).toFixed(2) + ' EW';
+  if (watts >= 1e15) return (watts / 1e15).toFixed(2) + ' PW';
+  if (watts >= 1e12) return (watts / 1e12).toFixed(2) + ' TW';
   if (watts >= 1e9) return (watts / 1e9).toFixed(2) + ' GW';
   if (watts >= 1e6) return (watts / 1e6).toFixed(2) + ' MW';
   if (watts >= 1e3) return (watts / 1e3).toFixed(1) + ' kW';

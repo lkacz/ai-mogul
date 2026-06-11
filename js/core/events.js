@@ -224,6 +224,12 @@ export const FACTS = [
   '💡 Real fact: DNA can store ~215 petabytes per gram and lasts millennia — synthesis cost, not density, is what keeps it out of datacenters.',
   '💡 Real fact: launch costs fell ~10× with reusable rockets; orbital datacenters with free solar power and radiative cooling are now seriously proposed.',
   '💡 Real fact: I. J. Good (1965): an ultraintelligent machine could design better machines — "an intelligence explosion". Takeoff speed is still debated.',
+  '💡 Real fact: the Kardashev scale (1964) ranks civilizations by energy use — Type I: a planet (~10¹⁶ W), Type II: a star (~4×10²⁶ W), Type III: a galaxy (~4×10³⁷ W).',
+  '💡 Real fact: Freeman Dyson (1960) proposed detecting alien megastructures by their waste-heat infrared glow — and that a "Dyson sphere" would really be a swarm of independent collectors.',
+  '💡 Real fact: a Matrioshka brain (Robert Bradbury) is a nested Dyson swarm where each shell computes on the waste heat of the one inside it.',
+  '💡 Real fact: Seth Lloyd (Nature, 2000): a 1 kg "ultimate laptop" could perform 5.4×10⁵⁰ ops/s — and the observable universe has done ~10¹²⁰ operations since the Big Bang.',
+  '💡 Real fact: the Penrose process (1969) extracts energy from a spinning black hole — up to 29% of its mass-energy, the densest battery physics allows.',
+  '💡 Real fact: building at stellar scale requires self-replicating factories (von Neumann, 1940s): one seed fab doubling ~40 times outproduces every factory ever built on Earth.',
 ];
 
 export const NEWS_FLAVOR = [

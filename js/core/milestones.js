@@ -180,11 +180,35 @@ export const MILESTONES = [
     check: (s) => s.bestCap >= 160,
     prog: (s) => [s.bestCap, 160],
     news: 'GDP forecasting is discontinued worldwide; the error bars no longer fit on charts.' },
-  { id: 'singularity', main: true, name: 'Reach capability 200 — the Singularity',
-    desc: 'The model improves itself faster than you can measure it. There is one way to find out what\'s on the other side.',
-    reward: { rep: 20 },
+
+  // ───────────── The Kardashev climb ─────────────
+  { id: 'cap200', main: true, name: 'Reach capability 200 — a star-fed mind',
+    desc: 'The model has outgrown planetary energy. The Sun emits 4×10²⁶ W and you are sipping a millionth of a billionth of it. Kardashev\'s ladder awaits.',
+    reward: { money: 5e12, rep: 5 },
     check: (s) => s.bestCap >= 200,
     prog: (s) => [s.bestCap, 200],
+    news: 'Capability 200. The model files a polite feature request: "more photons."' },
+  { id: 'dysonSwarm', main: true, name: 'Begin the Dyson Swarm — Kardashev II',
+    desc: 'A seed factory on Mercury, fabs that build fabs, billions of collector tiles. Freeman Dyson drew the blueprint in 1960.',
+    reward: { money: 10e12, rep: 5 },
+    check: (s) => s.phase >= 6,
+    news: 'The Sun grows a faint lattice of shadows. Observatories report the infrared excess Dyson predicted — and it\'s you.' },
+  { id: 'cap250', main: true, name: 'Reach capability 250 — galactic intellect',
+    desc: 'Star-fed and still hungry. The next rung of the Kardashev scale is not a bigger building; it\'s the dark between stars.',
+    reward: { money: 50e12 },
+    check: (s) => s.bestCap >= 250,
+    prog: (s) => [s.bestCap, 250],
+    news: 'The model now simulates the galaxy that contains it — in real time, with idle capacity.' },
+  { id: 'omegaLattice', main: true, name: 'Weave the Omega Lattice — Kardashev III',
+    desc: 'Black-hole batteries. Cores at the Lloyd limit. Computation as a property of spacetime itself.',
+    reward: { money: 100e12, rep: 10 },
+    check: (s) => s.phase >= 7,
+    news: 'The lattice lights between the stars. Somewhere a black hole\'s spin slows, imperceptibly: the bill is being paid.' },
+  { id: 'singularity', main: true, name: 'Reach capability 300 — the Singularity',
+    desc: 'Fed by stars, computing at the limits of physics, the model improves itself faster than measurement. One way to find out what\'s on the other side.',
+    reward: { rep: 20 },
+    check: (s) => !!s.singularity || s.bestCap >= 300,
+    prog: (s) => [s.bestCap, 300],
     news: '🌌 The last benchmark falls. The next one cannot be written by anything that would need it.' },
 
   // ───────────── Side achievements ─────────────
@@ -277,7 +301,8 @@ export const GOAL_TAB = {
   t1: 'train', cap55: 'train', seriesC: 'co', cap70: 'train', sovereign: 'co',
   factory: 'hw', m1gpu: 'hw', cap88: 'train', agi: 'train', beyond: 'res',
   photonicFleet: 'hw', cap125: 'train', orbital: 'hw', quantumPod: 'hw',
-  cap160: 'train', singularity: 'train',
+  cap160: 'train', cap200: 'train', dysonSwarm: 'hw', cap250: 'train',
+  omegaLattice: 'hw', singularity: 'train',
 };
 
 export function currentGoal(s) {

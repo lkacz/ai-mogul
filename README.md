@@ -6,8 +6,9 @@ San Mateo, January 2025. **Mario Damodei** quits his big-lab job with $1,500, a 
 used GTX 1070, and a conviction that the scaling laws aren't done. Train language models, sell
 fine-tuning gigs, ship an API, raise funding, build datacenters — and race three rival labs to
 **capability 100: AGI**. And then discover the quest doesn't end there: a hidden post-AGI arc
-through real future technologies leads to **capability 200 — the Singularity**, and the game
-ends in a big-bang.
+through real future technologies climbs the **Kardashev scale** — orbital constellations, a
+Dyson swarm, a galaxy-spanning Omega Lattice — to **capability 300: the Singularity**, and the
+game ends in a big-bang.
 
 No build step, no dependencies, no backend. Pure HTML/CSS/ES-modules — runs anywhere,
 deploys on GitHub Pages, saves to `localStorage`.
@@ -38,10 +39,11 @@ The numbers are compressed for playability, but the *mechanics* are the real thi
 | Funding round gates | Investors fund traction over time — seed → Series A/B/C → sovereign megaround → IPO |
 | AI research feedback | Past capability 50, your models accelerate your own algorithmic progress |
 | Hardware entropy | GPUs die at scale (Meta logged 466 interruptions in 54 days on Llama 3); racks catch fire (ask OVH, 2021); thieves like accelerators; humans spill coffee — ops staff and checkpointing mitigate |
-| Intelligence explosion | Past capability 100, self-improvement compounds exponentially (I. J. Good, 1965) — but the fixed point only passes 200 if you feed it new physics |
+| Intelligence explosion | Past capability 100, self-improvement compounds exponentially (I. J. Good, 1965) — but the fixed point only passes 300 if you feed it a star, then a galaxy |
+| Kardashev ladder | Facilities climb the real 1964 scale: planetary (Type I-ish factory) → stellar (Dyson swarm, 1960) → galactic (Lloyd-limit cores, black-hole batteries via the Penrose process) |
 
 Capability is a log-scale index of effective training compute: ~12 is a GPT-2-era model,
-~28 the ChatGPT moment, ~38 GPT-4-era, 100 = AGI, 200 = the Singularity.
+~28 the ChatGPT moment, ~38 GPT-4-era, 100 = AGI, 200 = a star-fed mind, 300 = the Singularity.
 
 ## Beyond AGI: the Beyond Silicon era 🛰️
 
@@ -61,10 +63,17 @@ item researched pops a "📚 the real thing" explainer of where it actually stan
   math stays classical, as real roadmaps suggest)
 - **Full world simulation, atomically precise manufacturing, Ω-Recursion…**
 
-Scale into the **Orbital Compute Constellation** — 100 GW of solar-powered satellites — push the
-Singularity Index to 200, and watch the ending: the model compresses everything it knows into a
-single point, and the screen plays a **big-bang** — shockwaves, a cooling particle universe,
-galaxies condensing, and one small blue world with a familiar garage light.
+Then climb the **Kardashev scale** for real: the **Orbital Compute Constellation** (100 GW of
+solar satellites), the **Dyson Swarm** — built by self-replicating fabricators from a seed
+factory on Mercury, exactly as every serious proposal since Dyson (1960) requires, and you can
+*watch the Sun grow a lattice of shadows* in the pixel scene as your collector fleet grows —
+and finally the **Omega Lattice**: Kardashev Type III, black-hole batteries (the Penrose
+process, 1969), cores computing at Seth Lloyd's ultimate physical limit (~5×10⁵⁰ ops/s per kg,
+Nature 2000), drawn as a glowing grid warping into an accretion disk. Power is measured in
+**suns** now. Push the Singularity Index to 300 and watch the ending: the model compresses
+everything it knows into a single point, and the screen plays a **big-bang** — shockwaves, a
+cooling particle universe, galaxies condensing, and one small blue world with a familiar
+garage light (if you built it kindly).
 
 ## The lab is alive 🕹️
 
@@ -75,8 +84,9 @@ racks blink with LEDs that track your real GPU count and training activity; moni
 live loss curve of the current run. Click anyone — including the cat — for a quip.
 Each facility is its own scene: garage → startup office → colo cage → hyperscale hall →
 the gigawatt Factory with its glowing core that pulses faster as you approach AGI →
-an orbital station window with Earth below, drifting laser-linked compute satellites, and a
-knot of light that tightens as the Singularity nears. Milestones rain confetti on everyone.
+an orbital station window with Earth below and laser-linked satellites; a Dyson swarm scene
+where collector tiles visibly occlude the Sun as your fleet grows; and the Omega Lattice — a
+luminous grid warping into a black hole's accretion disk, pulsing harder as the Singularity nears. Milestones rain confetti on everyone.
 
 ## Minigames at key moments 🎮
 
@@ -138,7 +148,7 @@ compass.
 
 - **Lab** — watch your lab live; allocate compute between training, inference (revenue) and research; do gigs early.
 - **Training** — pick parameters & tokens, watch the predicted capability, hit start.
-- **Hardware** — buy GPUs (GTX 1070 → H100 → B200 → custom silicon → photonic meshes → quantum pods); mind power & slots; upgrade the facility: garage → office → colo → hyperscale DC → 6 GW AI factory → orbital constellation.
+- **Hardware** — buy GPUs (GTX 1070 → H100 → B200 → custom silicon → photonic meshes → quantum pods → swarm collectors → Omega cores); mind power & slots; upgrade the facility up the Kardashev scale: garage → office → colo → hyperscale DC → 6 GW AI factory → orbital constellation → Dyson swarm → Omega Lattice.
 - **Research** — 43 real techniques across 5 eras, from BPE tokenization to Ω-Recursion.
   RP funds a project; **your researchers then build it over time** (lab speed = 1 + researchers,
   multiplied by AI research assistants) — watch the progress bar, hire to go faster.

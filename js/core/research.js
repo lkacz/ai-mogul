@@ -164,6 +164,16 @@ export const RESEARCH = [
     fx: { algo: 4, rpMult: 3 },
     desc: 'The model redesigns its own architecture, end to end. Each generation births the next. The curve goes vertical.',
     real: 'I. J. Good predicted it in 1965: "an ultraintelligent machine could design even better machines; there would then unquestionably be an intelligence explosion." Whether the real curve is a slow takeoff over decades or a fast one over months is one of the most consequential open questions in AI — it depends on exactly the feedback loops this game lets you play with.' },
+
+  // ── The Kardashev climb: stellar, then galactic compute ─────────
+  { id: 'vonNeumann', era: 4, rp: 120e6, money: 5e12, reqCap: 180, deps: ['nanofab'], name: 'Self-Replicating Fabricators',
+    fx: { unlock: 'dysonNode', ppMult: 2 },
+    desc: 'Fabs that build fabs that build fabs. Exponential construction — the only way anything Dyson-scale ever gets built. Unlocks Swarm Collectors.',
+    real: 'John von Neumann formalized self-reproducing machines in the 1940s, and every serious Dyson-swarm proposal depends on them: land one seed factory on Mercury, let it double, and ~40 doublings later you have a swarm. Freeman Dyson\'s 1960 Science paper proposed hunting such megastructures by their waste-heat infrared glow — a technosignature SETI surveys still search for today.' },
+  { id: 'lloydCore', era: 4, rp: 500e6, money: 100e12, reqCap: 215, deps: ['vonNeumann'], name: 'Lloyd-Limit Cores',
+    fx: { unlock: 'omegaCore', algo: 2 },
+    desc: 'Computation at the edge of physics: ~5×10⁵⁰ ops per second per kilogram, powered by black-hole spin. Unlocks Omega Cores.',
+    real: 'Seth Lloyd ("Ultimate physical limits to computation", Nature 2000) showed a 1 kg "ultimate laptop" could do 5.4×10⁵⁰ operations per second — bounded by energy via the Margolus–Levitin theorem — and later estimated the observable universe has performed ~10¹²⁰ operations since the Big Bang. The Penrose process (1969) can extract up to 29% of a rotating black hole\'s mass-energy: the densest battery physics permits.' },
 ];
 
 export const ERA_NAMES = ['Foundations', 'Scale', 'Frontier', 'Superintelligence', 'Beyond Silicon'];
