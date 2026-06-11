@@ -241,6 +241,8 @@ export const FACTS = [
   '💡 Real fact: Seth Lloyd (Nature, 2000): a 1 kg "ultimate laptop" could perform 5.4×10⁵⁰ ops/s — and the observable universe has done ~10¹²⁰ operations since the Big Bang.',
   '💡 Real fact: the Penrose process (1969) extracts energy from a spinning black hole — up to 29% of its mass-energy, the densest battery physics allows.',
   '💡 Real fact: building at stellar scale requires self-replicating factories (von Neumann, 1940s): one seed fab doubling ~40 times outproduces every factory ever built on Earth.',
+  '💡 Real fact: the cosmic microwave background is the oldest light there is, released ~380,000 years after the Big Bang — a baby picture of the universe\'s initial conditions.',
+  '💡 Real fact: Penrose\'s conformal cyclic cosmology proposes (controversially) that faint concentric "Hawking points" in the microwave background are traces of an aeon before our Big Bang.',
 ];
 
 export const NEWS_FLAVOR = [

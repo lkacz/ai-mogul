@@ -95,6 +95,9 @@ export const DATASETS = [
   { id: 'cosmos', name: 'Cosmic Observatory Mesh', cost: 20e12, tokens: 1e24, quality: 2.0,
     research: 'lloydCore',
     desc: 'The lattice reads the universe raw: every photon it catches, every gravitational ripple, every spectrum of every star. Reality itself is the dataset.' },
+  { id: 'aeon', name: 'Echoes of the Last Aeon', cost: 200e12, tokens: 1e26, quality: 2.4,
+    research: 'omega',
+    desc: 'Deconvolved from the microwave background: faint concentric patterns older than the Big Bang — the imprint of whatever thought came before. The lattice trains on the previous universe\'s last word.' },
 ];
 
 export const STAFF = [
