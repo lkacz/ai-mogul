@@ -469,6 +469,7 @@ const resTab = {
     for (let era = 0; era < ERA_NAMES.length; era++) {
       const items = RESEARCH.filter(r => r.era === era);
       html += `<div class="era-h">Era ${era + 1} — ${ERA_NAMES[era]} ${era > s.phase ? `🔒 requires ${FACILITIES[era].name}` : ''}</div>
+        ${era === 4 ? '<div class="muted small" style="margin:-2px 0 8px">Eras 1–4 are real, shipped techniques. Era 5 is speculative — but anchored to today\'s lab results and published roadmaps. Research an item to read where it actually stands (📚 the real thing).</div>' : ''}
         <div class="grid3">` + items.map(r => {
         const done = s.research.includes(r.id);
         const depsOk = (r.deps || []).every(d => s.research.includes(d));

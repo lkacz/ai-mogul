@@ -45,8 +45,9 @@ Capability is a log-scale index of effective training compute: ~12 is a GPT-2-er
 ## Beyond AGI: the Beyond Silicon era 🛰️
 
 AGI is the twist, not the ending. A fifth research era unlocks at capability 100, built from
-**real, plausible future technologies** — each one researched pops a "📚 the real thing"
-explainer of where it actually stands today:
+**real, plausible future technologies**. The rule the game holds itself to: eras 1–4 are real,
+shipped techniques; era 5 may extrapolate, but only along today's published roadmaps — and each
+item researched pops a "📚 the real thing" explainer of where it actually stands today:
 
 - **Photonic computing** — matmuls as light interference (unlocks the PX-1 Photonic Mesh)
 - **Analog in-memory computing** — memristor crossbars; Ohm's law multiplies, Kirchhoff adds
@@ -54,7 +55,9 @@ explainer of where it actually stands today:
 - **Superconducting & reversible logic** — picosecond Josephson junctions, the Landauer limit
 - **Fusion power on-site** — Q>10 tokamaks behind the substation
 - **Embodied AI fleets** — robots streaming grounded experience (a 10²⁰-token dataset)
-- **Quantum machine learning** — error-corrected QPUs (unlocks the QC-1 Quantum Pod)
+- **Quantum machine learning** — error-corrected QPU co-processors for the sampling and
+  optimization classical chips can't do (unlocks the QC-1 *hybrid* quantum pod — the tensor
+  math stays classical, as real roadmaps suggest)
 - **Full world simulation, atomically precise manufacturing, Ω-Recursion…**
 
 Scale into the **Orbital Compute Constellation** — 100 GW of solar-powered satellites — push the

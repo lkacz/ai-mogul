@@ -28,9 +28,9 @@ export const GPUS = [
   { id: 'px1', name: 'PX-1 Photonic Mesh', tflops: 2e6, watts: 2000, vram: 2048,
     price: 280e3, phase: 4, research: 'optical',
     desc: 'Matrix multiplication as interference patterns in silicon photonics. Light doesn\'t resist — almost no heat per MAC.' },
-  { id: 'qc1', name: 'QC-1 Quantum Pod', tflops: 2.5e7, watts: 6000, vram: 8192,
+  { id: 'qc1', name: 'QC-1 Hybrid Quantum Pod', tflops: 2.5e7, watts: 6000, vram: 8192,
     price: 4.5e6, phase: 5, research: 'quantumAI',
-    desc: 'Error-corrected qubits behind a photonic interconnect. Samples gradient distributions no classical chip can.' },
+    desc: 'A rack-scale hybrid: photonic tensor lattice for the matmuls, an error-corrected QPU co-processor for the sampling and optimization steps no classical machine can do. Together they train like 25 EFLOP/s of classical compute.' },
 ];
 
 export const FACILITIES = [
