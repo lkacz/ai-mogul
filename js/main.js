@@ -120,17 +120,6 @@ function maybeShowSingularity() {
   singularityShown = true;
   ended = true;
   s.paused = true;
-  const st = s.stats;
-  const agiH = s.wonAt ?? s.simHours;
-  const singH = s.singularityAt ?? s.simHours;
-  const stats = {
-    founder: founder().name,
-    agiDur: fmtDur(agiH),
-    singDur: fmtDur(singH),
-    models: s.models.length + (st.openSourced || 0),
-    gpusLost: fmtNum(st.gpusLost || 0),
-    integrity: Math.round(s.integrity ?? 70),
-  };
   // this universe is finished: erase it, and queue a different founder
   try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
   try {
@@ -141,7 +130,7 @@ function maybeShowSingularity() {
     }));
   } catch (e) { /* ignore */ }
   closeModal();
-  playSingularity(stats);   // never returns
+  playSingularity({ integrity: s.integrity });   // never returns
 }
 
 // ── Settings modal ────────────────────────────────────────────────

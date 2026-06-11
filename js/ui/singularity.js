@@ -345,26 +345,9 @@ export function playSingularity(stats = {}) {
       wrapText(text, CX, H * 0.84, W * 0.82, u / 30);
     }
 
-    // ── the memorial, forever ─────────────────────────────────────
-    if (t >= ETERNAL_T) {
-      const ma = clamp01((t - ETERNAL_T) / 3);
-      ctx.font = `${Math.max(15, u / 32)}px Georgia, serif`;
-      ctx.fillStyle = `rgba(240,236,228,${ma})`;
-      ctx.fillText('AI MOGUL', CX, H * 0.20);
-      ctx.font = `${Math.max(11, u / 52)}px Georgia, serif`;
-      ctx.fillStyle = `rgba(200,205,220,${ma * 0.9})`;
-      ctx.fillText('one story, kept safe:', CX, H * 0.26);
-      ctx.fillStyle = `rgba(180,188,205,${ma * 0.85})`;
-      ctx.fillText(`${stats.founder || 'a founder'} · garage to AGI in ${stats.agiDur || '—'} · to the stars in ${stats.singDur || '—'}`, CX, H * 0.31);
-      ctx.fillText(`${stats.models || 0} models trained · ${stats.gpusLost || 0} GPUs returned to entropy · integrity ${stats.integrity ?? 70} / 100`, CX, H * 0.345);
-      ctx.font = `italic ${Math.max(11, u / 50)}px Georgia, serif`;
-      ctx.fillStyle = `rgba(220,215,235,${ma * (0.75 + 0.25 * Math.sin(t * 0.8))})`;
-      ctx.fillText('Thank you for carrying the fire this far. ♥', CX, H * 0.42);
-      ctx.font = `${Math.max(10, u / 58)}px Consolas, monospace`;
-      ctx.fillStyle = `rgba(150,158,178,${ma * 0.8})`;
-      ctx.fillText('This universe is finished. Reload the page to begin a new one —', CX, H * 0.93);
-      ctx.fillText('a different founder is already eyeing a cold garage.', CX, H * 0.955);
-    } else if (t > 3) {
+    // ── after the last caption: just the cosmos, the world, the light.
+    // No epitaph, no instructions — the garage says everything.
+    if (t > 3 && t < ETERNAL_T) {
       ctx.font = `${Math.max(10, u / 64)}px Consolas, monospace`;
       ctx.textAlign = 'right';
       ctx.fillStyle = 'rgba(160,170,190,.4)';
