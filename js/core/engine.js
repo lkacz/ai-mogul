@@ -272,6 +272,39 @@ export function buyResearch(s, id) {
   return ok(`Research started: ${r.name}.`);
 }
 
+// ── model names: affectionate parodies, grander with every size class ──
+const MODEL_NAMES = [
+  // < 100M — the toys
+  ['NIBBLE', 'BLURT', 'SQUIB', 'GIGGLEBYTE', 'PIPSQUEAK', 'TODDLERNET', 'GOOGOO', 'MUMBLECORE'],
+  // 100M – 10B — the earnest era
+  ['GEEPITTY', 'GOFER', 'ALPACALYPSE', 'BLOOMER', 'PHIBBER', 'CURIO', 'QWIBBLE', 'BABBLEDORE'],
+  // 10B – 1T — the frontier
+  ['OPPOSUM', 'SORROWNET', 'MOISTRAL', 'DEEPSQUEAK', 'JIMINY', 'GROKKLE', 'LLAMARAMA', 'CHONKZILLA'],
+  // 1T – 1Qa — the giants
+  ['MEGATRONK', 'BEHEMOTH', 'GARGANTUA', 'OPPOSUM MAXIMUS', 'TITANIC PARROT', 'COLOSSEUM', 'PROMETHEIA', 'ZILLENNIUM'],
+  // 1Qa – 1Qi — the planet-minds
+  ['WORLDMIND', 'NOOSPHERA', 'YGGDRASIL', 'OVERMORROW', 'PANGAEA', 'EMPYREAN', 'AXIOMNIBUS', 'GAIAMATRIX'],
+  // ≥ 1Qi — the cosmic register
+  ['OMEGABRAIN', 'APEIRON', 'DEMIURGE', 'AKASHA', 'ETERNULA', 'ULTIMA RATIO', 'KARDASHEVIA', 'FINALE GRANDE'],
+];
+function compactParams(N) {
+  const units = [[1e18, 'Qi'], [1e15, 'Qa'], [1e12, 'T'], [1e9, 'B'], [1e6, 'M']];
+  for (const [u, suf] of units) {
+    if (N >= u) {
+      const v = N / u;
+      return (v >= 10 ? Math.round(v) : Math.round(v * 10) / 10) + suf;
+    }
+  }
+  return Math.round(N) + '';
+}
+function modelName(s, N) {
+  const tier = N < 1e8 ? 0 : N < 1e10 ? 1 : N < 1e12 ? 2 : N < 1e15 ? 3 : N < 1e18 ? 4 : 5;
+  const pool = MODEL_NAMES[tier];
+  const base = pool[(s.modelSeq - 1) % pool.length];
+  const prior = [...s.models, ...s.runs].filter(m => m.name && m.name.startsWith(base)).length;
+  return `${base}-${compactParams(N)}${prior ? ` v${prior + 1}` : ''}`;
+}
+
 export function startRun(s, N, D, silent = false) {
   const sel = selectors(s);
   if (s.runs.length >= sel.maxRuns) return err('All training slots busy.');
@@ -289,7 +322,7 @@ export function startRun(s, N, D, silent = false) {
   s.modelSeq++;
   const run = {
     id: uid(),
-    name: `Mogul-${s.modelSeq}`,
+    name: modelName(s, N),
     N, D, dataQ: sel.dataQ,
     physNeed: trainCompute(N, D),
     physDone: 0,
