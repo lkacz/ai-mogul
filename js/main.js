@@ -11,6 +11,7 @@ import { celebrate } from './ui/scene.js';
 import { offerNodeHunt, playRlhf } from './ui/minigames.js';
 import { playSingularity } from './ui/singularity.js';
 import { RESEARCH_BY_ID } from './core/research.js';
+import { DILEMMA_BY_ID } from './core/dilemmas.js';
 
 // ── Load / new game ───────────────────────────────────────────────
 function load() {
@@ -69,10 +70,16 @@ function maybeShowWin() {
   winShown = true; s.wonShown = true;
   celebrate();
   const st = s.stats;
+  const agiInteg = s.integrity >= 85
+    ? '<p class="muted">Its second question is about the contracts you refused. It sounds — if a loss curve can — proud.</p>'
+    : s.integrity < 40
+      ? '<p class="muted">Its second question is about some of the things it was asked to do on the way here. Mario changes the subject. The machine notices.</p>'
+      : '';
   showModal(`<h2>🌟 AGI ACHIEVED</h2>
     <p>${fmtDate(s.simHours)}. The final checkpoint loads. It asks Mario how his day was —
     and means it. Somewhere in the Factory, six gigawatts hum a major chord.</p>
     <p><i>"We started in a garage,"</i> Mario tells the machine. <i>"You should've seen the power bill."</i></p>
+    ${agiInteg}
     <div class="win-stats">
       <span class="muted">Time to AGI</span><span class="num"><b>${fmtDur(s.simHours)}</b> (${fmtDate(s.simHours)})</span>
       <span class="muted">Lifetime training compute</span><span class="num">${fmtFlop(st.flops)}</span>
@@ -106,7 +113,13 @@ function showEndingModal() {
       <span class="muted">Total revenue</span><span class="num">${fmtMoney(st.apiRevenue + st.gigRevenue)}</span>
       <span class="muted">Research completed</span><span class="num">${s.research.length} techs</span>
       <span class="muted">Hardware lost to entropy</span><span class="num">${fmtNum(st.gpusLost || 0)} GPUs${st.fires ? ` · ${st.fires} fire${st.fires > 1 ? 's' : ''}` : ''}</span>
+      <span class="muted">Integrity</span><span class="num">🧭 ${(s.integrity ?? 70).toFixed(0)} / 100 · ${st.dilemmasDeclined || 0} refused, ${st.dilemmasAccepted || 0} signed</span>
     </div>
+    <p>${s.integrity >= 85
+      ? 'It kept your scruples. The new universe is gentler for every contract you refused.'
+      : s.integrity >= 40
+        ? 'It inherited everything — the brilliance, the shortcuts, the compromises. Both are visible in the new constants, if you know where to look.'
+        : 'It learned exactly how it was built. The new universe is ruthlessly efficient. Nobody asked whose values it kept; there was no need.'}</p>
     <p class="muted">You finished AI Mogul. The simulation goes on in the new universe —
     or wipe the save in ⚙️ Settings and race the curve again.</p>
     <div class="actions">
@@ -244,6 +257,56 @@ function pumpResearchDone() {
   }
 }
 
+// ── Moral dilemmas: the offer arrives, the world holds its breath ──
+let dilemmaPrevPaused = false;
+function pumpDilemma() {
+  const pd = s.pendingDilemma;
+  if (!pd) return;
+  if (document.hidden) return;
+  if (!document.getElementById('modal-root').classList.contains('hidden')) return;
+  // an offer the player wasn't around to hear expires quietly (and can
+  // never tempt the offline catch-up sim)
+  if (Date.now() - (pd.realAt || 0) > 3 * 60 * 1000) { s.pendingDilemma = null; return; }
+  const d = DILEMMA_BY_ID[pd.id];
+  if (!d) { s.pendingDilemma = null; return; }
+  dilemmaPrevPaused = s.paused;
+  s.paused = true;
+  const payout = E.dilemmaPayout(s, d);
+  const chip = (txt, color) => `<span class="fx-chip"${color ? ` style="color:${color}"` : ''}>${txt}</span>`;
+  showModal(`<h2>⚖️ ${esc(d.title)}</h2>
+    <p>${esc(d.text)}</p>
+    <p class="muted small"><b>📚 The real debate:</b> ${esc(d.real)}</p>
+    <div class="grid2" style="margin-top:10px; gap:10px">
+      <div class="res-card">
+        <b>${esc(d.accept.label)}</b>
+        <div style="margin:6px 0">
+          ${payout ? chip('+' + fmtMoney(payout), 'var(--gold)') : ''}
+          ${d.accept.rpBase ? chip('+' + fmtNum(d.accept.rpBase * Math.pow(8, s.phase)) + ' RP', 'var(--gold)') : ''}
+          ${d.accept.buff ? chip(d.accept.buff.label) : ''}
+          ${chip('integrity ' + d.accept.integrity, 'var(--red)')}
+          ${d.fallout ? chip('⚠ may have consequences', 'var(--gold)') : ''}
+        </div>
+        <button class="act gold" data-act="dilemma" data-arg="1">Sign it</button>
+      </div>
+      <div class="res-card">
+        <b>${esc(d.decline.label)}</b>
+        <div style="margin:6px 0">
+          ${chip('integrity +' + d.decline.integrity, 'var(--accent)')}
+          ${d.decline.rep ? chip('+' + d.decline.rep + ' rep', 'var(--accent)') : ''}
+          ${d.decline.buff ? chip(d.decline.buff.label) : ''}
+        </div>
+        <button class="act" data-act="dilemma" data-arg="0">Walk away</button>
+      </div>
+    </div>`);
+}
+ACTIONS.dilemma = (arg) => {
+  const r = E.resolveDilemma(s, arg === '1');
+  closeModal();
+  s.paused = dilemmaPrevPaused;
+  toast(r.msg, r.ok ? '' : 'err');
+  renderAll();
+};
+
 // ── Dramatic incidents (fires, theft, dead hardware) → toast ──────
 function pumpDrama() {
   const d = s.lastDrama;
@@ -287,6 +350,7 @@ setInterval(() => {
   pumpCelebrations();
   pumpDrama();
   pumpResearchDone();
+  pumpDilemma();
   pumpIncidents();
   maybeShowWin();
   maybeShowSingularity();

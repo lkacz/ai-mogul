@@ -3,6 +3,7 @@
 
 import { BAL, capabilityFor, trainCompute, optimalTokens } from './balance.js';
 import { GPUS, FACILITIES, DATASETS, FUNDING, RIVAL_ASYMPTOTE } from './data.js';
+import { DILEMMAS, DILEMMA_BY_ID } from './dilemmas.js';
 import { RESEARCH_BY_ID } from './research.js';
 import { MILESTONES, MILESTONE_BY_ID } from './milestones.js';
 import { EVENTS, NEWS_FLAVOR, FACTS } from './events.js';
@@ -73,6 +74,34 @@ export function step(s, hours = 1) {
 
   // 5. Random events + ambient news/facts
   if (Math.random() < BAL.EVENT_CHANCE_PER_H * hours) fireEvent(s, sel);
+
+  // 5b. Moral dilemmas: rare, one at a time, each only once
+  if (!s.pendingDilemma &&
+      s.simHours - (s.lastDilemmaH || 0) > BAL.DILEMMA_GAP_H &&
+      Math.random() < BAL.DILEMMA_CHANCE_PER_H * hours) {
+    const pool = DILEMMAS.filter(d =>
+      s.phase >= d.minPhase && (!d.reqCap || s.bestCap >= d.reqCap) &&
+      !(s.dilemmasSeen || []).includes(d.id));
+    if (pool.length) {
+      const d = pool[(Math.random() * pool.length) | 0];
+      s.pendingDilemma = { id: d.id, realAt: Date.now() };
+      s.lastDilemmaH = s.simHours;
+    }
+  }
+
+  // 5c. Delayed fallout from past choices comes due
+  if (s.fallout && s.fallout.length) {
+    for (let i = s.fallout.length - 1; i >= 0; i--) {
+      const f = s.fallout[i];
+      if (s.simHours < f.atH) continue;
+      s.fallout.splice(i, 1);
+      if (f.rep) s.rep = clamp(s.rep + f.rep, 0, 100);
+      if (f.buff) s.buffs.push({ id: 'fo_' + f.atH, label: f.buff.label,
+        demand: f.buff.demand, elec: f.buff.elec, untilH: s.simHours + f.buff.hours });
+      pushNews(s, f.txt);
+      s.lastDrama = { txt: f.txt, realAt: Date.now() };
+    }
+  }
   if (Math.random() < 0.002 * hours) {
     const pool = Math.random() < 0.5 ? NEWS_FLAVOR : FACTS;
     pushNews(s, pool[(Math.random() * pool.length) | 0]);
@@ -121,7 +150,8 @@ function finalizeRun(s, sel, r) {
 
 function fireEvent(s, sel) {
   const pool = EVENTS.filter(e =>
-    s.phase >= e.minPhase && (e.maxPhase === undefined || s.phase <= e.maxPhase));
+    s.phase >= e.minPhase && (e.maxPhase === undefined || s.phase <= e.maxPhase) &&
+    (!e.cond || e.cond(s)));
   const total = pool.reduce((a, e) => a + e.weight, 0);
   let roll = Math.random() * total;
   let ev = pool[0];
@@ -349,6 +379,42 @@ export function takeFunding(s, id) {
   s.rep = Math.min(100, s.rep + f.rep);
   pushNews(s, `💰 ${f.name} closed: +${fmtNum(f.amount)} in the bank.`);
   return ok(`${f.name} closed!`);
+}
+
+// Resolve the pending moral dilemma. Visible effects apply now; an accepted
+// deal's fallout is queued for later — choices come back around.
+export function resolveDilemma(s, accepted) {
+  const pd = s.pendingDilemma;
+  if (!pd) return err('No offer on the table.');
+  const d = DILEMMA_BY_ID[pd.id];
+  s.pendingDilemma = null;
+  if (!d) return err('The offer expired.');
+  (s.dilemmasSeen = s.dilemmasSeen || []).push(d.id);
+  const o = accepted ? d.accept : d.decline;
+  s.integrity = clamp((s.integrity ?? BAL.INTEGRITY_START) + o.integrity, 0, 100);
+  let gained = 0;
+  if (o.moneyBase) { gained = o.moneyBase * Math.pow(25, s.phase); s.money += gained; }
+  if (o.rpBase) s.rp += o.rpBase * Math.pow(8, s.phase);
+  if (o.rep) s.rep = clamp(s.rep + o.rep, 0, 100);
+  if (o.buff) s.buffs.push({ id: 'dl_' + d.id, label: o.buff.label,
+    demand: o.buff.demand, elec: o.buff.elec, untilH: s.simHours + o.buff.hours });
+  if (accepted && d.fallout) {
+    s.fallout.push({
+      atH: s.simHours + d.fallout.minH + Math.random() * (d.fallout.maxH - d.fallout.minH),
+      txt: d.fallout.txt, rep: d.fallout.rep, buff: d.fallout.buff,
+    });
+  }
+  if (accepted) s.stats.dilemmasAccepted = (s.stats.dilemmasAccepted || 0) + 1;
+  else s.stats.dilemmasDeclined = (s.stats.dilemmasDeclined || 0) + 1;
+  pushNews(s, o.news);
+  return ok(accepted
+    ? `Deal signed${gained ? ': +' + fmtNum(gained) : ''}. Integrity ${o.integrity}.`
+    : `Offer declined. Integrity +${o.integrity}.`);
+}
+
+// payout preview for the UI (what accept would pay at the current phase)
+export function dilemmaPayout(s, d) {
+  return (d.accept.moneyBase || 0) * Math.pow(25, s.phase);
 }
 
 // Node Hunt minigame: give back a fraction of outage-lost training progress

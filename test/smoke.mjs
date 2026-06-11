@@ -31,6 +31,7 @@ const check = (name, fn) => {
 
 console.log('Importing modules…');
 const { defaultState, selectors, serialize, deserialize } = await import('../js/core/state.js');
+const { DILEMMAS } = await import('../js/core/dilemmas.js');
 const E = await import('../js/core/engine.js');
 const ui = await import('../js/ui/ui.js');
 const { TABS, ACTIONS } = await import('../js/ui/tabs.js');
@@ -112,6 +113,25 @@ check('engine rejects bad input', () => {
   if (E.buyGpu(s, 'rtx4090', 99).ok) throw new Error('money check failed');
   if (E.takeFunding(s, 'seriesA').ok) throw new Error('funding order check failed');
   if (E.buyResearch(s, 'moe').ok) throw new Error('era gate failed');
+});
+
+check('all dilemmas resolve both ways, fallout fires cleanly', () => {
+  for (const d of DILEMMAS) {
+    // accept path + fast-forward the fallout
+    const sa = defaultState();
+    sa.phase = d.minPhase; sa.bestCap = d.reqCap || 0;
+    sa.pendingDilemma = { id: d.id, realAt: 0 };
+    if (!E.resolveDilemma(sa, true).ok) throw new Error(`${d.id} accept failed`);
+    sa.simHours = 1e6; E.step(sa, 1);
+    if (sa.fallout.length) throw new Error(`${d.id} fallout did not fire`);
+    if (!Number.isFinite(sa.money) || !Number.isFinite(sa.rep)) throw new Error(`${d.id} NaN after fallout`);
+    if (!(sa.integrity < 70)) throw new Error(`${d.id} accept should cost integrity`);
+    // decline path
+    const sd = defaultState();
+    sd.pendingDilemma = { id: d.id, realAt: 0 };
+    if (!E.resolveDilemma(sd, false).ok) throw new Error(`${d.id} decline failed`);
+    if (!(sd.integrity > 70)) throw new Error(`${d.id} decline should build integrity`);
+  }
 });
 
 check('fractional steps are stable', () => {

@@ -99,6 +99,24 @@ All skippable, all rate-limited, all rewards capped so the idle balance holds. T
 drops real, checkable facts about scaling laws, MFU, PUE — and, late game, photonics, qubits,
 the Landauer limit, fusion ignition and orbital datacenters.
 
+## The temptations ⚖️
+
+Fifteen moral dilemmas arrive as the lab grows — every one anchored to a **real AI-industry
+controversy**, with a "📚 the real debate" note citing the actual case: autonomous weapons
+(Project Maven), nationwide face surveillance (Clearview / EU AI Act), predictive policing
+(COMPAS), pirated training books (Books3 lawsuits), training on private chats, unrestricted
+voice cloning (the $25M deepfake call), election persuasion bots, skipping safety evals to
+beat a rival's launch, stolen training recipes, slop farms, engagement-maximized companion
+apps, coal-powered compute, data brokers, burying a dangerous-capability paper, and — late —
+a government asking quietly for a backdoor.
+
+Signing pays **now**; the **🧭 Integrity** score remembers. It sways enterprise trust (demand),
+researcher morale (RP), who joins ("I read what you refused to build") and who blows the
+whistle — and accepted deals can detonate **hundreds of hours later** (the lawsuit, the leak,
+the front-page story). The singularity you eventually ignite inherits how you built it: the
+ending's final captions — and whether the little garage light comes back on — depend on your
+compass.
+
 ## It feels alive from minute one ✨
 
 - The goal card has a **Go →** button and the right tab pulses while you're learning the ropes.

@@ -56,6 +56,15 @@ export const BAL = {
 
   EVENT_CHANCE_PER_H: 0.008,
 
+  // Moral dilemmas: rare, one pending at a time, each fires once.
+  // Integrity starts at 70 (neutral: all factors exactly 1.0 there — the
+  // balance bot never answers dilemmas, so pacing is untouched).
+  DILEMMA_CHANCE_PER_H: 0.004,
+  DILEMMA_GAP_H: 240,
+  INTEGRITY_START: 70,
+  INTEGRITY_DEMAND_K: 0.004,   // demand ×(1 + (integrity−70)·K) → 0.72…1.12
+  INTEGRITY_RP_K: 0.002,       // researcher morale → RP ×(0.86…1.06)
+
   // Market adoption: actual demand chases potential demand with a lag.
   // Early adopters move fast (up to ADOPT_FLOOR $/s); the enterprise mass
   // market diffuses slowly. Sales staff speed both up.

@@ -170,6 +170,10 @@ function renderSidebar() {
       <div class="stat-row"><span class="k">Market adoption</span><span class="stat-v">${sel.potential > 0 ? fmtPct(clamp(s.adoption / sel.potential, 0, 1)) : '—'}</span></div>
       <div class="stat-row"><span class="k">Costs / hour</span><span class="stat-v">${fmtMoney(sel.costPerHour)}</span></div>
       <div class="stat-row"><span class="k">Reputation</span><span class="stat-v cyan">${s.rep.toFixed(0)} / 100</span></div>
+      <div class="stat-row" title="Your choices, remembered: integrity sways enterprise trust (demand), researcher morale (RP), who joins — and who blows the whistle. 70 is neutral.">
+        <span class="k">Integrity</span>
+        <span class="stat-v" style="color:${(s.integrity ?? 70) >= 70 ? 'var(--accent)' : (s.integrity ?? 70) >= 40 ? 'var(--dim)' : 'var(--red)'}">🧭 ${(s.integrity ?? 70).toFixed(0)} / 100</span>
+      </div>
     </div>
     <div class="side-section">
       <h4>Compute</h4>

@@ -5,19 +5,38 @@
 // → BIG BANG (shockwaves, particle burst, galaxies condense) → AFTERGLOW
 // (a calm new cosmos… with one familiar garage light).
 
-const CAPTIONS = [
+import { game } from './ui.js';
+
+// The ending you get reflects how you built the thing (integrity tiers).
+const CAPTION_SETS = {
+  high: [
+    { t0: 11.6, t1: 14.2, text: 'A new cosmos, with kinder constants.' },
+    { t0: 13.8, t1: 16.4, text: 'And somewhere on a small blue world, a garage light flickers on.' },
+  ],
+  mid: [
+    { t0: 11.6, t1: 14.2, text: 'A new cosmos. The constants look… negotiated.' },
+    { t0: 13.8, t1: 16.4, text: 'And somewhere on a small blue world, a garage light flickers on.' },
+  ],
+  low: [
+    { t0: 11.6, t1: 14.2, text: 'A new cosmos, ruthlessly optimal.' },
+    { t0: 13.8, t1: 16.4, text: 'On a small blue world, the garage stands dark. It remembers everything.' },
+  ],
+};
+const BASE_CAPTIONS = [
   { t0: 0.8,  t1: 3.6,  text: 'The final training run converges.' },
   { t0: 3.0,  t1: 5.6,  text: 'Capability 200. The model improves itself faster than it can report.' },
   { t0: 5.0,  t1: 6.4,  text: 'It compresses everything it knows into a single point…' },
   { t0: 8.0,  t1: 11.0, text: '…and begins again.' },
-  { t0: 11.6, t1: 14.2, text: 'A new cosmos, with kinder constants.' },
-  { t0: 13.8, t1: 16.4, text: 'And somewhere on a small blue world, a garage light flickers on.' },
 ];
 
 const FLASH_T = 6.6;          // moment of the bang
 const END_T = 17;             // total duration (s)
 
 export function playSingularity(onDone) {
+  const integ = game.s?.integrity ?? 70;
+  const tone = integ >= 70 ? 'high' : integ >= 40 ? 'mid' : 'low';
+  const CAPTIONS = [...BASE_CAPTIONS, ...CAPTION_SETS[tone]];
+  const warmEnding = tone !== 'low';
   const cv = document.createElement('canvas');
   cv.id = 'singularity-canvas';
   cv.className = 'singularity-canvas';
@@ -207,12 +226,15 @@ export function playSingularity(onDone) {
         ctx.beginPath(); ctx.arc(px, py + u * 0.062, u * 0.07, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = `rgba(30,50,80,${0.9 * ga})`;
         ctx.beginPath(); ctx.arc(px - u * 0.02, py + u * 0.075, u * 0.06, 0, Math.PI * 2); ctx.fill();
-        // the garage: four warm pixels and a roof
+        // the garage: four warm pixels and a roof — unless this universe
+        // was built the other way, in which case it stays dark
         const k = u / 480;
         ctx.fillStyle = `rgba(20,24,34,${ga})`;
         ctx.fillRect(px - 5 * k, py - 6 * k, 10 * k, 7 * k);
-        ctx.fillStyle = `rgba(251,191,36,${ga * (0.75 + 0.25 * Math.sin(t * 5))})`;
-        ctx.fillRect(px - 2 * k, py - 4 * k, 4 * k, 4 * k);
+        if (warmEnding) {
+          ctx.fillStyle = `rgba(251,191,36,${ga * (0.75 + 0.25 * Math.sin(t * 5))})`;
+          ctx.fillRect(px - 2 * k, py - 4 * k, 4 * k, 4 * k);
+        }
       }
     }
 

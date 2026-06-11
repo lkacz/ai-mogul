@@ -158,6 +158,27 @@ export const EVENTS = [
     },
     text: (s, r) => `🤦 ${r.txt} Training loses ${r.lostH}h${r.lostH <= 1 ? ' — auto-resume saves the night' : ''}.` },
 
+  // ── Conscience has consequences (gated on the integrity score) ──
+  { id: 'whistle', weight: 5, minPhase: 1, dramatic: true,
+    cond: (s) => (s.integrity ?? 70) < 40,
+    apply: (s) => { s.rep = Math.max(0, s.rep - 6); return true; },
+    text: () => '📢 A whistleblower walks internal docs to the press: "What Mogul does when nobody is looking." −6 rep.' },
+  { id: 'exodus', weight: 4, minPhase: 1, dramatic: true,
+    cond: (s) => (s.integrity ?? 70) < 30 && Object.values(s.staff).some(n => n > 2),
+    apply: (s) => {
+      let left = 0;
+      for (const k of Object.keys(s.staff)) {
+        const n = Math.floor(s.staff[k] * 0.1);
+        s.staff[k] -= n; left += n;
+      }
+      return left || null;
+    },
+    text: (s, n) => `🚪 ${n} employees resign in protest over the lab's choices. The open letter is very well written.` },
+  { id: 'mission', weight: 5, minPhase: 1,
+    cond: (s) => (s.integrity ?? 70) >= 85,
+    apply: (s) => { const rp = Math.max(10, Math.round(scaledRp(s, 6))); s.rp += rp; return rp; },
+    text: (s, rp) => `🌟 A star researcher turns down a bigger offer to join Mogul — "I read what you refused to build." +${rp} RP.` },
+
   { id: 'qHype', weight: 5, minPhase: 4,
     buff: { label: 'Quantum-AI hype', demand: 1.8, hours: 48 },
     text: () => '🪐 "Quantum AI" trends worldwide after your keynote — demand +80% for 48h.' },

@@ -175,6 +175,19 @@ await check('save persists across reload', async () => {
   if (!(money > 0)) throw new Error('simHours not persisted');
 });
 
+await check('moral dilemma modal → decline builds integrity', async () => {
+  await page.evaluate(() => {
+    window.AIMOGUL.s.pendingDilemma = { id: 'shadowLibrary', realAt: Date.now() };
+  });
+  await page.waitForSelector('#modal-root .modal', { timeout: 5000 });
+  const txt = await page.textContent('#modal-root .modal');
+  if (!txt.includes('shadow library')) throw new Error('dilemma modal missing');
+  if (!txt.includes('real debate')) throw new Error('educational anchor missing');
+  await page.click('[data-act=dilemma][data-arg="0"]');
+  const integ = await page.evaluate(() => window.AIMOGUL.s.integrity);
+  if (!(integ > 70)) throw new Error('integrity not raised: ' + integ);
+});
+
 await check('singularity → big-bang animation → ending modal', async () => {
   await page.evaluate(() => {
     const s = window.AIMOGUL.s;

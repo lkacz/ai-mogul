@@ -19,6 +19,11 @@ export function defaultState() {
     rp: 0,
     rep: 0,
     adoption: 0,   // current market demand ($/s) — lags behind potential
+    integrity: BAL.INTEGRITY_START,  // 0–100 moral compass; feeds trust & morale
+    pendingDilemma: null,            // { id, realAt } awaiting the player's call
+    dilemmasSeen: [],                // resolved dilemma ids (each fires once)
+    lastDilemmaH: 0,
+    fallout: [],                     // delayed consequences {atH, txt, rep?, buff?}
 
     phase: 0,                                   // index into FACILITIES
     gpus: { gtx1070: 1 },                       // id -> count
@@ -55,6 +60,7 @@ export function defaultState() {
       peakMoney: BAL.START_MONEY, elecSpent: 0,
       lrBest: 0, dedupBest: 0, nodesFixed: 0, minigames: 0, rlhfRated: 0,
       bestStreak: 0, gpusLost: 0, fires: 0, pagerPages: 0,
+      dilemmasAccepted: 0, dilemmasDeclined: 0,
     },
   };
 }
@@ -140,9 +146,11 @@ export function selectors(s) {
     capacity = reqRate * price;                          // $/s if fully utilized
     const rivalFactor = clamp(1 + (s.bestCap - maxRival) * 0.02,
       BAL.RIVAL_FACTOR_MIN, BAL.RIVAL_FACTOR_MAX);
+    // enterprises buy from labs they trust — integrity 70 is exactly neutral
+    const trust = 1 + ((s.integrity ?? BAL.INTEGRITY_START) - BAL.INTEGRITY_START) * BAL.INTEGRITY_DEMAND_K;
     potential = Math.min(BAL.DEMAND_HARDCAP,
       BAL.DEMAND_BASE * Math.pow(10, deployed.cap / BAL.DEMAND_DIV) *
-      (1 + s.rep / BAL.REP_DEMAND_DIV) * fx.demandMult * demandBuff * rivalFactor);
+      (1 + s.rep / BAL.REP_DEMAND_DIV) * fx.demandMult * demandBuff * rivalFactor * trust);
     revenue = Math.min(s.adoption, capacity);            // $/s
     served = capacity > 0 ? revenue / capacity : 0;
   }
@@ -158,9 +166,11 @@ export function selectors(s) {
   for (const [id, n] of Object.entries(s.staff)) salaries += (STAFF_BY_ID[id]?.wage || 0) * n;
   const costPerHour = elecPerHour + salaries + fac.upkeep;
 
+  // researcher morale: people do their best work where they believe in it
+  const morale = 1 + ((s.integrity ?? BAL.INTEGRITY_START) - BAL.INTEGRITY_START) * BAL.INTEGRITY_RP_K;
   const rpPerHour = (BAL.RP_FOUNDER +
     s.staff.researcher * BAL.RP_PER_RESEARCHER +
-    Math.sqrt(Math.max(0, resFlops)) * BAL.RP_COMPUTE_COEF) * fx.rpMult;
+    Math.sqrt(Math.max(0, resFlops)) * BAL.RP_COMPUTE_COEF) * fx.rpMult * morale;
 
   const maxRuns = 1 + fx.maxRuns;
   const ppRate = BAL.PP_BASE * fx.ppMult;  // max useful FLOP/s per model param
