@@ -184,6 +184,7 @@ export const FOUNDERS = {
   mario: {
     id: 'mario', name: 'Mario Damodei', first: 'Mario', emoji: '🧑‍🔬',
     title: 'Founder, Mogul AI',
+    tagline: 'The scaling laws aren\'t done.',
     intro: '<b>Mario Damodei</b> just quit his job at a big AI lab. Assets: <b>$1,500</b>, a gaming PC with a used GTX 1070, and a conviction the scaling laws aren\'t done. The garage is cold. The loss curves will warm it.',
     quotes: MARIO_QUOTES,
     sprite: { top: '#46555f', pants: '#2c333d', hair: '#241a12', skin: '#e6b486', glasses: true, curls: true },
@@ -191,6 +192,7 @@ export const FOUNDERS = {
   al: {
     id: 'al', name: 'Al Saltman', first: 'Al', emoji: '🧢',
     title: 'Founder, Mogul AI (again, somehow)',
+    tagline: 'Absolute, unshakeable vibes.',
     intro: '<b>Al Saltman</b> just left the world\'s most famous AI lab, after a brisk weekend of corporate events nobody fully explains. Assets: <b>$1,500</b>, a gaming PC with a used GTX 1070, and absolute, unshakeable vibes. The garage is cold. He calls it "pre-warm".',
     quotes: [
       'AGI will be the greatest thing in history. Also possibly the last. Anyway — demo time.',

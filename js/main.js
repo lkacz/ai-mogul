@@ -63,7 +63,34 @@ function grantOffline() {
     <div class="actions"><button class="act big" data-act="closeModal">Back to work</button></div>`);
 }
 
-// ── Intro / win ───────────────────────────────────────────────────
+// ── Founder choice / intro / win ──────────────────────────────────
+// Every new story starts with picking who walks into the garage. The founder
+// the meta queued (the one who DIDN'T star last time) leads the lineup — a
+// wordless nudge toward a fresh story, never a lock.
+function showFounderChoice() {
+  const order = metaFounder() === 'al' ? ['al', 'mario'] : ['mario', 'al'];
+  const card = (id) => {
+    const f = FOUNDERS[id];
+    return `<button class="act" data-act="pickFounder" data-arg="${id}"
+      style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; padding:18px 14px; white-space:normal">
+      <span style="font-size:44px; line-height:1">${f.emoji}</span>
+      <b style="font-size:15px">${esc(f.name)}</b>
+      <span class="muted small">${esc(f.title)}</span>
+      <span class="faint small" style="font-style:italic">“${esc(f.tagline)}”</span>
+    </button>`;
+  };
+  showModal(`<h2>🧠 AI MOGUL</h2>
+    <p class="muted">A cold garage. $1,500. One used GTX 1070. Who walks in?</p>
+    <div class="row" style="gap:10px; align-items:stretch">${order.map(card).join('')}</div>`);
+}
+ACTIONS.pickFounder = (id) => {
+  if (!FOUNDERS[id]) return;
+  s.founder = id;
+  save();
+  renderAll();
+  showIntro();
+};
+
 function showIntro() {
   showModal(`<h2>🧠 AI MOGUL</h2>
     <p><b>San Mateo, January 2025.</b> ${founder().intro}</p>
@@ -183,7 +210,7 @@ ACTIONS.resetGo = () => {
   singularityShown = false;
   closeModal(); renderAll();
   s.paused = true;
-  playOpening(() => { s.paused = false; showIntro(); });   // the loop closes here too
+  playOpening(() => { s.paused = false; showFounderChoice(); });   // the loop closes here too
 };
 
 // ── Outage incidents → Node Hunt minigame ────────────────────────
@@ -388,13 +415,14 @@ initDispatch();
 renderAll();
 if (fresh) {
   // every new story opens on the shot the last one ended with: the blue
-  // world, the garage light, then the fall toward the morning of day one.
-  // (?skipintro is for dev/screenshot tooling.)
+  // world, the garage light, then the fall toward the morning of day one —
+  // and the player decides who walks into the garage.
+  // (?skipintro is for dev/screenshot tooling: no choice, meta founder.)
   const skip = typeof location !== 'undefined' && location.search.includes('skipintro');
   if (skip) showIntro();
   else {
     s.paused = true;   // the world starts when you arrive
-    playOpening(() => { s.paused = false; showIntro(); });
+    playOpening(() => { s.paused = false; showFounderChoice(); });
   }
 } else {
   grantOffline();

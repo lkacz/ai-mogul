@@ -40,11 +40,17 @@ const check = async (name, fn) => {
 
 await page.goto('http://127.0.0.1:8742/', { waitUntil: 'networkidle' });
 
-await check('fresh boot: cosmic opening (the cycle) → intro modal', async () => {
+await check('fresh boot: cosmic opening → founder choice → intro modal', async () => {
   await page.waitForSelector('#opening-canvas', { timeout: 5000 });
   await page.waitForTimeout(700);
   await page.click('#opening-canvas');           // skip the fall to the garage
-  await page.waitForSelector('#modal-root .modal', { timeout: 6000 });
+  await page.waitForSelector('[data-act=pickFounder]', { timeout: 6000 });
+  const choice = await page.textContent('#modal-root .modal');
+  if (!choice.includes('Mario Damodei') || !choice.includes('Al Saltman'))
+    throw new Error('founder choice missing a candidate');
+  const first = await page.getAttribute('#modal-root [data-act=pickFounder]', 'data-arg');
+  if (first !== 'mario') throw new Error('fresh game should lead with Mario, got ' + first);
+  await page.click('[data-act=pickFounder][data-arg=mario]');
   const t = await page.textContent('#modal-root .modal');
   if (!t.includes('Mario Damodei')) throw new Error('intro text missing');
 });
@@ -306,7 +312,10 @@ await check('the loop closes by itself: memorial → fresh New Game+ with Al Sal
   await page.waitForSelector('#opening-canvas', { timeout: 30000 });   // the loop: end shot = start shot
   await page.waitForTimeout(700);
   await page.click('#opening-canvas');
-  await page.waitForSelector('#modal-root .modal', { timeout: 6000 });
+  await page.waitForSelector('[data-act=pickFounder]', { timeout: 6000 });
+  const first = await page.getAttribute('#modal-root [data-act=pickFounder]', 'data-arg');
+  if (first !== 'al') throw new Error('NG+ should lead with the new founder, got ' + first);
+  await page.click('[data-act=pickFounder][data-arg=al]');
   const txt = await page.textContent('#modal-root .modal');
   if (!txt.includes('Al Saltman')) throw new Error('NG+ intro missing Al Saltman');
   if (txt.includes('Mario')) throw new Error('old story leaked into the new game');
