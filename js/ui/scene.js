@@ -276,12 +276,28 @@ const DROP_QUIPS = [
   'Hey!', 'I was walking there.', 'Management by relocation, huh.',
   'Wheee— okay.', 'HR will hear about this.', 'Put me down— oh. You did.',
   'Is this a re-org?', 'I needed the steps, actually.',
+  'I knew I should\'ve unionized.', 'A forklift, but make it management.',
+  'My badge does NOT cover air travel.', 'This is going in my self-review.',
+  'Gravity. We meet again.', 'New corner, who dis?',
+  'I left my coffee back there.', 'Was it the TPS report?',
+  'Noted: the founder can fly us around now.', 'I\'ll allow it. Once.',
+  'Whee. Don\'t tell anyone I said whee.', 'Is this agile? Are we agile now?',
+  'I get airsick above two meters.', 'So THIS is the org chart.',
 ];
 const DESK_DROP_QUIPS = [
   'Fine, I\'ll run the ablations.', 'Working, working.',
   'You could have just asked.', 'Straight to the loss curves, then.',
+  'Okay, okay. Ablations it is.', 'You\'ve heard of remote work? This is the opposite.',
+  'Deployed. Like software. I\'m the software.', 'At least this one has the good chair.',
+  'Sure, I wasn\'t using my legs anyway.', 'Logging in. Under protest.',
+  'My calendar did say "focus time". Spooky.', 'This desk is warmer. I accept.',
 ];
-const CAT_DROP_QUIPS = ['mrrp?!', 'hisss.', '…acceptable.', 'this is MY spot now.'];
+const CAT_DROP_QUIPS = ['mrrp?!', 'hisss.', '…acceptable.', 'this is MY spot now.',
+  'mrow. (lawsuit pending.)', '*recalibrates dignity*',
+  'the floor is acceptable. barely.', 'i was COMFORTABLE.',
+  'fine. this was always my spot.', '*aggressive grooming*',
+  'you have 9 lives of trust left. 8.', 'purrs, at the frequency of complaint.',
+];
 
 // ── progressive augmentation: the humans keep up with the machines ──
 // colo: AR glasses · DC: neural implant · Factory: chrome arm · Orbital:

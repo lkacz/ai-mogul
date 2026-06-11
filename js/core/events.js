@@ -48,6 +48,13 @@ const OOPS_TEXTS = [
   'Someone pushes a config with learning rate 10. Ten.',
   'The new hire runs the cleanup cron against prod storage.',
   'A firmware update reboots every node. Alphabetically. Slowly.',
+  'Someone deploys to prod instead of staging. The environments were one letter apart.',
+  'A keyboard, a sleeping engineer, and the Enter key conspire at 4 AM.',
+  'The load test runs against the live cluster. It passes! Everything else fails.',
+  'Two engineers "fix" the same bug simultaneously. The fixes fight.',
+  'A calendar reminder titled "DO NOT DEPLOY FRIDAY" fires on Friday, after the deploy.',
+  'Someone renames a config key. Forty services disagree about its old name.',
+  'The retry logic retries the thing that should never, ever be retried.',
 ];
 
 export const EVENTS = [

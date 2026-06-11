@@ -2,6 +2,7 @@
 // concept. The world pauses while you play. Rewards are modest and capped.
 
 import { game, showModal, closeModal, toast, esc, renderAll } from './ui.js';
+import { drawQuip } from './scene.js';
 import { pushNews, restoreOutage } from '../core/engine.js';
 import { clamp } from '../core/util.js';
 
@@ -331,12 +332,15 @@ const NODE_LOGS = [
   'step time jumped 40× and nobody changed anything. Sure.',
   'gradient sync at 3% throughput. One node is lying.',
   'collective op hung; the dashboard is a wall of yellow.',
+  'heartbeats green, throughput zero. Classic.',
+  'sixteen nodes, fifteen alibis.',
+  'the run is "making progress" the way glaciers do.',
 ];
 
 export function playNodeHunt(lostH) {
   const faulty = (Math.random() * 16) | 0;
-  const fault = NODE_FAULTS[(Math.random() * NODE_FAULTS.length) | 0];
-  const firstLog = NODE_LOGS[(Math.random() * NODE_LOGS.length) | 0];
+  const fault = drawQuip(NODE_FAULTS);
+  const firstLog = drawQuip(NODE_LOGS);
   let tests = 5;
   let selA = -1, selB = -1;
   const cleared = new Set();
