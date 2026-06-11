@@ -71,9 +71,9 @@ export function spawnFloat(text, anchorEl, cls = '') {
 }
 
 // ── Modals ────────────────────────────────────────────────────────
-export function showModal(html) {
+export function showModal(html, cls = '') {
   const root = $('modal-root');
-  root.innerHTML = `<div class="modal">${html}</div>`;
+  root.innerHTML = `<div class="modal ${cls}">${html}</div>`;
   root.classList.remove('hidden');
 }
 export function closeModal() { $('modal-root').classList.add('hidden'); }

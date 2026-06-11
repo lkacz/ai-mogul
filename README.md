@@ -137,6 +137,28 @@ the front-page story). The singularity you eventually ignite inherits how you bu
 ending's final captions — and whether the little garage light comes back on — depend on your
 compass.
 
+## Build your facility — the Factorio corner 🏗️
+
+Every facility above the garage has a **floor-plan designer** (Hardware tab): a grid, a palette
+of real infrastructure, and a live score that explains — in actual engineering terms — why your
+layout works or doesn't. Good designs earn bounded PUE/MFU/power bonuses; the defaults are
+mediocre; and the tempting shortcuts are traps, just like in real life:
+
+- **Server closet**: racks need a CRAC/vent air path; packing them tight looks tidy and runs hot.
+- **Colo cage**: hot/cold-aisle **containment** (cuts cooling ~30% for real) — but surplus CRAHs
+  are the *overcooling trap*.
+- **Hyperscale hall**: evaporative towers on the wall, air handlers bridging tower→racks — and
+  the classic real-world failure, **generator exhaust recirculating into the intakes**.
+- **AI Factory**: draw the **direct-to-chip liquid loop** — pipes from each CDU to edge dry
+  coolers; gas turbines + battery firming; turbine-next-to-cooler is a *heat island*.
+- **Orbital platform**: the σT⁴ lesson — in vacuum heat leaves **only as radiation**; radiators
+  face deep space, never the Sun, never each other (view factor).
+- **Dyson shells**: Matrioshka nesting — collectors sunward, compute mid-shell, radiators
+  outward; foundry on Mercury feeding the mass driver; compute at Mercury flux overheats
+  (T ∝ 1/√r).
+- **Omega Lattice node**: Penrose power links from the black hole, compute against **cold sinks
+  facing the 2.7 K void** (Landauer), and a tidal-zone trap beside the hole.
+
 ## It feels alive from minute one ✨
 
 - The goal card has a **Go →** button and the right tab pulses while you're learning the ropes.

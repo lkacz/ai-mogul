@@ -264,3 +264,17 @@ table.tbl td { padding: 6px 8px; border-bottom: 1px solid #1d2331; }
 /* turbo speeds */
 .speed-btn.turbo { color: var(--gold); border-color: #4a3a16; }
 .speed-btn.turbo.on { background: var(--gold); color: #2a1f06; border-color: var(--gold); }
+
+/* ── Facility designer ──────────────────── */
+.modal.wide { max-width: 760px; }
+.dz-grid {
+  display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px;
+  background: #0a0d14; border: 1px solid var(--border); border-radius: 8px; padding: 6px;
+}
+.dz-cell {
+  aspect-ratio: 1; min-width: 0; font-size: 15px; line-height: 1;
+  background: #11151f; border: 1px solid #1d2433; border-radius: 4px;
+  color: var(--text); cursor: pointer; padding: 0;
+}
+.dz-cell:hover { border-color: var(--accent); }
+.dz-cell.filled { background: #182032; }

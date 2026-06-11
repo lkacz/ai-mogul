@@ -136,6 +136,24 @@ await check('tab badge appears when research is affordable', async () => {
   await page.waitForSelector('.tab-badge', { timeout: 3000 });
 });
 
+await check('facility designer: place parts, see score, commission layout', async () => {
+  await page.evaluate(() => { window.AIMOGUL.s.phase = 1; window.AIMOGUL.s.money = 1e5; });
+  await page.click('[data-act=tab][data-arg=hw]');
+  await page.click('[data-act=designOpen]');
+  await page.waitForSelector('.dz-grid', { timeout: 4000 });
+  // place a rack, then a CRAC beside it — score should respond
+  await page.click('[data-act=dzPick][data-arg=rack]');
+  await page.click('.dz-cell >> nth=14');
+  await page.click('[data-act=dzPick][data-arg=crac]');
+  await page.click('.dz-cell >> nth=15');
+  const txt = await page.textContent('#modal-root .modal');
+  if (!/CRAC airflow path/.test(txt)) throw new Error('score breakdown missing');
+  await page.click('[data-act=dzApply]');
+  const fx = await page.evaluate(() => window.AIMOGUL.s.facDesignFx);
+  if (!fx || !fx[1] || typeof fx[1].score !== 'number') throw new Error('design not commissioned: ' + JSON.stringify(fx));
+  await page.evaluate(() => { window.AIMOGUL.s.phase = 0; });   // back to the garage for later checks
+});
+
 await check('hardware tab + buy GPU', async () => {
   await page.click('[data-act=tab][data-arg=hw]');
   const before = await page.evaluate(() => JSON.parse(localStorage.getItem('aimogul_save_v1') || '{}').money ?? null);

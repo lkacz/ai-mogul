@@ -11,10 +11,11 @@ import { game, toast, showModal, closeModal, set, setBar, bar, esc, renderAll, s
 import { initScene } from './scene.js';
 import { initModelViz, setModelViz } from './modelviz.js';
 import { mgHandlers, offerLrGame, offerDedup } from './minigames.js';
+import { dzHandlers } from './designer.js';
 
 export const ACTIONS = {};
 export const INPUTS = {};
-Object.assign(ACTIONS, mgHandlers);
+Object.assign(ACTIONS, mgHandlers, dzHandlers);
 
 const FACILITY_EMOJI = ['🏠', '🏢', '🗄️', '🏭', '🌆', '🛰️', '☀️', '🌌'];
 
@@ -346,7 +347,7 @@ ACTIONS.cancelRun = (id) => doAction(E.cancelRun, id);
 // ════════════════════════ HARDWARE ════════════════════════
 const hwTab = {
   id: 'hw', label: '🖥️ Hardware',
-  sig: (s, sel) => [s.phase, JSON.stringify(s.gpus), s.research.length, Math.round(sel.gpuPriceBuff * 100)].join('|'),
+  sig: (s, sel) => [s.phase, JSON.stringify(s.gpus), s.research.length, Math.round(sel.gpuPriceBuff * 100), s.facDesignFx?.[s.phase]?.score].join('|'),
   build(s, sel) {
     const next = FACILITIES[s.phase + 1];
     const facHtml = `<div class="card">
@@ -356,7 +357,13 @@ const hwTab = {
       ${bar('hw-powerbar')}
       <div style="margin:8px 0 2px" class="bar-label"><span>Rack slots</span><span id="hw-slots"></span></div>
       ${bar('hw-slotbar')}
-      <div class="stat-row" style="margin-top:8px"><span class="k">Cooling overhead (PUE)</span><span class="stat-v">${sel.fac.pue.toFixed(2)}×</span></div>
+      ${s.phase >= 1 ? `<div class="row" style="margin:10px 0 4px; gap:8px">
+        <button class="act" data-act="designOpen">🏗️ Design the floor plan</button>
+        <span class="faint small">${s.facDesignFx?.[s.phase]
+          ? `layout score ${s.facDesignFx[s.phase].score}/100 — redesign anytime`
+          : 'no layout commissioned — default (mediocre) arrangement applies'}</span>
+      </div>` : ''}
+      <div class="stat-row" style="margin-top:8px"><span class="k">Cooling overhead (PUE)</span><span class="stat-v">${sel.pue.toFixed(2)}×${sel.pue < sel.fac.pue - 0.001 ? ' <span class="good small">(designed)</span>' : sel.pue > sel.fac.pue + 0.001 ? ' <span class="bad small">(bad layout!)</span>' : ''}</span></div>
       <div class="stat-row"><span class="k">Electricity</span><span class="stat-v">$${sel.fac.elecPrice.toFixed(3)}/kWh</span></div>
       <div class="stat-row"><span class="k">Electricity bill</span><span class="stat-v" id="hw-elec"></span></div>
       <div class="stat-row"><span class="k">Upkeep</span><span class="stat-v">${fmtMoney(sel.fac.upkeep)}/h</span></div>

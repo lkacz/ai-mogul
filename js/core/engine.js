@@ -4,6 +4,7 @@
 import { BAL, capabilityFor, trainCompute, optimalTokens } from './balance.js';
 import { GPUS, FACILITIES, DATASETS, FUNDING, RIVAL_ASYMPTOTE, founderize } from './data.js';
 import { DILEMMAS, DILEMMA_BY_ID } from './dilemmas.js';
+import { DESIGNS, scoreDesign, placedCount } from './design.js';
 import { RESEARCH_BY_ID } from './research.js';
 import { MILESTONES, MILESTONE_BY_ID } from './milestones.js';
 import { EVENTS, NEWS_FLAVOR, FACTS } from './events.js';
@@ -388,6 +389,24 @@ export function takeFunding(s, id) {
   s.rep = Math.min(100, s.rep + f.rep);
   pushNews(s, `💰 ${f.name} closed: +${fmtNum(f.amount)} in the bank.`);
   return ok(`${f.name} closed!`);
+}
+
+// Commission a facility floor plan from the designer. Bounded, science-based
+// effects: good layouts cool better and run cheaper; bad ones run hot.
+export function applyFacilityDesign(s, phase, cells) {
+  if (phase !== s.phase) return err('You can only redesign the facility you occupy.');
+  const def = DESIGNS[phase];
+  if (!def) return err('The garage is beyond optimization. It has a vibe.');
+  for (const t of Object.keys(def.parts)) {
+    if (placedCount(cells, t) > def.parts[t].n) return err('Too many parts of one type.');
+  }
+  const result = scoreDesign(phase, cells);
+  s.facDesign = s.facDesign || {};
+  s.facDesignFx = s.facDesignFx || {};
+  s.facDesign[phase] = cells;
+  s.facDesignFx[phase] = { ...result.fx, score: result.score };
+  pushNews(s, `🏗️ ${def.name} layout commissioned — design score ${result.score}/100.`);
+  return ok(`Layout applied — score ${result.score}/100.`);
 }
 
 // Resolve the pending moral dilemma. Visible effects apply now; an accepted

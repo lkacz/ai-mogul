@@ -33,6 +33,8 @@ export function defaultState(founderId = 'mario') {
     dataTier: 0,
     dataQBonus: {},    // dataset id -> quality multiplier from Dedup Frenzy
     deskPos: {},       // phase -> [[x,y],…] desk positions the player dragged
+    facDesign: {},     // phase -> { cellIndex: partId } facility layouts
+    facDesignFx: {},   // phase -> { pue, mfu, elec } computed design effects
     research: [],                                // completed research ids
     resProj: null,     // active research project { id, done, need } (lab-hours)
     resDoneQueue: [],  // completed research ids awaiting UI follow-up {id, realAt}
@@ -114,8 +116,11 @@ export function selectors(s) {
     gpuCount += n;
   }
 
+  // facility-design effects (the layout puzzle) — neutral when undesigned
+  const dfx = (s.facDesignFx && s.facDesignFx[s.phase]) || null;
+
   const mfu = clamp(
-    BAL.MFU_BASE + fx.mfu +
+    BAL.MFU_BASE + fx.mfu + (dfx ? dfx.mfu : 0) +
     Math.min(BAL.MFU_ENG_CAP, s.staff.engineer * BAL.MFU_PER_ENGINEER),
     0.05, BAL.MFU_MAX);
 
@@ -161,10 +166,11 @@ export function selectors(s) {
   const adoptRate = (inFastLane ? BAL.ADOPT_FAST : BAL.ADOPT_RATE) *
     (1 + BAL.ADOPT_SALES_K * Math.log10(1 + s.staff.sales));
 
-  // costs (per hour)
+  // costs (per hour) — a well-designed facility runs a cooler PUE
   const opsDiscount = 1 - Math.min(BAL.OPS_ELEC_CAP, s.staff.ops * BAL.OPS_ELEC_EACH);
-  const elecPerHour = (watts / 1000) * fac.pue * fac.elecPrice *
-    fx.powerMult * elecBuff * opsDiscount;
+  const pue = Math.max(1.01, fac.pue + (dfx ? dfx.pue : 0));
+  const elecPerHour = (watts / 1000) * pue * fac.elecPrice *
+    fx.powerMult * elecBuff * opsDiscount * (dfx ? dfx.elec : 1);
   let salaries = 0;
   for (const [id, n] of Object.entries(s.staff)) salaries += (STAFF_BY_ID[id]?.wage || 0) * n;
   const costPerHour = elecPerHour + salaries + fac.upkeep;
@@ -184,7 +190,7 @@ export function selectors(s) {
     fac, fx, algoEff, selfImprove, superImprove, flops, watts, vramGB, gpuCount, mfu,
     effFlops, trainRate, infFlops, resFlops, maxParams, dataQ, dataset: ds,
     deployed, price, capacity, potential, adoptRate, revenue, served, maxRival,
-    elecPerHour, salaries, costPerHour, rpPerHour, maxRuns, ppRate,
+    elecPerHour, salaries, costPerHour, rpPerHour, maxRuns, ppRate, pue,
     netPerHour: revenue * 3600 - costPerHour,
     gpuPriceBuff, demandBuff,
     powerUsed: watts, powerCap: fac.powerW,

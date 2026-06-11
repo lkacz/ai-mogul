@@ -32,6 +32,7 @@ const check = (name, fn) => {
 console.log('Importing modules…');
 const { defaultState, selectors, serialize, deserialize } = await import('../js/core/state.js');
 const { DILEMMAS } = await import('../js/core/dilemmas.js');
+const { DESIGNS, scoreDesign } = await import('../js/core/design.js');
 const E = await import('../js/core/engine.js');
 const ui = await import('../js/ui/ui.js');
 const { TABS, ACTIONS } = await import('../js/ui/tabs.js');
@@ -137,6 +138,35 @@ check('all dilemmas resolve both ways, fallout fires cleanly', () => {
     if (!E.resolveDilemma(sd, false).ok) throw new Error(`${d.id} decline failed`);
     if (!(sd.integrity > 70)) throw new Error(`${d.id} decline should build integrity`);
   }
+});
+
+check('facility designs: all tiers score, fx bounded, neutral when unset', () => {
+  for (const phase of Object.keys(DESIGNS).map(Number)) {
+    const empty = scoreDesign(phase, {});
+    if (!(empty.score >= 0 && empty.score <= 100)) throw new Error(`phase ${phase} empty score broken`);
+    // a deliberately decent layout: scatter parts near their friends
+    const def = DESIGNS[phase];
+    const cells = {};
+    let i = 13;
+    for (const [pid, p] of Object.entries(def.parts)) {
+      for (let k = 0; k < Math.min(p.n, 3); k++) { cells[i] = pid; i += 1; }
+      i += 2;
+    }
+    const res = scoreDesign(phase, cells);
+    if (!Number.isFinite(res.score)) throw new Error(`phase ${phase} score NaN`);
+    if (res.fx.pue < -0.13 || res.fx.mfu > 0.026 || res.fx.elec < 0.91)
+      throw new Error(`phase ${phase} fx out of bounds: ${JSON.stringify(res.fx)}`);
+    // apply through the engine
+    const st = defaultState(); st.phase = phase;
+    const r = E.applyFacilityDesign(st, phase, cells);
+    if (!r.ok) throw new Error(`phase ${phase} apply failed: ${r.msg}`);
+    if (!st.facDesignFx[phase]) throw new Error(`phase ${phase} fx not stored`);
+    E.step(st, 1);
+  }
+  // neutrality: an undesigned state computes identical economics
+  const a = defaultState(), b = defaultState();
+  b.facDesignFx = {};
+  if (selectors(a).elecPerHour !== selectors(b).elecPerHour) throw new Error('undesigned state not neutral');
 });
 
 check('fractional steps are stable', () => {
