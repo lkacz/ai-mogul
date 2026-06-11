@@ -251,3 +251,12 @@ table.tbl td { padding: 6px 8px; border-bottom: 1px solid #1d2331; }
   border-color: var(--purple); background: #1a1430; color: #e0d4fe;
   box-shadow: 0 0 18px rgba(167,139,250,.35);
 }
+
+/* custom-quantity input on accelerator cards */
+.qty-in {
+  width: 74px; padding: 4px 7px;
+  background: #0a0d14; color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px;
+}
+.qty-in:focus { outline: none; border-color: var(--accent); }

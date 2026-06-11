@@ -17,6 +17,9 @@ export const game = {
   builtSig: null,
   gigReadyAt: 0,      // real-time gig cooldown
   speeds: [1, 5, 25, 100, 500],
+  holdActive: false,  // press-and-hold auto-repeat in progress
+  holdMult: 1,        // its accelerating quantity multiplier
+  swallowClick: false,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -272,12 +275,48 @@ export function switchTab(id) {
 export function initDispatch() {
   requestAnimationFrame(moneyRoll);
   document.addEventListener('click', (e) => {
+    if (game.swallowClick) { game.swallowClick = false; return; }  // a hold just ended
     const el = e.target.closest('[data-act]');
     if (!el || el.disabled) return;
     const act = el.dataset.act;
     const fn = ACTIONS[act];
     if (fn) fn(el.dataset.arg, el);
   });
+
+  // Press-and-hold auto-repeat on buy/sell/hire buttons, with acceleration:
+  // the multiplier doubles every 0.7 s (up to ×256), so a held +1k button
+  // reaches millions without a million clicks. We capture act/arg up front —
+  // the button element itself gets rebuilt after every purchase.
+  const HOLD_ACTS = new Set(['buyGpu', 'sellGpu', 'hire', 'fire']);
+  let holdTo = 0, holdIv = 0;
+  const stopHold = () => {
+    clearTimeout(holdTo); clearInterval(holdIv);
+    holdTo = holdIv = 0;
+    game.holdActive = false; game.holdMult = 1;
+    // the release-click (if any) fires right after pointerup; don't let a
+    // stale swallow eat an unrelated later click
+    setTimeout(() => { game.swallowClick = false; }, 60);
+  };
+  document.addEventListener('pointerdown', (e) => {
+    const el = e.target.closest('[data-act]');
+    if (!el || el.disabled) return;
+    const act = el.dataset.act;
+    if (!HOLD_ACTS.has(act)) return;
+    const arg = el.dataset.arg;
+    const t0 = Date.now();
+    stopHold();
+    holdTo = setTimeout(() => {
+      game.holdActive = true;
+      holdIv = setInterval(() => {
+        game.holdMult = Math.min(256, Math.pow(2, Math.floor((Date.now() - t0) / 700)));
+        game.swallowClick = true;          // eat the click that fires on release
+        const fn = ACTIONS[act];
+        if (fn) fn(arg, el);
+      }, 110);
+    }, 400);
+  });
+  for (const ev of ['pointerup', 'pointercancel']) document.addEventListener(ev, stopHold);
+  window.addEventListener('blur', stopHold);
   document.addEventListener('input', (e) => {
     const el = e.target.closest('[data-input]');
     if (!el) return;

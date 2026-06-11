@@ -19,7 +19,9 @@ const FACILITY_EMOJI = ['🏠', '🏢', '🗄️', '🏭', '🌆', '🛰️'];
 
 function doAction(fn, ...args) {
   const r = fn(game.s, ...args);
-  toast(r.msg, r.ok ? '' : 'err');
+  // during a press-and-hold burst, toasts would spam 9×/s — the live counters
+  // (money, Owned) are the feedback
+  if (!game.holdActive) toast(r.msg, r.ok ? '' : 'err');
   renderAll();
   return r;
 }
@@ -366,11 +368,13 @@ const hwTab = {
         <div class="faint">⚡ ${fmtNum(g.tflops)} TFLOPS · 🔌 ${g.watts} W · 💾 ${g.vram} GB</div>
         <div class="row" style="justify-content:space-between; margin-top:4px">
           <span class="stat-v">Owned: ${fmtNum(owned)}</span>
-          ${locked ? `<span class="faint">🔒 ${lockMsg}</span>` : `<span class="row" style="gap:4px">
-            <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 1 })}'>+1</button>
-            <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 10 })}'>+10</button>
-            <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 1000 })}'>+1k</button>
+          ${locked ? `<span class="faint">🔒 ${lockMsg}</span>` : `<span class="row" style="gap:4px; flex-wrap:wrap; justify-content:flex-end">
+            <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 1 })}' title="Hold to auto-buy — it accelerates">+1</button>
+            <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 10 })}' title="Hold to auto-buy — it accelerates">+10</button>
+            <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 1000 })}' title="Hold to auto-buy — it accelerates">+1k</button>
             <button class="act sub" data-act="buyGpuMax" data-arg="${g.id}">Max</button>
+            <input class="qty-in" type="text" inputmode="text" placeholder="50k, 2m…" value="${esc(qtyMap[g.id] || '')}" data-input="gpuQty" data-id="${g.id}" title="Custom amount — accepts k / m / b suffixes">
+            <button class="act" data-act="buyGpuQty" data-arg="${g.id}">Buy</button>
           </span>`}
         </div>
         ${owned ? `<div class="row" style="gap:4px; margin-top:4px; justify-content:flex-end">
@@ -403,13 +407,37 @@ const hwTab = {
   },
 };
 
-ACTIONS.buyGpu = (arg) => { const { id, n } = JSON.parse(arg); doAction(E.buyGpu, id, n); };
+ACTIONS.buyGpu = (arg) => {
+  const { id, n } = JSON.parse(arg);
+  let qty = n * (game.holdActive ? game.holdMult : 1);
+  if (game.holdActive) qty = Math.max(1, Math.min(qty, E.maxAffordableGpu(game.s, id)));
+  doAction(E.buyGpu, id, qty);
+};
 ACTIONS.buyGpuMax = (id) => {
   const n = E.maxAffordableGpu(game.s, id);
   if (n <= 0) { toast('Can\'t fit or afford any more of these.', 'err'); return; }
   doAction(E.buyGpu, id, n);
 };
-ACTIONS.sellGpu = (arg) => { const { id, n } = JSON.parse(arg); doAction(E.sellGpu, id, n); };
+ACTIONS.sellGpu = (arg) => {
+  const { id, n } = JSON.parse(arg);
+  const owned = game.s.gpus[id] || 0;
+  doAction(E.sellGpu, id, Math.min(owned, n * (game.holdActive ? game.holdMult : 1)));
+};
+// custom amount: "250", "50k", "2.5m", "1b" — for when you need millions
+const qtyMap = {};
+function parseQty(str) {
+  const m = /^\s*([\d.,]+)\s*([kKmMbBtT]?)\s*$/.exec(String(str || ''));
+  if (!m) return NaN;
+  const v = parseFloat(m[1].replace(/,/g, ''));
+  const suf = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 }[m[2].toLowerCase()] || 1;
+  return Math.round(v * suf);
+}
+INPUTS.gpuQty = (v, el) => { qtyMap[el.dataset.id] = v; };
+ACTIONS.buyGpuQty = (id) => {
+  const n = parseQty(qtyMap[id]);
+  if (!Number.isFinite(n) || n <= 0) { toast('Enter an amount like 250, 50k or 2m.', 'err'); return; }
+  doAction(E.buyGpu, id, n);
+};
 ACTIONS.buyFacility = () => {
   const r = doAction(E.buyFacility, game.s.phase + 1);
   if (r.ok) {
@@ -648,8 +676,14 @@ const coTab = {
     }
   },
 };
-ACTIONS.hire = (arg) => { const { id, n } = JSON.parse(arg); doAction(E.hire, id, n); };
-ACTIONS.fire = (arg) => { const { id, n } = JSON.parse(arg); doAction(E.fire, id, n); };
+ACTIONS.hire = (arg) => {
+  const { id, n } = JSON.parse(arg);
+  doAction(E.hire, id, n * (game.holdActive ? game.holdMult : 1));
+};
+ACTIONS.fire = (arg) => {
+  const { id, n } = JSON.parse(arg);
+  doAction(E.fire, id, Math.min(game.s.staff[id] || 0, n * (game.holdActive ? game.holdMult : 1)));
+};
 ACTIONS.buyData = (id) => {
   const r = doAction(E.buyDataset, id);
   if (r.ok) {

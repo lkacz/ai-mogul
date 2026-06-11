@@ -124,6 +124,25 @@ await check('sell GPU frees the slot and refunds 45%', async () => {
   if (!(moneyAfter > moneyBefore)) throw new Error('no refund received');
 });
 
+await check('custom quantity buy with suffix parsing', async () => {
+  await page.evaluate(() => { window.AIMOGUL.s.money = 1e5; });
+  await page.fill('.res-card:has-text("GTX 1070") .qty-in', '5');
+  await page.click('.res-card:has-text("GTX 1070") [data-act=buyGpuQty]');
+  const card = await page.textContent('.res-card:has-text("GTX 1070")');
+  if (!card.includes('Owned: 6')) throw new Error('custom buy failed: ' + card.slice(0, 90));
+});
+
+await check('hold-to-buy auto-repeats until slots are full', async () => {
+  const btn = page.locator('.res-card:has-text("GTX 1070") [data-act=buyGpu]').first();
+  const box = await btn.boundingBox();
+  await page.mouse.move(box.x + 5, box.y + 5);
+  await page.mouse.down();
+  await page.waitForTimeout(1500);
+  await page.mouse.up();
+  const card = await page.textContent('.res-card:has-text("GTX 1070")');
+  if (!card.includes('Owned: 8')) throw new Error('hold did not repeat: ' + card.slice(0, 90));   // garage slot cap
+});
+
 await check('research / company / models / goals tabs render', async () => {
   for (const id of ['res', 'co', 'models', 'goals']) {
     await page.click(`[data-act=tab][data-arg=${id}]`);
