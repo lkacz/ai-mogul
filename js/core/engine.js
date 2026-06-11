@@ -108,7 +108,8 @@ function finalizeRun(s, sel, r) {
 }
 
 function fireEvent(s, sel) {
-  const pool = EVENTS.filter(e => s.phase >= e.minPhase);
+  const pool = EVENTS.filter(e =>
+    s.phase >= e.minPhase && (e.maxPhase === undefined || s.phase <= e.maxPhase));
   const total = pool.reduce((a, e) => a + e.weight, 0);
   let roll = Math.random() * total;
   let ev = pool[0];
@@ -126,7 +127,9 @@ function fireEvent(s, sel) {
     result = ev.apply(s, sel);
     if (result === null) return;
   }
-  pushNews(s, ev.text(s, result));
+  const txt = ev.text(s, result);
+  pushNews(s, txt);
+  if (ev.dramatic) s.lastDrama = { txt, realAt: Date.now() };  // UI pops a toast
 }
 
 function checkMilestones(s) {

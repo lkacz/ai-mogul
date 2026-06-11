@@ -37,6 +37,7 @@ The numbers are compressed for playability, but the *mechanics* are the real thi
 | Market adoption lag | Capability ≠ instant revenue; enterprises adopt over months, sales staff help |
 | Funding round gates | Investors fund traction over time — seed → Series A/B/C → sovereign megaround → IPO |
 | AI research feedback | Past capability 50, your models accelerate your own algorithmic progress |
+| Hardware entropy | GPUs die at scale (Meta logged 466 interruptions in 54 days on Llama 3); racks catch fire (ask OVH, 2021); thieves like accelerators; humans spill coffee — ops staff and checkpointing mitigate |
 | Intelligence explosion | Past capability 100, self-improvement compounds exponentially (I. J. Good, 1965) — but the fixed point only passes 200 if you feed it new physics |
 
 Capability is a log-scale index of effective training compute: ~12 is a GPT-2-era model,
@@ -104,6 +105,9 @@ the Landauer limit, fusion ignition and orbital datacenters.
 - Money **rolls** at 60 fps; gains float up off the buttons; funding rounds rain big gold numbers.
 - Every new-best model throws confetti in the lab; crossing a **capability tier**
   ("Coherent sentences" → "GPT-2-era" → … → "The Singularity") gets a purple tier-up banner.
+- And entropy fights back: dead HBM, a 2 AM burglary your ops crew can foil, a flat white set on
+  the test bench — and the rare rack fire that **actually burns in the pixel scene** for a day
+  while insurance pays out. Sell old cards at 45% to clear slots and power for better silicon.
 
 ## How to play
 

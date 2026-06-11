@@ -226,6 +226,27 @@ function drawPizza(ctx, x, y, n) {
   for (let i = 0; i < n; i++) P(ctx, x - i, y - 2 - i * 2, 12, 2, i % 2 ? '#b08968' : '#9c7754');
 }
 
+// A rack on fire (shown for 24h after the fire event, while the cleanup buff runs)
+function drawFireFx(ctx, x, y, t) {
+  const glow = ctx.createRadialGradient(x + 6, y - 6, 1, x + 6, y - 6, 26);
+  glow.addColorStop(0, `rgba(251,146,60,${0.30 + Math.sin(t * 9) * 0.10})`);
+  glow.addColorStop(1, 'rgba(251,146,60,0)');
+  ctx.fillStyle = glow; ctx.fillRect(x - 20, y - 32, 52, 40);
+  for (let i = 0; i < 9; i++) {
+    const fx = x + hash(i, (t * 8) | 0) * 14 - 3;
+    const fh = 4 + hash(i + 9, (t * 10) | 0) * 13;
+    P(ctx, fx, y - fh, 2, fh, i % 2 ? '#f59e0b' : '#ef4444');
+    if (hash(i, (t * 6) | 0) > 0.5) P(ctx, fx, y - fh - 3, 1, 3, '#fde68a');
+  }
+  for (let i = 0; i < 6; i++) {  // smoke drifting up
+    const sx = x + 5 + Math.sin(t * 1.5 + i * 2) * 5;
+    const sy = y - 16 - ((t * 9 + i * 13) % 46);
+    P(ctx, sx, sy, 3 + (i % 2), 2, `rgba(125,125,135,${0.55 - i * 0.08})`);
+  }
+}
+// where the burning rack sits in each scene
+const FIRE_POS = [[50, 100], [378, 136], [50, 140], [39, 140], [35, 140], [448, 192]];
+
 // ── per-phase scenes ──────────────────────────────────────────────
 function sceneCommon(ctx, wall, wallLo, floorA, floorB) {
   P(ctx, 0, 0, W, FLOOR_Y, wall);
@@ -499,6 +520,7 @@ function frame() {
   const ctx = buf.getContext('2d');
   ctx.clearRect(0, 0, W, H);
   scene.draw(ctx, t, s, sel, runProg);
+  if (s.buffs.some(b => b.id === 'fireCleanup')) drawFireFx(ctx, ...FIRE_POS[phase], t);
 
   // draw entities back-to-front
   const ents = [...chars];

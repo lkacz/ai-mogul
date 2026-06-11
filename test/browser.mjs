@@ -115,6 +115,15 @@ await check('hardware tab + buy GPU', async () => {
   if (!owned.includes('Owned: 2')) throw new Error('GPU count did not increase: ' + owned.slice(0, 80));
 });
 
+await check('sell GPU frees the slot and refunds 45%', async () => {
+  const moneyBefore = await page.evaluate(() => window.AIMOGUL.s.money);
+  await page.click('.res-card:has-text("GTX 1070") [data-act=sellGpu]');   // −1 button
+  const card = await page.textContent('.res-card:has-text("GTX 1070")');
+  if (!card.includes('Owned: 1')) throw new Error('GPU count did not decrease: ' + card.slice(0, 80));
+  const moneyAfter = await page.evaluate(() => window.AIMOGUL.s.money);
+  if (!(moneyAfter > moneyBefore)) throw new Error('no refund received');
+});
+
 await check('research / company / models / goals tabs render', async () => {
   for (const id of ['res', 'co', 'models', 'goals']) {
     await page.click(`[data-act=tab][data-arg=${id}]`);

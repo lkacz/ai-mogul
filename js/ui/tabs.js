@@ -367,14 +367,20 @@ const hwTab = {
             <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 10 })}'>+10</button>
             <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 1000 })}'>+1k</button>
             <button class="act sub" data-act="buyGpuMax" data-arg="${g.id}">Max</button>
-            ${owned ? `<button class="act warn" data-act="sellGpu" data-arg='${JSON.stringify({ id: g.id, n: owned })}' title="Sell all at ${Math.round(BAL.SELL_RATIO * 100)}%">Sell</button>` : ''}
           </span>`}
         </div>
+        ${owned ? `<div class="row" style="gap:4px; margin-top:4px; justify-content:flex-end">
+          <span class="faint" style="margin-right:auto">resale ${fmtMoney(g.price * BAL.SELL_RATIO)}/ea</span>
+          <button class="act warn" data-act="sellGpu" data-arg='${JSON.stringify({ id: g.id, n: 1 })}' title="Sell 1 for ${fmtMoney(g.price * BAL.SELL_RATIO)}">−1</button>
+          ${owned >= 10 ? `<button class="act warn" data-act="sellGpu" data-arg='${JSON.stringify({ id: g.id, n: 10 })}'>−10</button>` : ''}
+          <button class="act warn" data-act="sellGpu" data-arg='${JSON.stringify({ id: g.id, n: owned })}' title="Sell all ${fmtNum(owned)} for ${fmtMoney(g.price * BAL.SELL_RATIO * owned)}">Sell all</button>
+        </div>` : ''}
       </div>`;
     }).join('');
 
     return facHtml + `<div class="card"><h3>Accelerator market</h3>
-      <p class="muted small">FLOPS win training races; VRAM bounds model size (~18 B/param); watts hit the power budget and the bill.</p>
+      <p class="muted small">FLOPS win training races; VRAM bounds model size (~18 B/param); watts hit the power budget and the bill.
+      Old cards resell at ${Math.round(BAL.SELL_RATIO * 100)}% of list — clear slots and power for better silicon.</p>
       <div class="grid3">${gpuCards}</div></div>`;
   },
   update(s, sel) {

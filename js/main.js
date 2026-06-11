@@ -104,6 +104,7 @@ function showEndingModal() {
       <span class="muted">Models trained</span><span class="num">${s.models.length + st.openSourced}</span>
       <span class="muted">Total revenue</span><span class="num">${fmtMoney(st.apiRevenue + st.gigRevenue)}</span>
       <span class="muted">Research completed</span><span class="num">${s.research.length} techs</span>
+      <span class="muted">Hardware lost to entropy</span><span class="num">${fmtNum(st.gpusLost || 0)} GPUs${st.fires ? ` · ${st.fires} fire${st.fires > 1 ? 's' : ''}` : ''}</span>
     </div>
     <p class="muted">You finished AI Mogul. The simulation goes on in the new universe —
     or wipe the save in ⚙️ Settings and race the curve again.</p>
@@ -211,6 +212,16 @@ function pumpCelebrations() {
   lastBestCap = s.bestCap;
 }
 
+// ── Dramatic incidents (fires, theft, dead hardware) → toast ──────
+function pumpDrama() {
+  const d = s.lastDrama;
+  if (!d) return;
+  s.lastDrama = null;
+  // skip stale drama from offline catch-up — the news log still has it
+  if (Date.now() - (d.realAt || 0) > 60 * 1000) return;
+  toast(d.txt, 'err');
+}
+
 // ── Milestone toasts ──────────────────────────────────────────────
 function pumpMilestoneToasts() {
   if (!s.lastMilestone) return;
@@ -242,6 +253,7 @@ setInterval(() => {
   }
   pumpMilestoneToasts();
   pumpCelebrations();
+  pumpDrama();
   pumpIncidents();
   maybeShowWin();
   maybeShowSingularity();

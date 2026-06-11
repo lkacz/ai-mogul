@@ -1,11 +1,54 @@
-// Random events. Each: weight, minPhase, and either `buff` (timed multiplier)
-// or `apply(s, sel)` for instant effects. `text(s)` builds the news line.
+// Random events. Each: weight, minPhase (and optional maxPhase), and either
+// `buff` (timed multiplier) or `apply(s, sel)` for instant effects.
+// `text(s, result)` builds the news line. `dramatic: true` also pops a toast.
 
-import { fmtMoney } from './util.js';
+import { fmtMoney, fmtNum } from './util.js';
+import { GPU_BY_ID } from './state.js';
 
 // Amounts scale with phase so events stay relevant.
 const scaledMoney = (s, base) => base * Math.pow(25, s.phase);
 const scaledRp = (s, base) => base * Math.pow(8, s.phase);
+
+// Destroy ~frac of the fleet (at least minN units), spread proportionally
+// across owned types. Never takes the last GPU — the sim must stay playable.
+// Returns { n, value, desc } or null if nothing could be destroyed.
+export function destroyGpus(s, frac, minN = 1) {
+  const total = Object.values(s.gpus).reduce((a, b) => a + b, 0);
+  const toKill = Math.min(total - 1, Math.max(minN, Math.round(total * frac)));
+  if (toKill <= 0) return null;
+  const lost = {};
+  let killed = 0, value = 0;
+  for (const [id, n] of Object.entries(s.gpus)) {
+    if (!n) continue;
+    const share = Math.min(n, Math.floor(toKill * n / total));
+    if (share > 0) { lost[id] = share; killed += share; }
+  }
+  // remainder comes off the biggest pile
+  while (killed < toKill) {
+    const id = Object.keys(s.gpus).reduce((a, b) =>
+      (s.gpus[a] - (lost[a] || 0)) >= (s.gpus[b] - (lost[b] || 0)) ? a : b);
+    if (!(s.gpus[id] - (lost[id] || 0) > 0)) break;
+    lost[id] = (lost[id] || 0) + 1; killed++;
+  }
+  for (const [id, n] of Object.entries(lost)) {
+    s.gpus[id] -= n;
+    if (s.gpus[id] <= 0) delete s.gpus[id];
+    value += (GPU_BY_ID[id]?.price || 0) * n;
+  }
+  s.stats.gpusLost = (s.stats.gpusLost || 0) + killed;
+  const desc = Object.entries(lost)
+    .map(([id, n]) => `${fmtNum(n)}× ${GPU_BY_ID[id]?.name || id}`).join(', ');
+  return { n: killed, value, desc };
+}
+
+// Human-error flavor — every one of these is somebody's real war story.
+const OOPS_TEXTS = [
+  'A migration script points the cluster at the wrong checkpoint bucket.',
+  'An intern unplugs rack 7 to charge a phone.',
+  'Someone pushes a config with learning rate 10. Ten.',
+  'The new hire runs the cleanup cron against prod storage.',
+  'A firmware update reboots every node. Alphabetically. Slowly.',
+];
 
 export const EVENTS = [
   { id: 'demandSurge', weight: 10, minPhase: 0,
@@ -65,6 +108,51 @@ export const EVENTS = [
   { id: 'enterprise', weight: 5, minPhase: 1,
     apply: (s) => { const amt = scaledMoney(s, 3000); s.money += amt; return amt; },
     text: (s, amt) => `🤝 An enterprise signs an annual API contract upfront: +${fmtMoney(amt)}.` },
+  // ── Hardware drama: failures, fires, theft, human error ─────────
+  // All grounded in real incidents; losses are capped and never take the
+  // last GPU, so the early game can't soft-lock.
+  { id: 'hwFail', weight: 7, minPhase: 0, dramatic: true,
+    apply: (s) => destroyGpus(s, s.staff.ops > 0 ? 0.004 : 0.008),
+    text: (s, r) => `💀 Overnight attrition: ${r.desc} dead — ECC errors, cooked HBM. ${s.staff.ops > 0 ? 'Ops swap in hot spares for the rest.' : 'No ops staff, no hot spares.'} (Real: Meta logged 466 training interruptions in 54 days on 16k GPUs.)` },
+  { id: 'fire', weight: 2, minPhase: 1, maxPhase: 4, dramatic: true,
+    apply: (s, sel) => {
+      const r = destroyGpus(s, 0.03, 2);
+      if (!r) return null;
+      const payout = r.value * 0.35;
+      s.money += payout;
+      s.stats.fires = (s.stats.fires || 0) + 1;
+      const lostH = 8;
+      for (const run of s.runs) {
+        const rate = sel.trainRate / Math.max(1, s.runs.length);
+        run.physDone = Math.max(0, run.physDone - rate * 3600 * lostH);
+      }
+      s.buffs.push({ id: 'fireCleanup', label: '🔥 Fire cleanup', untilH: s.simHours + 24 });
+      return { ...r, payout };
+    },
+    text: (s, r) => `🔥 FIRE! Thermal runaway in a rack — ${r.desc} destroyed before suppression kicked in. Runs lose 8h; insurance pays ${fmtMoney(r.payout)}. (Datacenter fires are rare but real — ask OVH, 2021.)` },
+  { id: 'heist', weight: 3, minPhase: 0, maxPhase: 3, dramatic: true,
+    apply: (s) => {
+      if (s.staff.ops >= 5) return { saved: true };
+      return destroyGpus(s, 0.015);
+    },
+    text: (s, r) => r.saved
+      ? '🚨 Burglars hit the loading dock at 2 AM — your ops crew and the cameras chase them off. Nothing lost.'
+      : `🥷 Burglary! ${r.desc} stolen overnight. GPUs are the new copper. (Real: accelerator shipments get hijacked; that's why datacenters look like banks.)` },
+  { id: 'coffee', weight: 4, minPhase: 0, dramatic: true,
+    apply: (s) => destroyGpus(s, 0, 1),
+    text: (s, r) => `☕ A researcher sets a flat white on the test bench. ${r.desc} dies instantly, heroically. A "NO LIQUIDS" sign goes up, again.` },
+  { id: 'oops', weight: 5, minPhase: 0,
+    apply: (s, sel) => {
+      if (!s.runs.length) return null;
+      const lostH = sel.fx.outageGuard ? 1 : 3;
+      for (const run of s.runs) {
+        const rate = sel.trainRate / Math.max(1, s.runs.length);
+        run.physDone = Math.max(0, run.physDone - rate * 3600 * lostH);
+      }
+      return { lostH, txt: OOPS_TEXTS[(Math.random() * OOPS_TEXTS.length) | 0] };
+    },
+    text: (s, r) => `🤦 ${r.txt} Training loses ${r.lostH}h${r.lostH <= 1 ? ' — auto-resume saves the night' : ''}.` },
+
   { id: 'qHype', weight: 5, minPhase: 4,
     buff: { label: 'Quantum-AI hype', demand: 1.8, hours: 48 },
     text: () => '🪐 "Quantum AI" trends worldwide after your keynote — demand +80% for 48h.' },
