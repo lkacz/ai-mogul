@@ -62,6 +62,14 @@ await check('speed up to 25×', async () => {
   await page.click('.speed-btn:has-text("25×")');
 });
 
+await check('turbo 10k× engages with muted-notification notice', async () => {
+  await page.click('.speed-btn:has-text("10k×")');
+  await page.waitForSelector('.toast', { timeout: 3000 });
+  const t = await page.textContent('#toast-root');
+  if (!/Turbo/i.test(t)) throw new Error('no turbo notice');
+  await page.click('.speed-btn:has-text("25×")');   // back to normal for later checks
+});
+
 await check('start a training run → LR minigame offered', async () => {
   await page.click('[data-act=tab][data-arg=train]');
   await page.waitForSelector('[data-act=startRun]');

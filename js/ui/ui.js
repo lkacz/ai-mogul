@@ -16,7 +16,7 @@ export const game = {
   builtTab: null,
   builtSig: null,
   gigReadyAt: 0,      // real-time gig cooldown
-  speeds: [1, 5, 25, 100, 500],
+  speeds: [1, 5, 25, 100, 500, 10000, 100000],   // ≥10k = turbo: notifications muted
   holdActive: false,  // press-and-hold auto-repeat in progress
   holdMult: 1,        // its accelerating quantity multiplier
   swallowClick: false,
@@ -106,10 +106,11 @@ function renderHeader() {
   const want = 'p' + (s.paused ? 1 : 0) + 's' + s.speed;
   if (sc.dataset.sig !== want) {
     sc.dataset.sig = want;
+    const lbl = (v) => v >= 1000 ? (v / 1000) + 'k×' : v + '×';
     sc.innerHTML =
       `<button class="speed-btn ${s.paused ? 'on' : ''}" data-act="pause">⏸</button>` +
       game.speeds.map(v =>
-        `<button class="speed-btn ${!s.paused && s.speed === v ? 'on' : ''}" data-act="speed" data-arg="${v}">${v}×</button>`
+        `<button class="speed-btn ${!s.paused && s.speed === v ? 'on' : ''} ${v >= 10000 ? 'turbo' : ''}" data-act="speed" data-arg="${v}" ${v >= 10000 ? 'title="Turbo: the lab runs itself — incidents and offers resolve silently (usually not in your favor); only AGI and the Singularity interrupt."' : ''}>${lbl(v)}</button>`
       ).join('');
   }
 }
@@ -339,5 +340,13 @@ export function initDispatch() {
 // Common built-in actions
 ACTIONS.tab = (arg) => switchTab(arg);
 ACTIONS.pause = () => { game.s.paused = !game.s.paused; renderAll(); };
-ACTIONS.speed = (arg) => { game.s.speed = +arg; game.s.paused = false; renderAll(); };
+ACTIONS.speed = (arg) => {
+  const v = +arg;
+  const wasTurbo = game.s.speed >= 10000;
+  game.s.speed = v; game.s.paused = false;
+  if (v >= 10000 && !wasTurbo) {
+    toast('⚡ <b>Turbo engaged.</b> Notifications muted — incidents, offers and milestones resolve silently (the world doesn\'t wait for you). Only AGI and the Singularity will interrupt.');
+  }
+  renderAll();
+};
 ACTIONS.closeModal = () => closeModal();

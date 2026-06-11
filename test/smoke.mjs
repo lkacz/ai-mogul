@@ -113,6 +113,11 @@ check('engine rejects bad input', () => {
   if (E.buyGpu(s, 'rtx4090', 99).ok) throw new Error('money check failed');
   if (E.takeFunding(s, 'seriesA').ok) throw new Error('funding order check failed');
   if (E.buyResearch(s, 'moe').ok) throw new Error('era gate failed');
+  // the time wall: a run that needs millennia even at the batch-size limit
+  const st = defaultState();
+  st.dataTier = 5; st.gpus = { px1: 1e6 };
+  const r = E.startRun(st, 1e15, 2e16);
+  if (r.ok || !/batch-size wall/.test(r.msg)) throw new Error('time-wall check failed: ' + r.msg);
 });
 
 check('all dilemmas resolve both ways, fallout fires cleanly', () => {

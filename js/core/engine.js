@@ -292,6 +292,12 @@ export function startRun(s, N, D, silent = false) {
   if (N > sel.maxParams) return err('Not enough VRAM — model won\'t fit (need ~18 B/param).');
   if (!(D > 0)) return err('Need a token budget.');
   if (D > sel.dataset.tokens) return err('Not enough data — buy a bigger dataset.');
+  // the time wall: even an infinite cluster can't push a run faster than
+  // 6·D / ppRate (critical batch size) — refuse runs no lab would commit to
+  const minYears = 6 * D / sel.ppRate / 3600 / 8760;
+  if (minYears > BAL.RUN_HARD_CAP_Y) {
+    return err(`Beyond the batch-size wall: even with unlimited compute this run takes ${fmtNum(minYears)} years. Train smaller (or research parallelism).`);
+  }
   if (sel.flops <= 0) return err('You need at least one GPU.');
   s.modelSeq++;
   const run = {

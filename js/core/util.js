@@ -61,7 +61,8 @@ export function fmtDur(hours) {
   const d = hours / 24;
   if (d < 60) return d.toFixed(1) + 'd';
   if (d < 730) return (d / 30.4).toFixed(1) + 'mo';
-  return (d / 365).toFixed(1) + 'y';
+  const y = d / 365;
+  return (y < 1000 ? y.toFixed(1) : fmtNum(y)) + 'y';
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

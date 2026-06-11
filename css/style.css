@@ -260,3 +260,7 @@ table.tbl td { padding: 6px 8px; border-bottom: 1px solid #1d2331; }
   font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 12px;
 }
 .qty-in:focus { outline: none; border-color: var(--accent); }
+
+/* turbo speeds */
+.speed-btn.turbo { color: var(--gold); border-color: #4a3a16; }
+.speed-btn.turbo.on { background: var(--gold); color: #2a1f06; border-color: var(--gold); }

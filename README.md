@@ -145,7 +145,13 @@ compass.
 - **Company** — hire staff, buy datasets, publish papers, raise six rounds of funding.
 - **Goals** — a 32-step quest line from "first training run" to the Singularity (the post-AGI steps stay hidden until you get there), plus achievements.
 
-1 real second ≈ 1 sim hour at 1× (up to 500×). Space pauses. Progress accrues while you're away.
+1 real second ≈ 1 sim hour at 1× (up to 500×, plus **10k× / 100k× turbo** — at turbo the lab
+runs unsupervised: incidents, offers and milestones resolve silently and not always in your
+favor; only AGI and the Singularity interrupt). Space pauses. Progress accrues while you're away.
+
+There's also a **time wall**: the critical-batch-size limit means a run can't finish faster
+than 6·D/ppRate even on an infinite cluster — the game refuses thousand-year runs the same way
+a real lab would, and tells you why.
 
 ## Development
 

@@ -191,7 +191,10 @@ const trainTab = {
       const sug = E.suggestRun(s);
       trainUI.logN = log10(sug.N);
     }
-    const maxLogN = Math.max(6.05, log10(Math.min(sel.maxParams, sel.dataset.tokens / BAL.CHINCHILLA_RATIO * 10)));
+    // the slider also stops at the time wall: with Chinchilla data the
+    // fastest possible run is 120·N/ppRate — cap N at RUN_SOFT_CAP_Y of it
+    const maxByTime = sel.ppRate * BAL.RUN_SOFT_CAP_Y * 8760 * 3600 / 120;
+    const maxLogN = Math.max(6.05, log10(Math.min(sel.maxParams, sel.dataset.tokens / BAL.CHINCHILLA_RATIO * 10, maxByTime)));
     trainUI.logN = clamp(trainUI.logN, 6, maxLogN);
     const runsHtml = s.runs.map(r => `
       <div class="run-card">
@@ -281,6 +284,9 @@ const trainTab = {
     set('tr-chin', fmtPct(chin) + (chin > 0.97 ? ' ✓' : ''));
     set('tr-cap', cap.toFixed(1) + ' — ' + capTier(cap) + (cap > s.bestCap ? '  (new best!)' : ''));
     const warns = [];
+    const minYears = 6 * D / sel.ppRate / 3600 / 8760;
+    if (minYears > BAL.RUN_HARD_CAP_Y) warns.push(`⛔ Batch-size wall: even infinite compute makes this a ${fmtNum(minYears)}-year run.`);
+    else if (etaH > 8760) warns.push('⚠ A multi-year run gets obsoleted before it finishes — real labs wait for better hardware/algorithms and retrain.');
     if (N > sel.maxParams) warns.push('⛔ Won\'t fit in VRAM (~18 bytes/param). Buy GPUs or research ZeRO.');
     if (D > sel.dataset.tokens) warns.push('⛔ Not enough data — acquire a bigger dataset (Company tab).');
     if (util < 0.6 && sel.trainRate > 0) warns.push(`⚠ Model too small for the cluster — ${fmtPct(1 - util)} of your training FLOPs would idle.`);

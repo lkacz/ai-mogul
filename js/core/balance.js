@@ -97,6 +97,13 @@ export const BAL = {
   // N × PP_BASE FLOP/s (× research ppMult) no matter how big the cluster.
   // This is why real frontier runs take months.
   PP_BASE: 3e6,
+
+  // The time wall: a run's minimum duration is 6·D / ppRate seconds even
+  // with an infinite cluster. Real labs never commit to multi-year runs —
+  // hardware and algorithms obsolete them first (the "compute Osborne
+  // effect"). Slider stops at the soft cap; the engine refuses past hard.
+  RUN_SOFT_CAP_Y: 2,
+  RUN_HARD_CAP_Y: 5,
 };
 
 export function trainCompute(N, D) { return 6 * N * D; }

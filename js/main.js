@@ -68,6 +68,7 @@ let winShown = false;
 function maybeShowWin() {
   if (!s.won || winShown || s.wonShown) return;
   winShown = true; s.wonShown = true;
+  if (s.speed > 500) s.speed = 500;   // turbo disengages for the big moments
   celebrate();
   const st = s.stats;
   const agiInteg = s.integrity >= 85
@@ -132,6 +133,7 @@ let singularityShown = false;
 function maybeShowSingularity() {
   if (!s.singularity || singularityShown || s.singularityShown) return;
   singularityShown = true; s.singularityShown = true;
+  if (s.speed > 25) s.speed = 25;     // the ending deserves real time
   save();
   closeModal();
   playSingularity(() => { celebrate(); showEndingModal(); save(); });
@@ -333,25 +335,45 @@ let acc = 0;
 let lastT = performance.now();
 let lastPhase = s.phase;
 
+// Turbo (≥10k×): the player has explicitly stopped supervising. Every signal
+// is consumed silently — effects still land, nobody reports them — and only
+// AGI / the Singularity interrupt.
+const isTurbo = () => s.speed >= 10000 && !s.paused;
+function drainSignalsSilently() {
+  s.lastMilestone = null;
+  s.lastDrama = null;
+  s.lastIncident = null;                 // the outage loss stands, unannounced
+  if (s.resDoneQueue) s.resDoneQueue.length = 0;
+  s.pendingDilemma = null;               // unanswered offers evaporate
+  lastBestCap = s.bestCap;               // no retroactive celebration bursts
+  lastTier = capTier(s.bestCap);
+}
+
 setInterval(() => {
   const now = performance.now();
   let dt = (now - lastT) / 1000; lastT = now;
   if (dt > 30) dt = 30;             // background-tab catch-up cap
   if (!s.paused) {
     acc += dt * s.speed;            // 1 real second = 1 sim hour at 1×
+    // turbo needs a bigger budget: up to 3000 steps × 4 h = 240k sim-h/s
+    const maxH = s.speed >= 10000 ? 4 : 1;
     let iter = 0;
-    while (acc >= 0.25 && iter < 1500) {
-      const h = Math.min(1, acc);
+    while (acc >= 0.25 && iter < 3000) {
+      const h = Math.min(maxH, acc);
       E.step(s, h);
       acc -= h; iter++;
     }
   }
-  pumpMilestoneToasts();
-  pumpCelebrations();
-  pumpDrama();
-  pumpResearchDone();
-  pumpDilemma();
-  pumpIncidents();
+  if (isTurbo()) {
+    drainSignalsSilently();
+  } else {
+    pumpMilestoneToasts();
+    pumpCelebrations();
+    pumpDrama();
+    pumpResearchDone();
+    pumpDilemma();
+    pumpIncidents();
+  }
   maybeShowWin();
   maybeShowSingularity();
   if (s.phase !== lastPhase) { lastPhase = s.phase; renderAll(); }
