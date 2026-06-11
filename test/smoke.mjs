@@ -34,6 +34,7 @@ const { defaultState, selectors, serialize, deserialize } = await import('../js/
 const { DILEMMAS } = await import('../js/core/dilemmas.js');
 const { DESIGNS, scoreDesign } = await import('../js/core/design.js');
 const { drawDesignScene, PART_DRAW } = await import('../js/ui/designparts.js');
+const sceneMod = await import('../js/ui/scene.js');
 const E = await import('../js/core/engine.js');
 const ui = await import('../js/ui/ui.js');
 const { TABS, ACTIONS } = await import('../js/ui/tabs.js');
@@ -194,6 +195,22 @@ check('designer canvas renderers: every part of every facility draws', () => {
     for (const t of [0, 0.7, 3.3]) {
       drawDesignScene(ctx, phase, cells, res.marks, t, 13, Object.keys(def.parts)[0]);
     }
+  }
+});
+
+check('quip decks: no repeats until a pool is exhausted, no boundary repeat', () => {
+  const arr = Array.from({ length: 37 }, (_, i) => 'line' + i);
+  let last = null;
+  for (let cycle = 0; cycle < 5; cycle++) {
+    const seen = new Set();
+    for (let i = 0; i < arr.length; i++) {
+      const q = sceneMod.drawQuip(arr);
+      if (seen.has(q)) throw new Error(`repeat within a cycle: ${q}`);
+      if (i === 0 && q === last) throw new Error('new shuffle opened with the previous line');
+      seen.add(q);
+      last = q;
+    }
+    if (seen.size !== arr.length) throw new Error('cycle did not exhaust the pool');
   }
 });
 

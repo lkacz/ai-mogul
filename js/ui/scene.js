@@ -38,6 +38,43 @@ const QUIPS = {
     'The baseline beat us. Burying the baseline.',
     'Day 40: the curve is still log-linear. Send snacks.',
     'I asked it to prove a lemma. It asked for a raise.',
+    'Two GPUs walk into a bar. The bar OOMs.',
+    'I significance-tested my horoscope. It replicated.',
+    'The model passed the eval. The eval failed the vibe check.',
+    'Citation needed. Citation found. Citation retracted.',
+    'We don\'t say "it broke". We say "negative result".',
+    'My ablation ablated the wrong thing. New paper, though.',
+    'Epoch 1: hope. Epoch 2: hubris. Epoch 3: NaN.',
+    'Reviewers want more baselines. The baselines want lawyers.',
+    'I taught it chain-of-thought. Now it overthinks like me.',
+    'Correlation isn\'t causation, but it IS a NeurIPS paper.',
+    'My learning rate and my sleep schedule: both cosine.',
+    'It memorized the test set. Honestly? Relatable.',
+    'Grad student descent: stochastic, poorly paid.',
+    'The loss spiked. So did my heart rate. Same chart.',
+    'I whisper "please" before every run. Effect size: small but real.',
+    'New SOTA! For the next eleven minutes.',
+    'The model says it\'s sure. The logits say it\'s lying.',
+    'I plotted my life. Log-scale, and still flat.',
+    'Tokenizer bug. Three weeks. TOKENIZER bug.',
+    'It proves theorems but can\'t count the r\'s in strawberry.',
+    'Our data is clean. Our code is… seasoned.',
+    'Hypothesis: no. Conclusion: also no. Funding: somehow yes.',
+    'Emergent abilities! (We lowered the threshold.)',
+    'I dream of a benchmark nobody has overfit. A meadow.',
+    'The intern\'s "small fix" improved everything. Investigating.',
+    'Asked it for novel ideas. It suggested my own thesis. Rude.',
+    'Attention is all you need. Attention, and forty billion dollars.',
+    'My favorite hyperparameter is denial.',
+    'The curves crossed! …the axes were mislabeled.',
+    'Half my job is naming things. Today: Mogul-Final-v2-REAL.',
+    'Peer review: where dreams become "minor revisions".',
+    'It wrote a better related-work section than me. I\'m fine.',
+    'I reran it with seed 42. The universe noticed.',
+    'Eval suite green. Deploying fear.',
+    'It hallucinated a citation to a paper I WISH existed.',
+    'We beat the baseline! The baseline was a coin.',
+    'My desk plant is also overfit to this environment.',
   ],
   engineer: [
     'I fused the kernels. All of them.',
@@ -51,6 +88,45 @@ const QUIPS = {
     'Works on my node.',
     'The fix was a sleep(1). I\'m not proud.',
     'Deleted 400 lines today. Best commit of my life.',
+    'The cluster is fine. The dashboard about the cluster is on fire.',
+    '99 little bugs in the code… take one down… 127 little bugs.',
+    'I don\'t always test. But when I do, it\'s in prod.',
+    'CUDA out of memory. Same.',
+    'Renamed "temp_fix" to "permanent_fix". Done.',
+    'The race condition only happens on Tuesdays. It\'s Tuesday.',
+    'No bugs here. Only undocumented stochasticity.',
+    'Kubernetes? I barely know-eties.',
+    'Latency budget: 10ms. Latency actual: yes.',
+    'I bisected the regression. It was me. Three months ago.',
+    'The fix is one character. Finding it was one weekend.',
+    'Logs say everything\'s fine. The logs are gaslighting me.',
+    'We cache everything now. Including this sentence.',
+    'Restarted it. It works. I hate that it works.',
+    'GPU at 100%! …utilization or temperature? Yes.',
+    'A TODO from 2025 is load-bearing now.',
+    'Wrote a script to write scripts. It unionized.',
+    'Our uptime has an asterisk. The asterisk has a postmortem.',
+    'Don\'t touch the network config. It remembers.',
+    'I speak four languages: Python, CUDA, YAML, apology.',
+    'Profiler says the slow part is "everything".',
+    'Not technical debt — technical compound interest.',
+    'The checkpoint is 4 TB. The bug is 4 bytes.',
+    'Who needs sleep when you have retry loops?',
+    'Disk full. Deleted my feelings. Still full.',
+    'NCCL error 13: communication breakdown. Same, NCCL. Same.',
+    'The all-reduce is neither all nor reduced.',
+    'Monitoring the monitoring. Monitorings all the way down.',
+    'Pushed at 4:59 PM Friday. I contain multitudes.',
+    'Two hard problems: cache invalidation, and node 7.',
+    'My rubber duck asked for equity.',
+    'Benchmarked it twice. Got three numbers.',
+    'The flag was --force. It forced.',
+    'I alphabetized the chaos. Organized chaos now.',
+    'Rollback plan: cry, then rollback.',
+    'Quantized my coffee to 4-bit. Tastes the same.',
+    'Bug report says "it\'s weird sometimes". Accurate.',
+    'Migrated everything. Nothing moved. Everything changed.',
+    'Step time down 3%. I will be insufferable about this.',
   ],
   ops: [
     'Rack 12 is making the noise again.',
@@ -63,6 +139,36 @@ const QUIPS = {
     'New ticket: "server is wet". Closing as won\'t-fix.',
     'I can tell which rack it is by the smell.',
     'Forklift certified, by the way.',
+    'Humidity is 45%. I will fight to keep it 45%.',
+    'A bird got in. It has a badge now.',
+    'Diesel tank\'s full. My patience is the backup.',
+    'Someone labeled this cable "important". WHICH END?',
+    'Hot-aisle yoga at six. Bring electrolytes.',
+    'The BMS sent 4,000 alerts. One mattered. Guess which.',
+    'Tightened 600 screws today. Zen.',
+    'New guy plugged A into B. We don\'t have a B.',
+    'Chiller 3 sings in E-flat when it\'s happy.',
+    'PUE 1.09. Personal best. Framed it.',
+    'The raised floor has a civilization under it now.',
+    'Fire suppression test Friday. NOT a drill drill.',
+    'The forklift\'s name is Susan. Susan eats pallets.',
+    'I hear a failing fan from 40 meters. A gift. A curse.',
+    'Cable tray\'s full. Starting a second story.',
+    'Generator test at noon. Earplugs in the bowl.',
+    'Someone microwaved fish in the NOC. Incident declared.',
+    'Rack 47 runs warm. Don\'t mention it. It gets self-conscious.',
+    'My step counter thinks I ran a marathon. Just patch day.',
+    'UPS batteries swapped. The old ones retire to a farm upstate.',
+    'Lost my multimeter. Found three older multimeters.',
+    'The blinky light means it works. The OTHER blinky light…',
+    'Badge denied to my own office. Character building.',
+    'Found the roof leak. It was sweat. Mine.',
+    'They name hurricanes; I name power events. This one\'s Kevin.',
+    'The dust filter looked like a full sheep.',
+    'If it hums wrong, I know. Everything here hums.',
+    'Coffee machine is on the UPS. Priorities are correct.',
+    'Crash cart got new wheels. Fastest cart in the region.',
+    'I waxed the cold aisle. Don\'t ask. It\'s beautiful.',
   ],
   sales: [
     'Just closed a seven-figure logo!',
@@ -74,10 +180,85 @@ const QUIPS = {
     'Renewal closed! They never even logged in.',
     'Procurement said Q3. Their Q3, of next year.',
     'I put "AGI-ready" on the slide. Legal is typing…',
+    'The POC became a P-O-Yes.',
+    'Client wants "AGI but cheaper". Quoted them "later".',
+    'My quota grows faster than the model. Explain THAT scaling law.',
+    'Demo gods were kind. It cost two dongles.',
+    'They said "send a one-pager". One page. Six-point font.',
+    '"Per token" confuses them. "Per magic" closes.',
+    'The customer churned, then un-churned. Butter market.',
+    'Legal redlined my emoji. The emoji stays.',
+    'I CC\'d their CEO. Bold? Yes. Effective? Also yes.',
+    'Q4 pipeline is 40% hope by volume.',
+    'They want SOC 2, ISO, and a pinky promise. Done.',
+    'Discovery call #9. Discovered: they like calls.',
+    'My CRM has feelings for me. All of them red.',
+    'Closed-won! Rang the gong. The gong is resting now.',
+    '"Strategic partnership" means nobody pays. Yet.',
+    'The RFP had 400 questions. Question 7 was a trap.',
+    'I sold the roadmap. Engineering is drawing the road.',
+    'We made the customer TOO successful. They left.',
+    'Renewal at 3×. Dedicating this one to my CRM.',
+    'They benchmarked us against a spreadsheet. We won. Barely.',
+    'Travel policy says economy. My back says invoice them.',
+    'Our champion left the company. Recruiting a new champion.',
+    'Asked for budget, got "alignment". Can\'t deposit alignment.',
+    'Their procurement portal wants a password from 2019.',
+    'I whispered "multi-year discount" and a deal appeared.',
+    'NDA signed! Now I can finally say… nothing.',
+    'The logo wall gained a logo. The logo wall is my bio.',
+    'Upsold the upsell. Upsells all the way up.',
+    'Competitor called us "niche". We\'re "focused". Sending tweet.',
+    'My ringtone is the deal-closed sound. Pavlov, but money.',
+    'Forecast: cloudy with a chance of commit.',
   ],
   cat: ['mrrp.', 'purrs at 3.2 kW.', '…', 'meow (this means "scale").',
-    'sits on the warm rack. claims it.', 'mlem.', 'knocks a GPU off the shelf. slowly.'],
+    'sits on the warm rack. claims it.', 'mlem.', 'knocks a GPU off the shelf. slowly.',
+    'stares at the cable. the cable blinks first.',
+    'mrrrp. (translation: deploy it.)',
+    'sits on the keyboard. ships to prod.',
+    'the red dot is a hallucination. pursue it anyway.',
+    '*slow blink at the loss curve*',
+    'purrs at 16 kHz. the fans harmonize.',
+    'naps through the all-hands. correct.',
+    'whiskers detect a 0.2 °C drift. unacceptable.',
+    'bats the mouse off the desk. QA complete.',
+    'meows at the server. the server listens. fix confirmed.',
+    'the warm rack is mine. the cold aisle is also mine.',
+    'demands treats per token.',
+    'judges the architecture. silently. forever.',
+    '*knocks over the good GPU* oops.',
+    'attention is all i need. provide it.',
+    'chases the cursor. catches the bug.',
+    'sleeps 18 hours a day. peak efficiency.',
+    'tail flick = code review rejected.',
+    'loafs on the CRAC. quality assurance.',
+    'has never once hallucinated. unlike SOME models.',
+  ],
 };
+
+// ── no-repeat quips: every pool is dealt like a shuffled deck — nothing
+// repeats until the whole pool is exhausted, and the next shuffle never
+// opens with the line that just closed the last one.
+const quipBags = new WeakMap();
+export function drawQuip(arr) {
+  let st = quipBags.get(arr);
+  if (!st || st.i >= st.order.length) {
+    const order = arr.map((_, k) => k);
+    for (let k = order.length - 1; k > 0; k--) {       // Fisher–Yates
+      const j = Math.floor(Math.random() * (k + 1));
+      [order[k], order[j]] = [order[j], order[k]];
+    }
+    if (st && order.length > 1 && order[0] === st.last) {
+      const j = 1 + Math.floor(Math.random() * (order.length - 1));
+      [order[0], order[j]] = [order[j], order[0]];
+    }
+    st = { order, i: 0, last: st ? st.last : -1 };
+    quipBags.set(arr, st);
+  }
+  st.last = st.order[st.i++];
+  return arr[st.last];
+}
 
 const ROLES = {
   // 'mario' is the founder slot — its look & lines come from FOUNDERS at draw time
@@ -175,7 +356,7 @@ function thinkChar(c, dt, t, layout) {
     c.state = 'walk';
   }
   // idle chatter
-  if (!c.speech && Math.random() < dt / 26) say(c, pick(roleQuips(c.role), Math.random()));
+  if (!c.speech && Math.random() < dt / 26) say(c, drawQuip(roleQuips(c.role)));
   if (c.speech && t > c.speech.until) c.speech = null;
 }
 
@@ -767,7 +948,7 @@ function onPointerUp() {
     c.y = clamp(c.y, FLOOR_Y + 10, FLOOR_B - 2);    // back onto the floor
     if (quick) {                                     // it was just a poke
       c.state = 'idle'; c.think = 2 + Math.random() * 4;
-      say(c, pick(roleQuips(c.role), Math.random()));
+      say(c, drawQuip(roleQuips(c.role)));
     } else {
       // dropped on a desk? straight to work
       const phase = clamp(s.phase, 0, SCENES.length - 1);
@@ -776,16 +957,16 @@ function onPointerUp() {
       if (seat >= 0 && c.role !== 'ops') {
         c.deskSeat = seat; c.x = desks[seat][0]; c.y = desks[seat][1];
         c.state = 'work'; c.think = 6 + Math.random() * 6;
-        say(c, pick(DESK_DROP_QUIPS, Math.random()));
+        say(c, drawQuip(DESK_DROP_QUIPS));
       } else {
         c.state = 'idle'; c.think = 2 + Math.random() * 4;
-        say(c, pick(DROP_QUIPS, Math.random()));
+        say(c, drawQuip(DROP_QUIPS));
       }
     }
   } else if (drag.kind === 'cat') {
     cat.y = clamp(cat.y, FLOOR_Y + 8, FLOOR_B - 2);
     cat.tx = cat.x; cat.state = 'sit';
-    say(cat, quick ? pick(QUIPS.cat, Math.random()) : pick(CAT_DROP_QUIPS, Math.random()), 2.4);
+    say(cat, quick ? drawQuip(QUIPS.cat) : drawQuip(CAT_DROP_QUIPS), 2.4);
   }
   drag = null;
 }
