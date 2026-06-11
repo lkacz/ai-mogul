@@ -97,7 +97,7 @@ const R = {
     if (!as.length) return { txt: `${txt} (none placed)`, pts: 0, max };
     const mark = {}; let ok = 0;
     for (const i of as) { const e = g.onEdge(i, side); if (e) ok++; mark[i] = e ? 'ok' : 'bad'; }
-    const pts = Math.round(max * ok / as.length) - Math.min((as.length - ok) * 2, max / 2);
+    const pts = Math.round(max * ok / as.length) - Math.round(Math.min((as.length - ok) * 2, max / 2));
     return { txt: `${txt} (${ok}/${as.length})`, pts, max, trap: ok < as.length, mark };
   },
   ratio: (a, b, perB, per, max, txt) => (g) => {

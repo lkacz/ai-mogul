@@ -51,6 +51,9 @@ await check('fresh boot: cosmic opening (the cycle) → intro modal', async () =
 
 await check('dismiss intro', async () => {
   await page.click('#modal-root [data-act=closeModal]');
+  // keep random dilemma offers from popping modals mid-suite (the dedicated
+  // dilemma check injects its own pendingDilemma)
+  await page.evaluate(() => { window.AIMOGUL.s.lastDilemmaH = 1e12; });
 });
 
 await check('sidebar shows AGI index + goal with Go button', async () => {
@@ -124,14 +127,21 @@ await check('lab scene: desks are draggable and the layout persists', async () =
   await page.click('[data-act=tab][data-arg=lab]');
   const box = await page.locator('#scene-canvas').boundingBox();
   const fx = box.width / 480, fy = box.height / 200;
-  await page.mouse.move(box.x + 120 * fx, box.y + 164 * fy);   // the garage desk
-  await page.mouse.down();
-  await page.mouse.move(box.x + 300 * fx, box.y + 176 * fy, { steps: 8 });
-  await page.mouse.up();
-  const dp = await page.evaluate(() => window.AIMOGUL.s.deskPos);
-  if (!dp || !dp[0] || Math.abs(dp[0][0][0] - 300) > 30) {
-    throw new Error('desk drag not persisted: ' + JSON.stringify(dp));
+  // a wandering character can intercept the grab (people are picked first) —
+  // retry a few times; whoever we accidentally carried wanders off again
+  let ok = false;
+  for (let attempt = 0; attempt < 4 && !ok; attempt++) {
+    await page.mouse.move(box.x + 120 * fx, box.y + 164 * fy);   // the garage desk
+    await page.mouse.down();
+    await page.mouse.move(box.x + 300 * fx, box.y + 176 * fy, { steps: 8 });
+    await page.mouse.up();
+    ok = await page.evaluate(() => {
+      const dp = window.AIMOGUL.s.deskPos;
+      return !!(dp && dp[0] && Math.abs(dp[0][0][0] - 300) < 30);
+    });
+    if (!ok) await page.waitForTimeout(500);
   }
+  if (!ok) throw new Error('desk drag not persisted after retries');
 });
 
 await check('tab badge appears when research is affordable', async () => {

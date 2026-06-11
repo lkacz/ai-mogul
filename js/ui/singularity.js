@@ -412,7 +412,7 @@ export function playOpening(onDone) {
     x: rnd() * 2 - 1, y: rnd() * 2 - 1, s: rnd() * 1.5 + 0.3, tw: rnd() * 6,
   }));
   const galaxies = Array.from({ length: 7 }, () => ({
-    x: (rnd() * 1.5 - 0.75), y: (rnd() * 1.3 - 0.75),
+    x: (rnd() * 1.5 - 0.75), y: (rnd() * 1.3 - 0.65),   // same field as the memorial
     rot: rnd() * Math.PI * 2, dir: rnd() < 0.5 ? -1 : 1,
     size: 0.05 + rnd() * 0.09, hue: 190 + rnd() * 140,
   }));

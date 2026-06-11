@@ -37,7 +37,10 @@ function savingsPerHour(fx) {
   if (!sel || sel.elecPerHour <= 0) return 0;
   const basePue = sel.fac.pue;
   const newPue = Math.max(1.01, basePue + fx.pue);
-  const baseBill = sel.elecPerHour * (basePue / sel.pue);
+  // normalize the current bill back to the undesigned baseline (undo both
+  // the PUE shift AND the elec multiplier of any already-commissioned design)
+  const curFx = (game.s.facDesignFx || {})[game.s.phase];
+  const baseBill = sel.elecPerHour * (basePue / sel.pue) / (curFx?.elec || 1);
   return baseBill * (1 - (newPue / basePue) * fx.elec);
 }
 

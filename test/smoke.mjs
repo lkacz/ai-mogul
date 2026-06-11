@@ -33,6 +33,7 @@ console.log('Importing modules…');
 const { defaultState, selectors, serialize, deserialize } = await import('../js/core/state.js');
 const { DILEMMAS } = await import('../js/core/dilemmas.js');
 const { DESIGNS, scoreDesign } = await import('../js/core/design.js');
+const { drawDesignScene, PART_DRAW } = await import('../js/ui/designparts.js');
 const E = await import('../js/core/engine.js');
 const ui = await import('../js/ui/ui.js');
 const { TABS, ACTIONS } = await import('../js/ui/tabs.js');
@@ -167,6 +168,33 @@ check('facility designs: all tiers score, fx bounded, neutral when unset', () =>
   const a = defaultState(), b = defaultState();
   b.facDesignFx = {};
   if (selectors(a).elecPerHour !== selectors(b).elecPerHour) throw new Error('undesigned state not neutral');
+});
+
+check('designer canvas renderers: every part of every facility draws', () => {
+  // canvas code otherwise only runs in a real browser — exercise all part
+  // renderers and the scene composer against a no-op 2d-context stub
+  const grad = { addColorStop() {} };
+  const ctx = new Proxy({}, {
+    get: (o, k) => {
+      if (k === 'createRadialGradient' || k === 'createLinearGradient') return () => grad;
+      if (k === 'measureText') return () => ({ width: 10 });
+      return typeof o[k] !== 'undefined' ? o[k] : () => {};
+    },
+    set: () => true,
+  });
+  for (const phase of Object.keys(DESIGNS).map(Number)) {
+    const def = DESIGNS[phase];
+    const cells = {};
+    let i = 13;
+    for (const pid of Object.keys(def.parts)) {
+      if (!PART_DRAW[pid]) throw new Error(`phase ${phase}: no renderer for part "${pid}"`);
+      cells[i] = pid; i += 2;
+    }
+    const res = scoreDesign(phase, cells);
+    for (const t of [0, 0.7, 3.3]) {
+      drawDesignScene(ctx, phase, cells, res.marks, t, 13, Object.keys(def.parts)[0]);
+    }
+  }
 });
 
 check('fractional steps are stable', () => {

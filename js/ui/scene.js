@@ -718,21 +718,21 @@ function onPointerDown(e) {
   for (let i = chars.length - 1; i >= 0; i--) {
     const c = chars[i];
     if (Math.abs(mx - c.x) < 8 && my > c.y - 24 && my < c.y + 2) {
-      drag = { kind: 'char', ref: c, moved: 0, t0: Date.now() };
+      drag = { kind: 'char', ref: c, moved: 0, t0: Date.now(), x0: mx, y0: my };
       c.state = 'held'; c.deskSeat = -1;
       break;
     }
   }
   const phase = clamp(s.phase, 0, SCENES.length - 1);
   if (!drag && cat && phase <= 1 && Math.abs(mx - cat.x) < 9 && Math.abs(my - cat.y + 4) < 8) {
-    drag = { kind: 'cat', ref: cat, moved: 0, t0: Date.now() };
+    drag = { kind: 'cat', ref: cat, moved: 0, t0: Date.now(), x0: mx, y0: my };
     cat.state = 'held';
   }
   if (!drag) {
     const desks = effectiveLayout(s, sel, phase).desks || [];
     for (let i = 0; i < desks.length; i++) {
       if (Math.abs(mx - desks[i][0]) < 12 && Math.abs(my - (desks[i][1] - 12)) < 14) {
-        drag = { kind: 'desk', idx: i, moved: 0, t0: Date.now(), pos: [desks[i][0], desks[i][1]] };
+        drag = { kind: 'desk', idx: i, moved: 0, t0: Date.now(), x0: mx, y0: my, pos: [desks[i][0], desks[i][1]] };
         break;
       }
     }
@@ -743,7 +743,7 @@ function onPointerDown(e) {
 function onPointerMove(e) {
   if (!drag) return;
   const { mx, my } = evtPos(e);
-  drag.moved += 1;
+  drag.moved = Math.max(drag.moved, Math.hypot(mx - drag.x0, my - drag.y0));
   if (drag.kind === 'desk') {
     drag.pos = [clamp(mx, 22, W - 22), clamp(my + 12, FLOOR_Y + 14, FLOOR_B - 2)];
     const s = game.s;
@@ -760,7 +760,7 @@ function onPointerMove(e) {
 
 function onPointerUp() {
   if (!drag) return;
-  const quick = drag.moved < 4 && Date.now() - drag.t0 < 350;
+  const quick = drag.moved < 5 && Date.now() - drag.t0 < 400;   // displacement in scene px
   const s = game.s;
   if (drag.kind === 'char') {
     const c = drag.ref;
