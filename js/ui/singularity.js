@@ -10,6 +10,23 @@
 const FLASH_T = 78.5;             // the moment of the crossing
 const ETERNAL_T = 119;            // when the memorial screen settles
 
+// The blue world and its garage — drawn identically at both ends of the
+// loop: the ending's memorial and the opening of every new game.
+// (px, py) anchors the garage base; s scales the whole composition.
+function drawBlueWorld(ctx, px, py, u, ga, t, lightAlpha, s = 1) {
+  ctx.fillStyle = `rgba(70,110,170,${0.9 * ga})`;
+  ctx.beginPath(); ctx.arc(px, py + u * 0.062 * s, u * 0.07 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = `rgba(30,50,80,${0.9 * ga})`;
+  ctx.beginPath(); ctx.arc(px - u * 0.02 * s, py + u * 0.075 * s, u * 0.06 * s, 0, Math.PI * 2); ctx.fill();
+  const k = u / 480 * s;
+  ctx.fillStyle = `rgba(20,24,34,${ga})`;
+  ctx.fillRect(px - 5 * k, py - 6 * k, 10 * k, 7 * k);
+  if (lightAlpha > 0) {
+    ctx.fillStyle = `rgba(251,191,36,${lightAlpha})`;
+    ctx.fillRect(px - 2 * k, py - 4 * k, 4 * k, 4 * k);
+  }
+}
+
 // ── the constellations of us: simple shapes drawn in stars ─────────
 const star5 = [];
 for (let i = 0; i < 10; i++) {
@@ -319,19 +336,9 @@ export function playSingularity(stats = {}) {
       // the small blue world, the garage, the light
       if (t > 102) {
         const ga = clamp01((t - 102) / 2.5);
-        const px = CX, py = H * 0.84;
-        ctx.fillStyle = `rgba(70,110,170,${0.9 * ga})`;
-        ctx.beginPath(); ctx.arc(px, py + u * 0.062, u * 0.07, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = `rgba(30,50,80,${0.9 * ga})`;
-        ctx.beginPath(); ctx.arc(px - u * 0.02, py + u * 0.075, u * 0.06, 0, Math.PI * 2); ctx.fill();
-        const k = u / 480;
-        ctx.fillStyle = `rgba(20,24,34,${ga})`;
-        ctx.fillRect(px - 5 * k, py - 6 * k, 10 * k, 7 * k);
-        if (t > 107) {
-          const la = clamp01((t - 107) / 1.2);
-          ctx.fillStyle = `rgba(251,191,36,${la * (0.7 + 0.3 * Math.sin(t * (tone === 'low' ? 2 : 5)))})`;
-          ctx.fillRect(px - 2 * k, py - 4 * k, 4 * k, 4 * k);
-        }
+        const la = t > 107
+          ? clamp01((t - 107) / 1.2) * (0.7 + 0.3 * Math.sin(t * (tone === 'low' ? 2 : 5))) : 0;
+        drawBlueWorld(ctx, CX, H * 0.84, u, ga, t, la * ga);
       }
     }
 
@@ -374,4 +381,141 @@ export function playSingularity(stats = {}) {
   }
 
   requestAnimationFrame(frame);
+}
+
+// ── The opening: the loop closes ────────────────────────────────────
+// Every new game begins on the exact shot the last one ended with — the
+// quiet cosmos, the small blue world, the garage light — then falls toward
+// the light until we're inside, and the story starts again.
+export function playOpening(onDone) {
+  const cv = document.createElement('canvas');
+  cv.id = 'opening-canvas';
+  cv.className = 'singularity-canvas';
+  document.body.appendChild(cv);
+  const ctx = cv.getContext('2d');
+
+  let W = 0, H = 0, CX = 0, CY = 0, u = 0;
+  function resize() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = cv.width = Math.round(innerWidth * dpr);
+    H = cv.height = Math.round(innerHeight * dpr);
+    CX = W / 2; CY = H / 2;
+    u = Math.min(W, H);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const rnd = Math.random;
+  const ease = (x) => x * x * (3 - 2 * x);
+  const cl01 = (x) => Math.min(1, Math.max(0, x));
+  const stars = Array.from({ length: 260 }, () => ({
+    x: rnd() * 2 - 1, y: rnd() * 2 - 1, s: rnd() * 1.5 + 0.3, tw: rnd() * 6,
+  }));
+  const galaxies = Array.from({ length: 7 }, () => ({
+    x: (rnd() * 1.5 - 0.75), y: (rnd() * 1.3 - 0.75),
+    rot: rnd() * Math.PI * 2, dir: rnd() < 0.5 ? -1 : 1,
+    size: 0.05 + rnd() * 0.09, hue: 190 + rnd() * 140,
+  }));
+
+  const HOLD = 2.6, ZOOM_END = 6.8, END = 8.3;
+  const t0 = performance.now();
+  let finished = false, raf = 0;
+
+  function finish() {
+    if (finished) return;
+    finished = true;
+    cancelAnimationFrame(raf);
+    window.removeEventListener('resize', resize);
+    cv.style.transition = 'opacity .7s';
+    cv.style.opacity = '0';
+    setTimeout(() => { cv.remove(); onDone && onDone(); }, 720);
+  }
+  cv.addEventListener('click', () => {
+    if ((performance.now() - t0) / 1000 > 0.25) finish();
+  });
+
+  function frame() {
+    if (finished) return;
+    const t = (performance.now() - t0) / 1000;
+    if (t >= END) { finish(); return; }
+    cv.style.opacity = String(Math.min(1, t / 0.9));
+
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+
+    // zoom: 1 at hold, then exponential dive toward the garage light
+    const zp = ease(cl01((t - HOLD) / (ZOOM_END - HOLD)));
+    const z = Math.pow(90, zp);
+    // focal point = the garage base; its screen anchor drifts to mid-frame
+    const F = { x: CX, y: H * 0.84 };
+    const A = { x: CX, y: F.y + (CY * 1.12 - F.y) * zp };
+    const map = (wx, wy) => [(wx - F.x) * z + A.x, (wy - F.y) * z + A.y];
+
+    // the cosmos recedes as we fall
+    const skyAl = 1 / Math.max(1, z * 0.55);
+    for (const st of stars) {
+      const [x, y] = map(CX + st.x * W * 0.5, CY + st.y * H * 0.5);
+      if (x < -9 || x > W + 9 || y < -9 || y > H + 9) continue;
+      const tw = 0.4 + 0.6 * Math.sin(t * 1.2 + st.tw);
+      ctx.fillStyle = `rgba(205,215,240,${0.8 * tw * skyAl})`;
+      ctx.fillRect(x, y, st.s * u / 880, st.s * u / 880);
+    }
+    if (z < 6) {
+      for (const g of galaxies) {
+        const [gx, gy] = map(CX + g.x * W * 0.5, CY + g.y * H * 0.5);
+        const R = g.size * u * z;
+        const rot = g.rot + t * 0.04 * g.dir;
+        for (let i = 0; i < 70; i++) {
+          const fr = i / 70, arm = (i % 2) * Math.PI;
+          const a = rot + arm + fr * 5.2;
+          const rr = R * Math.pow(fr, 0.7);
+          ctx.fillStyle = `hsla(${g.hue + fr * 40},80%,${70 - fr * 25}%,${(1 - fr) * 0.7 * skyAl})`;
+          const sz = Math.max(1, (1.6 - fr) * u / 240);
+          ctx.fillRect(gx + Math.cos(a) * rr * 1.15, gy + Math.sin(a) * rr * 0.62, sz, sz);
+        }
+      }
+    }
+
+    // the blue world, the garage, the light — same hand that drew the ending
+    const [px, py] = map(F.x, F.y);
+    const light = 0.7 + 0.3 * Math.sin(t * 5);
+    drawBlueWorld(ctx, px, py, u, 1, t, light, z);
+    // the light blooms as we arrive
+    if (zp > 0.45) {
+      const glow = ctx.createRadialGradient(px, py - 2 * z, 1, px, py - 2 * z, u * 0.4 * zp);
+      glow.addColorStop(0, `rgba(251,191,36,${(zp - 0.45) * 1.4})`);
+      glow.addColorStop(1, 'rgba(251,191,36,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, W, H);
+    }
+    // …and becomes the morning of the first day
+    if (t > ZOOM_END) {
+      ctx.fillStyle = `rgba(252,222,160,${cl01((t - ZOOM_END) / 0.9)})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // the same words the last universe ended on
+    ctx.textAlign = 'center';
+    const CAPS = [
+      [0.6, 3.1, 'Somewhere, on a small blue world —'],
+      [3.4, 6.2, '— someone is about to have an idea.'],
+    ];
+    for (const [c0, c1, text] of CAPS) {
+      if (t < c0 || t > c1) continue;
+      const al = Math.min(1, (t - c0) / 0.6, (c1 - t) / 0.6);
+      ctx.font = `${Math.max(14, u / 36)}px Georgia, 'Times New Roman', serif`;
+      ctx.fillStyle = `rgba(232,236,245,${al})`;
+      ctx.fillText(text, CX, H * 0.16);
+    }
+    if (t > 1) {
+      ctx.font = `${Math.max(10, u / 64)}px Consolas, monospace`;
+      ctx.textAlign = 'right';
+      ctx.fillStyle = 'rgba(160,170,190,.4)';
+      ctx.fillText('click to begin ▸', W - u * 0.03, H - u * 0.03);
+    }
+    ctx.textAlign = 'left';
+
+    raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
 }

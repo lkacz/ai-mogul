@@ -1,4 +1,4 @@
-// One-off: capture the burning-rack effect in the office scene.
+// One-off: the opening cinematic — the cycle's first frame and the dive.
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
@@ -14,21 +14,17 @@ const server = http.createServer(async (req, res) => {
     res.end(await readFile(p));
   } catch { res.writeHead(404); res.end(); }
 });
-await new Promise(r => server.listen(8746, r));
+await new Promise(r => server.listen(8754, r));
 const exe = ['C:/Program Files/Google/Chrome/Application/chrome.exe',
   'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(existsSync);
 const browser = await chromium.launch({ executablePath: exe, headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 880 } });
-await page.goto('http://127.0.0.1:8746/?skipintro', { waitUntil: 'networkidle' });
-await page.click('#modal-root [data-act=closeModal]');
-await page.evaluate(() => {
-  const s = window.AIMOGUL.s;
-  s.phase = 1; s.money = 4e5; s.gpus = { a100: 24 };
-  s.staff = { researcher: 2, engineer: 1, ops: 1, sales: 1 };
-  s.buffs.push({ id: 'fireCleanup', label: '🔥 Fire cleanup', untilH: s.simHours + 24 });
-});
-await page.waitForTimeout(2500);
-await page.screenshot({ path: join(ROOT, 'test', 'shot_fire.png') });
-console.log('shot fire');
+await page.goto('http://127.0.0.1:8754/', { waitUntil: 'networkidle' });
+await page.waitForSelector('#opening-canvas');
+await page.waitForTimeout(1800);
+await page.screenshot({ path: join(ROOT, 'test', 'shot_opening_hold.png') });
+await page.waitForTimeout(3200);   // ~5 s — mid-dive
+await page.screenshot({ path: join(ROOT, 'test', 'shot_opening_zoom.png') });
+console.log('shot opening');
 await browser.close();
 server.close();

@@ -9,7 +9,7 @@ const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
 const server = http.createServer(async (req, res) => {
   try {
-    const p = normalize(join(ROOT, req.url === '/' ? 'index.html' : decodeURIComponent(req.url.split('?')[0])));
+    const p = normalize(join(ROOT, req.url.split('?')[0] === '/' ? 'index.html' : decodeURIComponent(req.url.split('?')[0])));
     res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream' });
     res.end(await readFile(p));
   } catch { res.writeHead(404); res.end(); }
@@ -19,7 +19,7 @@ const exe = ['C:/Program Files/Google/Chrome/Application/chrome.exe',
   'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(existsSync);
 const browser = await chromium.launch({ executablePath: exe, headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 880 } });
-await page.goto('http://127.0.0.1:8751/', { waitUntil: 'networkidle' });
+await page.goto('http://127.0.0.1:8751/?skipintro', { waitUntil: 'networkidle' });
 await page.click('#modal-root [data-act=closeModal]');
 
 const cases = [

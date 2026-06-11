@@ -9,7 +9,7 @@ const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
 const server = http.createServer(async (req, res) => {
   try {
-    const p = normalize(join(ROOT, req.url === '/' ? 'index.html' : decodeURIComponent(req.url.split('?')[0])));
+    const p = normalize(join(ROOT, req.url.split('?')[0] === '/' ? 'index.html' : decodeURIComponent(req.url.split('?')[0])));
     res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream' });
     res.end(await readFile(p));
   } catch { res.writeHead(404); res.end(); }
@@ -38,7 +38,7 @@ const PHASES = [
       runs: [{ id: 'r1', name: 'Mogul-30', N: 2e13, D: 4e14, dataQ: 1.9, physNeed: 4.8e28, physDone: 3e28, startH: 0 }] } },
 ];
 
-await page.goto('http://127.0.0.1:8743/', { waitUntil: 'networkidle' });
+await page.goto('http://127.0.0.1:8743/?skipintro', { waitUntil: 'networkidle' });
 await page.click('#modal-root [data-act=closeModal]');
 
 for (const ph of PHASES) {

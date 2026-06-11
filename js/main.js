@@ -10,7 +10,7 @@ import { game, renderAll, initDispatch, toast, showModal, closeModal, esc } from
 import { ACTIONS } from './ui/tabs.js';
 import { celebrate } from './ui/scene.js';
 import { offerNodeHunt, playRlhf } from './ui/minigames.js';
-import { playSingularity } from './ui/singularity.js';
+import { playSingularity, playOpening } from './ui/singularity.js';
 import { RESEARCH_BY_ID } from './core/research.js';
 import { DILEMMA_BY_ID } from './core/dilemmas.js';
 
@@ -181,7 +181,9 @@ ACTIONS.resetGo = () => {
   Object.assign(s, defaultState(metaFounder()));
   winShown = false;
   singularityShown = false;
-  closeModal(); renderAll(); showIntro();
+  closeModal(); renderAll();
+  s.paused = true;
+  playOpening(() => { s.paused = false; showIntro(); });   // the loop closes here too
 };
 
 // ── Outage incidents → Node Hunt minigame ────────────────────────
@@ -378,5 +380,16 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) save(
 window.AIMOGUL = game;   // debug/test handle
 initDispatch();
 renderAll();
-if (fresh) showIntro();
-else grantOffline();
+if (fresh) {
+  // every new story opens on the shot the last one ended with: the blue
+  // world, the garage light, then the fall toward the morning of day one.
+  // (?skipintro is for dev/screenshot tooling.)
+  const skip = typeof location !== 'undefined' && location.search.includes('skipintro');
+  if (skip) showIntro();
+  else {
+    s.paused = true;   // the world starts when you arrive
+    playOpening(() => { s.paused = false; showIntro(); });
+  }
+} else {
+  grantOffline();
+}

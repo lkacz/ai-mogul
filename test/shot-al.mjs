@@ -9,7 +9,7 @@ const ROOT = new URL('..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
 const server = http.createServer(async (req, res) => {
   try {
-    const p = normalize(join(ROOT, req.url === '/' ? 'index.html' : decodeURIComponent(req.url.split('?')[0])));
+    const p = normalize(join(ROOT, req.url.split('?')[0] === '/' ? 'index.html' : decodeURIComponent(req.url.split('?')[0])));
     res.writeHead(200, { 'content-type': MIME[extname(p)] || 'application/octet-stream' });
     res.end(await readFile(p));
   } catch { res.writeHead(404); res.end(); }
@@ -23,7 +23,7 @@ await page.addInitScript(() => {
   localStorage.removeItem('aimogul_save_v1');
   localStorage.setItem('aimogul_meta_v1', JSON.stringify({ runs: 1, founder: 'al' }));
 });
-await page.goto('http://127.0.0.1:8750/', { waitUntil: 'networkidle' });
+await page.goto('http://127.0.0.1:8750/?skipintro', { waitUntil: 'networkidle' });
 await page.screenshot({ path: join(ROOT, 'test', 'shot_al_intro.png') });
 await page.click('#modal-root [data-act=closeModal]');
 await page.waitForTimeout(2600);
