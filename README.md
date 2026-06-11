@@ -139,9 +139,15 @@ compass.
 
 ## Build your facility — the Factorio corner 🏗️
 
-Every facility above the garage has a **floor-plan designer** (Hardware tab): a grid, a palette
-of real infrastructure, and a live score that explains — in actual engineering terms — why your
-layout works or doesn't. Good designs earn bounded PUE/MFU/power bonuses; the defaults are
+Every facility above the garage has a **floor-plan designer** (Hardware tab): an **animated
+blueprint** where the machinery looks and behaves like the real thing — racks blink, CRAC fans
+spin, evaporative towers shed mist, gas turbines flicker and plume, **pipes join into real runs
+with coolant flowing through them**, radiators pulse infrared into space, the Mercury foundry's
+mass driver launches tiles, and the black hole's accretion ring turns. The Sun physically glows
+on the left edge of the space-era grids. Parts glow green (working), amber (missing something)
+or red (an engineering mistake, with heat shimmer rising). A **narrated build guide** walks you
+through each system in the canonical order — what the core is, what it needs next, and why —
+and hovering any part explains it. A live score breaks the engineering down line by line: Good designs earn bounded PUE/MFU/power bonuses; the defaults are
 mediocre; and the tempting shortcuts are traps, just like in real life:
 
 - **Server closet**: racks need a CRAC/vent air path; packing them tight looks tidy and runs hot.

@@ -139,16 +139,20 @@ await check('tab badge appears when research is affordable', async () => {
   await page.waitForSelector('.tab-badge', { timeout: 3000 });
 });
 
-await check('facility designer: place parts, see score, commission layout', async () => {
+await check('facility designer: animated blueprint, build guide, commission', async () => {
   await page.evaluate(() => { window.AIMOGUL.s.phase = 1; window.AIMOGUL.s.money = 1e5; });
   await page.click('[data-act=tab][data-arg=hw]');
   await page.click('[data-act=designOpen]');
-  await page.waitForSelector('.dz-grid', { timeout: 4000 });
-  // place a rack, then a CRAC beside it — score should respond
+  await page.waitForSelector('#dz-canvas', { timeout: 4000 });
+  const txt0 = await page.textContent('#modal-root .modal');
+  if (!/Build guide/.test(txt0)) throw new Error('narrated build guide missing');
+  // place a rack, then a CRAC beside it — on the canvas
+  const box = await page.locator('#dz-canvas').boundingBox();
+  const cw = box.width / 12, ch = box.height / 6;
   await page.click('[data-act=dzPick][data-arg=rack]');
-  await page.click('.dz-cell >> nth=14');
+  await page.mouse.click(box.x + cw * 2.5, box.y + ch * 1.5);
   await page.click('[data-act=dzPick][data-arg=crac]');
-  await page.click('.dz-cell >> nth=15');
+  await page.mouse.click(box.x + cw * 3.5, box.y + ch * 1.5);
   const txt = await page.textContent('#modal-root .modal');
   if (!/CRAC airflow path/.test(txt)) throw new Error('score breakdown missing');
   await page.click('[data-act=dzApply]');
