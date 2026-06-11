@@ -86,7 +86,12 @@ The Lab tab renders your facility as a living pixel-art scene, drawn procedurall
 (no sprite assets, zero dependencies): Mario Damodei wanders the garage among GPU shelves and
 pizza boxes; hired scientists, engineers, ops and sales walk around and work at standing desks;
 racks blink with LEDs that track your real GPU count and training activity; monitors show the
-live loss curve of the current run. Click anyone — including the cat — for a quip.
+live loss curve of the current run. Click anyone — including the cat — for a quip, or **pick
+them up and carry them** (they object: "HR will hear about this."). Drop someone on a desk and
+they get to work; drag the desks themselves and your layout persists in the save. And watch the
+people change with the eras: AR glasses at the colo, neural implants at the hyperscale DC, a
+chrome arm at the Factory, exo-bodies in orbit — until, by the Omega Lattice, they're full
+chrome chassis and **only their blinking human eyes** tell you a person is still in there.
 Each facility is its own scene: garage → startup office → colo cage → hyperscale hall →
 the gigawatt Factory with its glowing core that pulses faster as you approach AGI →
 an orbital station window with Earth below and laser-linked satellites; a Dyson swarm scene

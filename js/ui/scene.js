@@ -90,6 +90,25 @@ const ROLES = {
 const roleStyle = (role) => role === 'mario' ? founderDef().sprite : ROLES[role];
 const roleQuips = (role) => role === 'mario' ? founderDef().quotes : QUIPS[role];
 
+// what people say when you pick them up and put them somewhere else
+const DROP_QUIPS = [
+  'Hey!', 'I was walking there.', 'Management by relocation, huh.',
+  'Wheee— okay.', 'HR will hear about this.', 'Put me down— oh. You did.',
+  'Is this a re-org?', 'I needed the steps, actually.',
+];
+const DESK_DROP_QUIPS = [
+  'Fine, I\'ll run the ablations.', 'Working, working.',
+  'You could have just asked.', 'Straight to the loss curves, then.',
+];
+const CAT_DROP_QUIPS = ['mrrp?!', 'hisss.', '…acceptable.', 'this is MY spot now.'];
+
+// ── progressive augmentation: the humans keep up with the machines ──
+// colo: AR glasses · DC: neural implant · Factory: chrome arm · Orbital:
+// exo-legs + visor · Dyson: chrome body · Lattice: full chassis — and only
+// the eyes are still, unmistakably, human.
+const CHROME = '#94a1b5', CHROME_D = '#5f6a82';
+const augStage = () => Math.max(0, (game.s?.phase ?? 0) - 1);
+
 // ── characters ────────────────────────────────────────────────────
 const chars = [];   // persists across tab rebuilds
 let cat = null;
@@ -126,6 +145,10 @@ function syncPopulation(s) {
 function say(c, text, dur = 3.6) { c.speech = { text, until: performance.now() / 1000 + dur }; }
 
 function thinkChar(c, dt, t, layout) {
+  if (c.state === 'held') {       // dangling from the player's cursor
+    if (c.speech && t > c.speech.until) c.speech = null;
+    return;
+  }
   c.think -= dt;
   if (c.state === 'walk') {
     const dx = c.tx - c.x, dy = c.ty - c.y;
@@ -159,31 +182,53 @@ function thinkChar(c, dt, t, layout) {
 // ── drawing: people ───────────────────────────────────────────────
 function drawPerson(ctx, c, t) {
   const r = roleStyle(c.role);
+  const aug = augStage();
   const x = c.x | 0, fy = c.y | 0;       // fy = feet
   const working = c.state === 'work';
   const walking = c.state === 'walk';
+  const held = c.state === 'held';
   const bob = walking ? Math.round(Math.sin(c.walkT * 2) * 1) : 0;
-  const legA = walking ? Math.round(Math.sin(c.walkT) * 2) : 0;
+  const legA = walking ? Math.round(Math.sin(c.walkT) * 2)
+    : held ? Math.round(Math.sin(t * 9) * 2) : 0;   // dangling legs
   const y0 = fy - 20 + bob;               // top of head
 
-  // shadow
-  P(ctx, x - 4, fy - 1, 9, 2, 'rgba(0,0,0,.30)');
+  // bodies turn chrome as the eras pass
+  const pants = aug >= 4 ? CHROME_D : r.pants;
+  const top = aug >= 5 ? CHROME : r.top;
+
+  // shadow (not while airborne in the player's grip)
+  if (!held) P(ctx, x - 4, fy - 1, 9, 2, 'rgba(0,0,0,.30)');
   // legs
-  P(ctx, x - 3 + legA, fy - 6, 2, 6, r.pants);
-  P(ctx, x + 1 - legA, fy - 6, 2, 6, r.pants);
+  P(ctx, x - 3 + legA, fy - 6, 2, 6, pants);
+  P(ctx, x + 1 - legA, fy - 6, 2, 6, pants);
+  if (aug >= 4) { P(ctx, x - 3 + legA, fy - 4, 2, 1, '#2c3445'); P(ctx, x + 1 - legA, fy - 4, 2, 1, '#2c3445'); } // exo joints
   // torso (lab coat is longer)
   const coatLen = c.role === 'researcher' ? 10 : 8;
-  P(ctx, x - 3, y0 + 6, 7, coatLen, r.top);
-  if (c.role === 'ops') P(ctx, x - 3, y0 + 7, 7, 2, '#f7c948'); // hi-vis stripe
-  if (c.role === 'sales') P(ctx, x - 1, y0 + 7, 1, 4, '#d8315b'); // tie
-  // arms: swing when walking, type when working
-  const armA = working ? Math.round(Math.sin(t * 14 + c.seed) * 1) : walking ? legA : 0;
-  P(ctx, x - 4, y0 + 7 + (working ? 2 : 0), 1, 5 + armA, r.top);
-  P(ctx, x + 4, y0 + 7 + (working ? 2 : 0), 1, 5 - armA, r.top);
+  P(ctx, x - 3, y0 + 6, 7, coatLen, top);
+  if (aug < 5) {
+    if (c.role === 'ops') P(ctx, x - 3, y0 + 7, 7, 2, '#f7c948'); // hi-vis stripe
+    if (c.role === 'sales') P(ctx, x - 1, y0 + 7, 1, 4, '#d8315b'); // tie
+  } else {
+    P(ctx, x - 3, y0 + 10, 7, 1, '#39455c');                       // chassis seam
+    P(ctx, x - 1, y0 + 12, 3, 1, '#39455c');
+  }
+  if (aug >= 3) P(ctx, x - 1, y0 + 8, 1, 1,
+    Math.sin(t * 3 + c.seed) > 0 ? '#22d3ee' : '#155e6b');          // chest light
+  // arms: swing when walking, type when working; one goes chrome first
+  const armA = working ? Math.round(Math.sin(t * 14 + c.seed) * 1) : (walking || held) ? legA : 0;
+  P(ctx, x - 4, y0 + 7 + (working ? 2 : 0), 1, 5 + armA, top);
+  P(ctx, x + 4, y0 + 7 + (working ? 2 : 0), 1, 5 - armA, aug >= 3 ? CHROME : top);
   // head
-  P(ctx, x - 2, y0, 5, 6, r.skin);
-  // hair: founder styles vary — Mario's famous curls, Al's hoodie
-  if (r.curls) {
+  P(ctx, x - 2, y0, 5, 6, aug >= 6 ? CHROME : r.skin);
+  // hair: founder styles vary — Mario's famous curls, Al's hoodie.
+  // Past Dyson scale a brushed-metal cranial shell replaces it (founders
+  // keep their trademark on top — you can still tell who's who).
+  if (aug >= 5) {
+    P(ctx, x - 3, y0 - 2, 7, 3, CHROME_D);
+    P(ctx, x + 0, y0 - 4, 1, 2, CHROME_D);                          // antenna
+    P(ctx, x + 0, y0 - 5, 1, 1, Math.sin(t * 5 + c.seed) > 0 ? '#a78bfa' : '#4c3a6b');
+    if (r.curls) { P(ctx, x - 2, y0 - 3, 2, 1, r.hair); P(ctx, x + 1, y0 - 3, 2, 1, r.hair); }
+  } else if (r.curls) {
     P(ctx, x - 3, y0 - 2, 7, 3, r.hair);
     P(ctx, x - 3, y0 + 1, 1, 2, r.hair);
     P(ctx, x + 3, y0 + 1, 1, 2, r.hair);
@@ -197,7 +242,23 @@ function drawPerson(ctx, c, t) {
   } else {
     P(ctx, x - 2, y0 - 1, 5, 2, r.hair);
   }
-  if (r.glasses) P(ctx, x - 2, y0 + 2, 5, 1, '#1c2430');
+  // eyes & face tech, era by era
+  if (aug >= 6) {
+    // full chassis — but the eyes are still human. They blink.
+    P(ctx, x - 2, y0 + 2, 5, 2, '#1a2130');                         // face plate slit
+    if (Math.sin(t * 0.9 + c.seed) > -0.92) {                       // blink
+      P(ctx, x - 1, y0 + 2, 1, 1, '#f4e8dc'); P(ctx, x - 1, y0 + 3, 1, 1, r.skin);
+      P(ctx, x + 1, y0 + 2, 1, 1, '#f4e8dc'); P(ctx, x + 1, y0 + 3, 1, 1, r.skin);
+    }
+  } else if (aug >= 4) {
+    P(ctx, x - 2, y0 + 2, 5, 1, '#22d3ee');                         // full AR visor
+  } else if (aug >= 1) {
+    P(ctx, x - 2, y0 + 2, 5, 1, 'rgba(34,211,238,.75)');            // AR glasses
+  } else if (r.glasses) {
+    P(ctx, x - 2, y0 + 2, 5, 1, '#1c2430');
+  }
+  if (aug >= 2 && aug < 6) P(ctx, x + 3, y0 + 1, 1, 1,
+    Math.sin(t * 2.2 + c.seed) > 0 ? '#a78bfa' : '#574a7a');        // neural implant
 }
 
 function drawCat(ctx, c, t) {
@@ -312,7 +373,6 @@ function drawGarage(ctx, t, s, sel, runProg) {
       P(ctx, sx + 8, sy + 5, 2, 2, Math.sin(t * 4 + gi) > 0 ? '#39e6a3' : '#1c4734'); // fan LED
     }
   }
-  drawDesk(ctx, 120, 176 - 4, t, runProg);
   drawPizza(ctx, 200, 190, clamp(1 + ((s.stats.runsStarted / 3) | 0), 1, 4));
   // poster
   P(ctx, 150, 40, 22, 28, '#23303f'); P(ctx, 153, 46, 16, 2, '#39e6a3'); P(ctx, 153, 52, 16, 10, '#1a4456');
@@ -327,7 +387,6 @@ function drawOffice(ctx, t, s, sel, runProg) {
   P(ctx, 150, 30, 60, 34, '#1c2940');
   for (let i = 0; i < 6; i++) P(ctx, 154 + i * 9, 42 + hash(i) * 10, 5, 22, '#283d5c');
   drawCoffee(ctx, 240, 140, t);                          // coffee corner at wall base
-  drawDesk(ctx, 70, 168, t, runProg); drawDesk(ctx, 130, 180, t, runProg); drawDesk(ctx, 190, 168, t, runProg);
   P(ctx, 278, 144, 7, 5, '#7a4b2c');                     // office plant: pot…
   P(ctx, 280, 128, 3, 16, '#39754f'); P(ctx, 276, 122, 11, 9, '#3f9c63'); // …and leaves
   // server closet on the right fills with racks
@@ -350,7 +409,6 @@ function drawColo(ctx, t, s, sel, runProg) {
   // overhead cable tray
   P(ctx, 0, 70, W, 4, '#161b26');
   for (let x = 6; x < W; x += 17) P(ctx, x, 74, 2, 8, '#e0903a');
-  drawDesk(ctx, 400, 182, t, runProg);                  // crash cart
 }
 
 function layoutDc() { return { x0: 24, x1: 440, desks: [[60, 188]] }; }
@@ -365,7 +423,6 @@ function drawDc(ctx, t, s, sel, runProg) {
   for (let i = 0; i < racks; i++) drawRack(ctx, 14 + i * 25, 92, t, i + 40, act, 48);
   // yellow safety line
   P(ctx, 0, 168, W, 2, '#caa53d'); for (let x = 0; x < W; x += 14) P(ctx, x, 168, 7, 2, '#171c26');
-  drawDesk(ctx, 60, 184, t, runProg);
 }
 
 function layoutFactory() { return { x0: 24, x1: 440, desks: [[240, 188]] }; }
@@ -389,7 +446,6 @@ function drawFactory(ctx, t, s, sel, runProg) {
   // robot arm tending racks
   const ra = Math.sin(t * 0.8) * 30;
   P(ctx, 330 + ra, 20, 4, 26, '#5b6478'); P(ctx, 326 + ra, 44, 12, 5, '#e0903a');
-  drawDesk(ctx, 240, 184, t, runProg);
   if (s.won) { // golden hour
     ctx.fillStyle = `rgba(251,191,36,${0.08 + Math.sin(t) * 0.04})`; ctx.fillRect(0, 0, W, H);
   }
@@ -465,8 +521,6 @@ function drawOrbital(ctx, t, s, sel, runProg) {
   // a couple of local racks + the crash-cart desks
   drawRack(ctx, 444, 148, t, 7, s.runs.length ? 0.9 : 0.2, 44);
   drawRack(ctx, 462, 148, t, 8, s.runs.length ? 0.9 : 0.2, 44);
-  drawDesk(ctx, 110, 180, t, runProg);
-  drawDesk(ctx, 350, 184, t, runProg);
   if (s.singularity) {  // afterglow of the new universe
     ctx.fillStyle = `rgba(216,180,254,${0.05 + Math.sin(t * 0.8) * 0.03})`;
     ctx.fillRect(0, 0, W, H);
@@ -522,8 +576,6 @@ function drawDyson(ctx, t, s, sel, runProg) {
     const on = Math.sin(t * (2 + (i % 4)) + i * 1.8) > 0.1;
     P(ctx, 12 + i * 19, 136, 4, 2, on ? (i % 3 ? '#39e6a3' : '#ffd778') : '#27314a');
   }
-  drawDesk(ctx, 90, 182, t, runProg);
-  drawDesk(ctx, 330, 186, t, runProg);
 }
 
 function layoutLattice() { return { x0: 24, x1: 420, desks: [[120, 188], [300, 184]] }; }
@@ -596,8 +648,6 @@ function drawLattice(ctx, t, s, sel, runProg) {
     const on = Math.sin(t * (2 + (i % 4)) + i * 2.1) > 0.15;
     P(ctx, 12 + i * 19, 136, 4, 2, on ? (i % 3 ? '#a78bfa' : '#22d3ee') : '#1d2433');
   }
-  drawDesk(ctx, 120, 184, t, runProg);
-  drawDesk(ctx, 300, 180, t, runProg);
   if (s.singularity) {
     ctx.fillStyle = `rgba(216,180,254,${0.05 + Math.sin(t * 0.8) * 0.03})`;
     ctx.fillRect(0, 0, W, H);
@@ -636,25 +686,108 @@ export function initScene(el) {
   canvas = el;
   if (!canvas || !buf || !buf.getContext) return;
   buf.width = W; buf.height = H;
-  canvas.addEventListener('click', onClick);
+  canvas.addEventListener('pointerdown', onPointerDown);
+  canvas.addEventListener('pointermove', onPointerMove);
+  canvas.addEventListener('pointerup', onPointerUp);
+  canvas.addEventListener('pointercancel', onPointerUp);
   if (!raf) { lastFrame = performance.now() / 1000; raf = requestAnimationFrame(frame); }
 }
 
-function onClick(e) {
+// the player-rearranged layout: desk overrides live in the save
+function effectiveLayout(s, sel, phase) {
+  const lay = SCENES[phase].layout(s, sel);
+  const ov = s.deskPos && s.deskPos[phase];
+  if (ov && lay.desks) {
+    lay.desks = lay.desks.map((d, i) => ov[i] ? [ov[i][0], ov[i][1]] : d);
+  }
+  return lay;
+}
+
+// ── drag & drop: pick up the people, the cat, the desks ──────────
+let drag = null;   // { kind: 'char'|'cat'|'desk', ref?, idx?, moved, t0 }
+
+function evtPos(e) {
   const r = canvas.getBoundingClientRect();
-  const mx = (e.clientX - r.left) / r.width * W;
-  const my = (e.clientY - r.top) / r.height * H;
-  for (const c of chars) {
+  return { mx: (e.clientX - r.left) / r.width * W, my: (e.clientY - r.top) / r.height * H };
+}
+
+function onPointerDown(e) {
+  const { mx, my } = evtPos(e);
+  const s = game.s, sel = game.sel;
+  if (!s || !sel) return;
+  for (let i = chars.length - 1; i >= 0; i--) {
+    const c = chars[i];
     if (Math.abs(mx - c.x) < 8 && my > c.y - 24 && my < c.y + 2) {
-      say(c, pick(roleQuips(c.role), Math.random()));
-      return;
+      drag = { kind: 'char', ref: c, moved: 0, t0: Date.now() };
+      c.state = 'held'; c.deskSeat = -1;
+      break;
     }
   }
-  if (cat && Math.abs(mx - cat.x) < 9 && Math.abs(my - cat.y + 4) < 8) {
-    say(cat, pick(QUIPS.cat, Math.random()), 2.2);
-    cat.tx = clamp(mx + (Math.random() - 0.5) * 120, 30, W - 30);
-    cat.state = 'walk';
+  const phase = clamp(s.phase, 0, SCENES.length - 1);
+  if (!drag && cat && phase <= 1 && Math.abs(mx - cat.x) < 9 && Math.abs(my - cat.y + 4) < 8) {
+    drag = { kind: 'cat', ref: cat, moved: 0, t0: Date.now() };
+    cat.state = 'held';
   }
+  if (!drag) {
+    const desks = effectiveLayout(s, sel, phase).desks || [];
+    for (let i = 0; i < desks.length; i++) {
+      if (Math.abs(mx - desks[i][0]) < 12 && Math.abs(my - (desks[i][1] - 12)) < 14) {
+        drag = { kind: 'desk', idx: i, moved: 0, t0: Date.now(), pos: [desks[i][0], desks[i][1]] };
+        break;
+      }
+    }
+  }
+  if (drag) { try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* older browsers */ } }
+}
+
+function onPointerMove(e) {
+  if (!drag) return;
+  const { mx, my } = evtPos(e);
+  drag.moved += 1;
+  if (drag.kind === 'desk') {
+    drag.pos = [clamp(mx, 22, W - 22), clamp(my + 12, FLOOR_Y + 14, FLOOR_B - 2)];
+    const s = game.s;
+    const phase = clamp(s.phase, 0, SCENES.length - 1);
+    const desks = SCENES[phase].layout(s, game.sel).desks || [];
+    if (!s.deskPos) s.deskPos = {};
+    if (!s.deskPos[phase]) s.deskPos[phase] = desks.map(d => [d[0], d[1]]);
+    s.deskPos[phase][drag.idx] = drag.pos;
+  } else {
+    drag.ref.x = clamp(mx, 14, W - 14);
+    drag.ref.y = clamp(my + 10, 30, FLOOR_B - 2);   // lift them right off the floor
+  }
+}
+
+function onPointerUp() {
+  if (!drag) return;
+  const quick = drag.moved < 4 && Date.now() - drag.t0 < 350;
+  const s = game.s;
+  if (drag.kind === 'char') {
+    const c = drag.ref;
+    c.y = clamp(c.y, FLOOR_Y + 10, FLOOR_B - 2);    // back onto the floor
+    if (quick) {                                     // it was just a poke
+      c.state = 'idle'; c.think = 2 + Math.random() * 4;
+      say(c, pick(roleQuips(c.role), Math.random()));
+    } else {
+      // dropped on a desk? straight to work
+      const phase = clamp(s.phase, 0, SCENES.length - 1);
+      const desks = effectiveLayout(s, game.sel, phase).desks || [];
+      const seat = desks.findIndex(d => Math.abs(c.x - d[0]) < 10 && Math.abs(c.y - d[1]) < 10);
+      if (seat >= 0 && c.role !== 'ops') {
+        c.deskSeat = seat; c.x = desks[seat][0]; c.y = desks[seat][1];
+        c.state = 'work'; c.think = 6 + Math.random() * 6;
+        say(c, pick(DESK_DROP_QUIPS, Math.random()));
+      } else {
+        c.state = 'idle'; c.think = 2 + Math.random() * 4;
+        say(c, pick(DROP_QUIPS, Math.random()));
+      }
+    }
+  } else if (drag.kind === 'cat') {
+    cat.y = clamp(cat.y, FLOOR_Y + 8, FLOOR_B - 2);
+    cat.tx = cat.x; cat.state = 'sit';
+    say(cat, quick ? pick(QUIPS.cat, Math.random()) : pick(CAT_DROP_QUIPS, Math.random()), 2.4);
+  }
+  drag = null;
 }
 
 function frame() {
@@ -668,13 +801,13 @@ function frame() {
 
   const phase = clamp(s.phase, 0, SCENES.length - 1);
   const scene = SCENES[phase];
-  const layout = scene.layout(s, sel);
+  const layout = effectiveLayout(s, sel, phase);
   const runProg = s.runs.length ? s.runs[0].physDone / s.runs[0].physNeed : -1;
 
   syncPopulation(s);
   for (const c of chars) thinkChar(c, dt, t, layout);
   // cat lives in the garage & office only
-  if (cat && phase <= 1) {
+  if (cat && phase <= 1 && cat.state !== 'held') {
     if (cat.state === 'walk') {
       const dx = cat.tx - cat.x;
       if (Math.abs(dx) < 2) cat.state = 'sit';
@@ -686,13 +819,17 @@ function frame() {
   const ctx = buf.getContext('2d');
   ctx.clearRect(0, 0, W, H);
   scene.draw(ctx, t, s, sel, runProg);
+  // desks come from the layout so the player can rearrange them
+  for (const [dx2, dy2] of layout.desks || []) drawDesk(ctx, dx2, dy2 - 4, t, runProg);
   if (s.buffs.some(b => b.id === 'fireCleanup')) drawFireFx(ctx, ...FIRE_POS[phase], t);
 
-  // draw entities back-to-front
-  const ents = [...chars];
+  // draw entities back-to-front; whoever the player is carrying rides on top
+  const heldChar = drag && drag.kind === 'char' ? drag.ref : null;
+  const ents = chars.filter(c => c !== heldChar);
   ents.sort((a, b) => a.y - b.y);
   for (const c of ents) drawPerson(ctx, c, t);
   if (cat && phase <= 1) drawCat(ctx, cat, t);
+  if (heldChar) drawPerson(ctx, heldChar, t);
 
   // confetti
   for (let i = confetti.length - 1; i >= 0; i--) {

@@ -32,6 +32,7 @@ export function defaultState(founderId = 'mario') {
     staff: { engineer: 0, researcher: 0, ops: 0, sales: 0 },
     dataTier: 0,
     dataQBonus: {},    // dataset id -> quality multiplier from Dedup Frenzy
+    deskPos: {},       // phase -> [[x,y],…] desk positions the player dragged
     research: [],                                // completed research ids
     resProj: null,     // active research project { id, done, need } (lab-hours)
     resDoneQueue: [],  // completed research ids awaiting UI follow-up {id, realAt}

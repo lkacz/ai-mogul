@@ -59,10 +59,10 @@ const labTab = {
       : `<div class="muted">No model deployed. Train one, then deploy it from the Models tab. Revenue = min(market adoption, serving capacity).</div>`;
 
     return `<div class="card scene-card">
-      <canvas id="scene-canvas" class="scene-canvas" title="This is your lab, live. Click the people."></canvas>
+      <canvas id="scene-canvas" class="scene-canvas" title="This is your lab, live. Click the people — or pick them up and rearrange the furniture."></canvas>
       <div class="row" style="justify-content:space-between; margin-top:7px; flex-wrap:wrap">
         <span><b>${FACILITY_EMOJI[s.phase]} ${esc(sel.fac.name)}</b> <span class="faint">— ${esc(sel.fac.desc)}</span></span>
-        <span class="faint">👆 click the people (and the cat)</span>
+        <span class="faint">👆 poke or drag the people, the cat, the desks</span>
       </div>
     </div>
     <div class="grid2">
