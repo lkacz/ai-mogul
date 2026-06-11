@@ -300,11 +300,13 @@ export function playDedup(dsId) {
 // ══════════════════════════════════════════════════════════════════
 export function offerNodeHunt(incident) {
   pauseWorld();
+  const paged = game.s.stats.pagerPages || 0;
   showModal(`<h2>📟 3:07 AM — pager goes off</h2>
     <p>The all-reduce is hanging: <b>one of 16 nodes</b> is bad and the run lost
     <b class="bad">${incident.lostH}h of progress</b>. Find the node with
     <b>5 diagnostics</b> and you claw back <b class="gold">90% of it</b> (plus RP for the postmortem).</p>
     ${lessonBox('One straggler GPU stalls a whole synchronous training job. Real SREs bisect node ranges exactly like this — binary search finds 1 of 16 in 4 tests.')}
+    ${paged >= 2 ? '<p class="muted small">😮‍💨 Tired of carrying the pager? Hire an <b>ops rotation (3+ Infra/DC Ops)</b> on the Company tab — they\'ll bisect future incidents themselves and save most of the progress.</p>' : ''}
     <div class="actions">
       <button class="act sub" data-act="mgSkipNode">Eat the loss (skip)</button>
       <button class="act big" data-act="mgPlayNode" data-arg="${incident.lostH}">🎮 Page me in</button>

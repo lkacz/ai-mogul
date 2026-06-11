@@ -83,7 +83,7 @@ export const STAFF = [
   { id: 'researcher', name: 'Research Scientist', wage: 95,
     desc: 'Generates 1.2 RP/h each — and every researcher speeds up the active research project.' },
   { id: 'ops', name: 'Infra / DC Ops', wage: 45,
-    desc: 'Keeps the fleet alive: −1.5% electricity each (max −45%), hot spares halve hardware attrition, 5+ deter burglars.' },
+    desc: 'Keeps the fleet alive: −1.5% electricity each (max −45%), hot spares halve attrition, 3+ form an on-call rotation that auto-fixes outages, 5+ deter burglars.' },
   { id: 'sales', name: 'GTM & Sales', wage: 50,
     desc: 'Sells the API: +4% demand each.' },
 ];

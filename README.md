@@ -89,7 +89,9 @@ ends with a "📚 The real thing" note:
 - **🧹 Dedup Frenzy** (acquiring a dataset) — zap SEO spam, duplicates and PII before they hit
   the corpus, without deleting Shakespeare. Permanent data-quality bonus.
 - **📟 Node Hunt** (cluster outage at 3 AM) — one of 16 nodes is stalling the all-reduce; find
-  it by bisection with 5 diagnostics and win back 90% of the lost progress.
+  it by bisection with 5 diagnostics and win back 90% of the lost progress. The pager is
+  rate-limited so it stays an event, not a chore — and once you hire an **ops rotation (3+)**,
+  they carry it: incidents get auto-bisected and most progress saved, just like real on-call.
 - **🍭 RLHF Rater** (researching RLHF) — judge answer pairs and meet the real failure modes:
   sycophancy, hallucination, verbosity, non-haiku haikus.
 

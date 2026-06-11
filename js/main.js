@@ -181,6 +181,9 @@ ACTIONS.resetGo = () => {
 };
 
 // ── Outage incidents → Node Hunt minigame ────────────────────────
+// The pager is fun twice and a chore after that: rate-limited hard in real
+// time, and 3+ ops staff take over the rotation entirely (handled in core).
+let pagerCooldownReal = 0;
 function pumpIncidents() {
   const inc = s.lastIncident;
   if (!inc) return;
@@ -190,6 +193,9 @@ function pumpIncidents() {
   if (!document.getElementById('modal-root').classList.contains('hidden')) return;
   if (Date.now() - (inc.realAt || 0) > 90 * 1000) return;
   if (!s.runs.length) return;
+  if (Date.now() < pagerCooldownReal) return;             // the loss stands; the news has it
+  pagerCooldownReal = Date.now() + 6 * 60 * 1000;
+  s.stats.pagerPages = (s.stats.pagerPages || 0) + 1;
   offerNodeHunt(inc);
 }
 

@@ -75,18 +75,23 @@ export const EVENTS = [
   { id: 'outage', weight: 7, minPhase: 0,
     apply: (s, sel) => {
       const guard = sel.fx.outageGuard;
-      const lostH = guard ? 1 : 6;
+      // 3+ ops = an on-call rotation: they bisect the bad node themselves
+      // and you keep 70% of what would have been lost. No 3 AM pager for you.
+      const covered = s.staff.ops >= 3;
+      const lostH = (guard ? 1 : 6) * (covered ? 0.3 : 1);
       for (const r of s.runs) {
         const rate = sel.trainRate / Math.max(1, s.runs.length);
         r.physDone = Math.max(0, r.physDone - rate * 3600 * lostH);
       }
-      // offer the Node Hunt minigame (consumed by the UI if the player is around)
-      if (s.runs.length) s.lastIncident = { lostH, realAt: Date.now() };
-      return lostH;
+      // page the player only when there's no rotation to take it
+      if (s.runs.length && !covered) s.lastIncident = { lostH, realAt: Date.now() };
+      return { lostH, covered };
     },
-    text: (s, h) => h <= 1
-      ? '🔌 Power blip — auto-resume restores training from checkpoint (−1h progress).'
-      : '🔌 Power outage! Training runs lose 6 hours of progress. (Research checkpointing!)' },
+    text: (s, r) => r.covered
+      ? `🔌 Node failure at 3 AM — your ops rotation bisects it before coffee. Only ${r.lostH.toFixed(1)}h lost.`
+      : r.lostH <= 1
+        ? '🔌 Power blip — auto-resume restores training from checkpoint (−1h progress).'
+        : '🔌 Power outage! Training runs lose 6 hours of progress. (Research checkpointing! Or hire an ops rotation.)' },
   { id: 'poach', weight: 4, minPhase: 1,
     apply: (s) => {
       const ids = Object.keys(s.staff).filter(k => s.staff[k] > 0);
@@ -158,17 +163,20 @@ export const EVENTS = [
     text: () => '🪐 "Quantum AI" trends worldwide after your keynote — demand +80% for 48h.' },
   { id: 'flare', weight: 6, minPhase: 5,
     apply: (s, sel) => {
-      const lostH = sel.fx.outageGuard ? 1 : 4;
+      const covered = s.staff.ops >= 3;
+      const lostH = (sel.fx.outageGuard ? 1 : 4) * (covered ? 0.3 : 1);
       for (const r of s.runs) {
         const rate = sel.trainRate / Math.max(1, s.runs.length);
         r.physDone = Math.max(0, r.physDone - rate * 3600 * lostH);
       }
-      if (s.runs.length) s.lastIncident = { lostH, realAt: Date.now() };
-      return lostH;
+      if (s.runs.length && !covered) s.lastIncident = { lostH, realAt: Date.now() };
+      return { lostH, covered };
     },
-    text: (s, h) => h <= 1
-      ? '☀️ Solar flare! Rad-hardened checkpoints hold — the constellation loses only 1h.'
-      : '☀️ Solar flare! The constellation safes itself for 4 hours of training while the particle storm passes.' },
+    text: (s, r) => r.covered
+      ? `☀️ Solar flare — mission ops ride it out by the book. Only ${r.lostH.toFixed(1)}h lost.`
+      : r.lostH <= 1
+        ? '☀️ Solar flare! Rad-hardened checkpoints hold — the constellation loses only 1h.'
+        : '☀️ Solar flare! The constellation safes itself for 4 hours of training while the particle storm passes.' },
 ];
 
 // Real, checkable facts — surfaced occasionally in the news ticker.
