@@ -278,3 +278,7 @@ table.tbl td { padding: 6px 8px; border-bottom: 1px solid #1d2331; }
 }
 .dz-cell:hover { border-color: var(--accent); }
 .dz-cell.filled { background: #182032; }
+.dz-cell.ok { border-color: rgba(52,211,153,.65); }
+.dz-cell.warn { border-color: rgba(251,191,36,.75); }
+.dz-cell.bad { border-color: rgba(248,113,113,.85); background: #221318; }
+.float-num.bad { color: var(--red); }

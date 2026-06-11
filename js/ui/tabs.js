@@ -470,7 +470,11 @@ ACTIONS.buyFacility = () => {
     const f = FACILITIES[game.s.phase];
     showModal(`<h2>${FACILITY_EMOJI[game.s.phase]} ${esc(f.name)}</h2>
       <p>${esc(founderize(f.story, game.s.founder))}</p>
-      <div class="actions"><button class="act big" data-act="closeModal">Let's get to work</button></div>`);
+      <p class="muted small">The floor is bare concrete and possibility. A good layout runs cooler and cheaper than the default mess.</p>
+      <div class="actions">
+        <button class="act gold" data-act="designOpen">🏗️ Design the floor plan</button>
+        <button class="act" data-act="closeModal">Later — let's get to work</button>
+      </div>`);
   }
 };
 

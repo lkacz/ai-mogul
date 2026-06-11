@@ -4,7 +4,7 @@
 import { BAL, capabilityFor, trainCompute, optimalTokens } from './balance.js';
 import { GPUS, FACILITIES, DATASETS, FUNDING, RIVAL_ASYMPTOTE, founderize } from './data.js';
 import { DILEMMAS, DILEMMA_BY_ID } from './dilemmas.js';
-import { DESIGNS, scoreDesign, placedCount } from './design.js';
+import { DESIGNS, GRID_W, GRID_H, scoreDesign, placedCount } from './design.js';
 import { RESEARCH_BY_ID } from './research.js';
 import { MILESTONES, MILESTONE_BY_ID } from './milestones.js';
 import { EVENTS, NEWS_FLAVOR, FACTS } from './events.js';
@@ -397,6 +397,14 @@ export function applyFacilityDesign(s, phase, cells) {
   if (phase !== s.phase) return err('You can only redesign the facility you occupy.');
   const def = DESIGNS[phase];
   if (!def) return err('The garage is beyond optimization. It has a vibe.');
+  // validate the layout data itself — unknown parts or out-of-range cells
+  // (stale saves, tampering) must never reach the scorer or the UI
+  for (const [i, p] of Object.entries(cells || {})) {
+    const ci = +i;
+    if (!Number.isInteger(ci) || ci < 0 || ci >= GRID_W * GRID_H || !def.parts[p]) {
+      return err('That layout data is corrupted — clear and redraw.');
+    }
+  }
   for (const t of Object.keys(def.parts)) {
     if (placedCount(cells, t) > def.parts[t].n) return err('Too many parts of one type.');
   }

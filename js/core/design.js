@@ -62,47 +62,72 @@ function ctxOf(cells) {
   return { cells, list, at, adj, onEdge, connected, xOf, yOf };
 }
 
-// rule helpers returning { txt, pts, max } — pts may go negative (the traps)
+// Rule helpers. Each returns { txt, pts, max, trap?, mark? } — `mark` paints
+// grid cells (ok / warn / bad) so the player can SEE which rack is uncooled.
+// Coverage rules are proportional (fraction of placed parts satisfied) and
+// every design rewards actually deploying its capacity — a tiny perfect
+// layout can't beat a big good one.
+const asArr = (b) => Array.isArray(b) ? b : [b];
+const adjAny = (g, i, bs) => asArr(bs).some(b => g.adj(i, b, true) > 0);
+
 const R = {
-  near: (a, b, per, max, txt) => (g) => {
-    const n = Math.min(g.list(a).filter(i => g.adj(i, b, true) > 0).length * per, max);
-    return { txt, pts: n, max };
+  placed: (a, max, txt) => (g, def) => {
+    const n = g.list(a).length, cap = def.parts[a].n;
+    return { txt: `${txt} (${n}/${cap})`, pts: Math.round(max * n / cap), max };
+  },
+  coverage: (a, b, max, txt) => (g) => {
+    const as = g.list(a);
+    if (!as.length) return { txt: `${txt} (none placed)`, pts: 0, max };
+    const mark = {}; let ok = 0;
+    for (const i of as) { const c = adjAny(g, i, b); if (c) ok++; mark[i] = c ? 'ok' : 'warn'; }
+    return { txt: `${txt} (${ok}/${as.length})`, pts: Math.round(max * ok / as.length), max, mark };
   },
   trap: (a, b, per, txt) => (g) => {
-    let n = 0;
-    for (const i of g.list(a)) n += g.adj(i, b, true);
-    return { txt, pts: -Math.min(n * per, per * 4), max: 0, trap: n > 0 };
+    const mark = {}; let n = 0;
+    for (const i of g.list(a)) if (adjAny(g, i, b)) { n++; mark[i] = 'bad'; }
+    return { txt, pts: -Math.min(n * per, per * 4), max: 0, trap: n > 0, mark };
   },
-  hotspot: (a, per, max, txt) => (g) => {
-    const crowded = g.list(a).filter(i => g.adj(i, a, true) >= 3).length;
-    return { txt, pts: -Math.min(crowded * per, max), max: 0, trap: crowded > 0 };
+  hotspot: (a, per, txt) => (g) => {
+    const mark = {}; let n = 0;
+    for (const i of g.list(a)) if (g.adj(i, a, true) >= 3) { n++; mark[i] = 'bad'; }
+    return { txt, pts: -Math.min(n * per, per * 4), max: 0, trap: n > 0, mark };
   },
-  edge: (a, side, per, max, txt) => (g) => {
-    const ok = g.list(a).filter(i => g.onEdge(i, side)).length;
-    const all = g.list(a).length;
-    return { txt, pts: Math.min(ok * per, max) - (all - ok) * per, max };
+  edge: (a, side, max, txt) => (g) => {
+    const as = g.list(a);
+    if (!as.length) return { txt: `${txt} (none placed)`, pts: 0, max };
+    const mark = {}; let ok = 0;
+    for (const i of as) { const e = g.onEdge(i, side); if (e) ok++; mark[i] = e ? 'ok' : 'bad'; }
+    const pts = Math.round(max * ok / as.length) - Math.min((as.length - ok) * 2, max / 2);
+    return { txt: `${txt} (${ok}/${as.length})`, pts, max, trap: ok < as.length, mark };
   },
   ratio: (a, b, perB, per, max, txt) => (g) => {
-    const need = Math.ceil(g.list(a).length / perB);
-    const have = g.list(b).length;
+    const na = g.list(a).length;
+    if (!na) return { txt: `${txt} (no load yet)`, pts: 0, max };
+    const need = Math.ceil(na / perB), have = g.list(b).length;
     const pts = have >= need ? max : Math.max(0, max - (need - have) * per);
-    return { txt: txt + ` (need ${need}, have ${have})`, pts, max };
+    return { txt: `${txt} (need ${need}, have ${have})`, pts, max };
   },
   overkill: (a, b, perB, per, txt) => (g) => {
     const extra = Math.max(0, g.list(b).length - Math.ceil(Math.max(1, g.list(a).length) / perB) - 1);
     return { txt, pts: -Math.min(extra * per, per * 3), max: 0, trap: extra > 0 };
   },
-  link: (a, via, b, per, max, txt) => (g) => {
-    const ok = g.list(a).filter(i => g.connected(i, [via], b)).length;
-    return { txt: txt + ` (${ok}/${g.list(a).length})`, pts: Math.min(ok * per, max), max };
+  link: (a, via, b, max, txt) => (g) => {
+    const as = g.list(a);
+    if (!as.length) return { txt: `${txt} (none placed)`, pts: 0, max };
+    const mark = {}; let ok = 0;
+    for (const i of as) {
+      const c = g.adj(i, b, false) > 0 || g.connected(i, [via], b);
+      if (c) ok++; mark[i] = c ? 'ok' : 'warn';
+    }
+    return { txt: `${txt} (${ok}/${as.length})`, pts: Math.round(max * ok / as.length), max, mark };
   },
-  placed: (a, per, max, txt) => (g) => ({ txt, pts: Math.min(g.list(a).length * per, max), max }),
 };
 
 export const DESIGNS = {
   1: {
     name: 'Server Closet', icon: '🏢',
     blurb: 'A real closet build: racks want a cold-air path, people want quiet, and the UPS buys you the seconds the grid won\'t.',
+    fact: 'ASHRAE recommends rack inlet air at 18–27 °C — small rooms die by hot-exhaust recirculation, which is why the air path matters more than the AC\'s size.',
     parts: {
       rack: { n: 6, name: 'Server rack', icon: '🗄️', tip: 'Wants a CRAC or vent next to it — ASHRAE says keep inlets below ~27 °C.' },
       crac: { n: 2, name: 'CRAC unit', icon: '❄️', tip: 'Computer-room air conditioner. Each handles ~3 racks.' },
@@ -111,18 +136,20 @@ export const DESIGNS = {
       desk: { n: 3, name: 'Desk', icon: '🪑', tip: 'Humans. They claim 60 dB of rack whine is "fine". It is not fine.' },
     },
     rules: [
-      R.near('rack', 'crac', 5, 20, 'Racks with a CRAC airflow path'),
-      R.near('rack', 'vent', 3, 9, 'Racks using free outside air'),
-      R.edge('vent', null, 5, 10, 'Vents on an outside wall'),
-      R.ratio('rack', 'crac', 3, 6, 12, 'Cooling capacity vs heat load'),
-      R.near('ups', 'rack', 6, 6, 'UPS adjacent to the racks it protects'),
-      R.hotspot('rack', 4, 12, 'HOTSPOT: racks packed ≥3-together overheat (looks tidy, runs hot)'),
+      R.placed('rack', 12, 'Racks deployed'),
+      R.coverage('rack', 'crac', 18, 'Racks with a CRAC airflow path'),
+      R.coverage('rack', 'vent', 8, 'Racks using free outside air'),
+      R.edge('vent', null, 8, 'Vents on an outside wall'),
+      R.ratio('rack', 'crac', 3, 5, 10, 'Cooling capacity vs heat load'),
+      R.coverage('ups', 'rack', 6, 'UPS adjacent to the racks it protects'),
+      R.hotspot('rack', 4, 'HOTSPOT: racks packed ≥3-together overheat (looks tidy, runs hot)'),
       R.trap('desk', 'rack', 3, 'NOISE: desks beside racks tank morale'),
     ],
   },
   2: {
     name: 'Colo Cage', icon: '🗄️',
     blurb: 'The hot/cold-aisle game: containment panels cut cooling energy ~30% in real datacenters — and overcooling wastes every watt it saves.',
+    fact: 'Hot-aisle containment is one of the highest-ROI retrofits in the industry; Google\'s fleet-wide PUE of ~1.1 is built on exactly this kind of airflow discipline.',
     parts: {
       rack: { n: 10, name: 'Rack row', icon: '🗄️', tip: 'Arrange in rows: cold air in the front, hot exhaust out the back.' },
       panel: { n: 8, name: 'Containment panel', icon: '🧱', tip: 'Seals a hot aisle so exhaust can\'t mix back into the cold supply.' },
@@ -130,18 +157,19 @@ export const DESIGNS = {
       pdu: { n: 2, name: 'PDU', icon: '🔌', tip: 'Power distribution. Short cable runs lose less and trip less.' },
     },
     rules: [
-      R.placed('rack', 2, 20, 'Rack rows deployed'),
-      R.near('rack', 'panel', 3, 18, 'Rows with aisle containment (≈30% cooling savings, for real)'),
-      R.near('rack', 'crah', 2, 10, 'Rows with a chilled-air path'),
-      R.ratio('rack', 'crah', 4, 5, 10, 'CRAH capacity vs heat load'),
+      R.placed('rack', 14, 'Rack rows deployed'),
+      R.coverage('rack', 'panel', 16, 'Rows with aisle containment (≈30% cooling savings, for real)'),
+      R.coverage('rack', 'crah', 10, 'Rows with a chilled-air path'),
+      R.ratio('rack', 'crah', 4, 5, 8, 'CRAH capacity vs heat load'),
       R.overkill('rack', 'crah', 4, 4, 'OVERCOOLING: surplus CRAHs burn energy for nothing'),
-      R.near('pdu', 'rack', 4, 8, 'PDUs close to the load'),
-      R.hotspot('rack', 3, 9, 'HOTSPOT: blob layouts trap exhaust — rows beat blobs'),
+      R.coverage('pdu', 'rack', 6, 'PDUs close to the load'),
+      R.hotspot('rack', 3, 'HOTSPOT: blob layouts trap exhaust — rows beat blobs'),
     ],
   },
   3: {
     name: 'Hyperscale Hall', icon: '🏭',
     blurb: 'Evaporative towers on the wall, air handlers bridging them to the racks — and never, ever let the diesel exhaust drift into your intakes.',
+    fact: 'Generator-exhaust re-ingestion during outages is a documented cause of datacenter thermal shutdowns — the backup power kills the cooling it was protecting.',
     parts: {
       rack: { n: 12, name: 'Rack row', icon: '🗄️', tip: 'The 60 MW of load all this exists for.' },
       tower: { n: 3, name: 'Evap cooling tower', icon: '🌫️', tip: 'Evaporates water to dump heat — needs outside air (grid edge).' },
@@ -150,19 +178,20 @@ export const DESIGNS = {
       gen: { n: 2, name: 'Backup genset', icon: '🛢️', tip: 'Diesel ride-through. Real DC failure mode: exhaust recirculating into intakes.' },
     },
     rules: [
-      R.edge('tower', null, 5, 15, 'Towers on an outside wall'),
-      R.near('ahu', 'tower', 3, 12, 'Air handlers fed by towers'),
-      R.near('rack', 'ahu', 2, 14, 'Rack rows on conditioned air'),
-      R.near('rack', 'sub', 1, 6, 'Load close to the substation'),
-      R.near('gen', 'sub', 4, 8, 'Gensets wired into the substation'),
+      R.placed('rack', 14, 'Rack rows deployed'),
+      R.edge('tower', null, 10, 'Towers on an outside wall'),
+      R.coverage('ahu', 'tower', 10, 'Air handlers fed by towers'),
+      R.coverage('rack', 'ahu', 14, 'Rack rows on conditioned air'),
+      R.coverage('gen', 'sub', 6, 'Gensets wired into the substation'),
       R.trap('gen', 'tower', 5, 'EXHAUST RECIRCULATION: genset fumes in the wet-cooling intake'),
       R.trap('gen', 'ahu', 5, 'EXHAUST RECIRCULATION: genset fumes in the air handlers'),
-      R.hotspot('rack', 3, 9, 'HOTSPOT: unbroken rack blocks choke airflow'),
+      R.hotspot('rack', 3, 'HOTSPOT: unbroken rack blocks choke airflow'),
     ],
   },
   4: {
     name: 'AI Factory', icon: '🌆',
     blurb: 'Direct-to-chip liquid cooling: draw the pipe loop from each CDU to the dry coolers. Gas turbines firm the power — keep their heat plume away from the coolers.',
+    fact: '100 kW+ racks (GB200 NVL72-class) are liquid-cooled, full stop — air physically can\'t carry the heat. Real AI campuses (xAI Memphis) firm their power with on-site gas turbines plus battery banks.',
     parts: {
       pod: { n: 10, name: 'GPU pod', icon: '🟩', tip: 'High-density compute. Air can\'t cool this — it needs the liquid loop.' },
       cdu: { n: 3, name: 'CDU', icon: '🟦', tip: 'Coolant distribution unit. Must connect, via pipes, to a dry cooler.' },
@@ -173,20 +202,21 @@ export const DESIGNS = {
       sub: { n: 1, name: 'Substation', icon: '⚡', tip: 'Where turbines, batteries and grid meet.' },
     },
     rules: [
-      R.link('cdu', 'pipe', 'cooler', 8, 24, 'CDUs plumbed to a dry cooler'),
-      R.near('pod', 'cdu', 2, 10, 'Pods on a CDU manifold'),
-      R.near('pod', 'pipe', 1, 8, 'Pods along the coolant loop'),
-      R.edge('cooler', null, 5, 10, 'Dry coolers on outside air'),
-      R.near('turbine', 'sub', 3, 6, 'Turbines feeding the substation'),
-      R.near('battery', 'turbine', 4, 4, 'Battery firming the turbines'),
+      R.placed('pod', 14, 'GPU pods deployed'),
+      R.link('cdu', 'pipe', 'cooler', 18, 'CDUs plumbed to a dry cooler'),
+      R.coverage('pod', ['cdu', 'pipe'], 14, 'Pods on the liquid loop'),
+      R.edge('cooler', null, 8, 'Dry coolers on outside air'),
+      R.coverage('turbine', 'sub', 6, 'Turbines feeding the substation'),
+      R.coverage('battery', 'turbine', 4, 'Battery firming the turbines'),
       R.trap('turbine', 'cooler', 6, 'HEAT ISLAND: turbine plume cooks the dry coolers'),
       R.trap('turbine', 'pod', 3, 'Turbine vibration & heat next to pods'),
-      R.hotspot('pod', 3, 9, 'Pod blocks beyond the loop\'s reach'),
+      R.hotspot('pod', 3, 'Pod blocks beyond the loop\'s reach'),
     ],
   },
   5: {
     name: 'Orbital Platform', icon: '🛰️',
     blurb: 'In vacuum there is no air to carry heat away — every watt must leave as σT⁴ radiation. Radiators are the whole game. The Sun is to the LEFT.',
+    fact: 'The ISS dumps its heat through ammonia-loop radiators held edge-on to the Sun; radiator mass is the single biggest engineering objection to orbital-datacenter proposals.',
     parts: {
       solar: { n: 6, name: 'Solar wing', icon: '🟨', tip: 'Wants the sunward (left) edge, square to the light.' },
       pod: { n: 8, name: 'Compute pod', icon: '🟩', tip: 'Generates heat that has exactly one exit: a radiator.' },
@@ -194,18 +224,20 @@ export const DESIGNS = {
       laser: { n: 2, name: 'Laser link', icon: '🔆', tip: 'Optical crosslinks to the rest of the constellation.' },
     },
     rules: [
-      R.edge('solar', 'left', 4, 16, 'Solar wings square to the Sun (left edge)'),
-      R.edge('radiator', 'right', 4, 16, 'Radiators facing deep space (right edge)'),
-      R.near('pod', 'radiator', 3, 18, 'Pods with a heat path to a radiator'),
+      R.placed('pod', 12, 'Compute pods deployed'),
+      R.edge('solar', 'left', 12, 'Solar wings square to the Sun (left edge)'),
+      R.edge('radiator', 'right', 12, 'Radiators facing deep space (right edge)'),
+      R.coverage('pod', 'radiator', 16, 'Pods with a heat path to a radiator'),
       R.trap('radiator', 'radiator', 3, 'VIEW FACTOR: radiators facing each other re-absorb each other\'s heat'),
       R.trap('radiator', 'solar', 4, 'Radiator in the solar wings\' light & shadow — useless'),
-      R.near('laser', 'pod', 3, 6, 'Crosslinks beside the compute'),
-      R.hotspot('pod', 3, 9, 'Pod cluster with no room to reject heat'),
+      R.coverage('laser', 'pod', 4, 'Crosslinks beside the compute'),
+      R.hotspot('pod', 3, 'Pod cluster with no room to reject heat'),
     ],
   },
   6: {
     name: 'Dyson Shells', icon: '☀️',
     blurb: 'A Matrioshka layout: the Sun is to the LEFT. Collectors sunward, compute in the middle, radiators outward — each shell works on the waste heat of the one inside it.',
+    fact: 'A swarm element\'s equilibrium temperature falls as 1/√r from the star — Matrioshka brains (Bradbury) exploit that gradient, each cooler shell computing on the inner shell\'s waste heat.',
     parts: {
       collector: { n: 8, name: 'Collector tile', icon: '🟨', tip: 'Closer to the Sun = more flux (left half of the grid).' },
       compute: { n: 7, name: 'Compute shell', icon: '🟩', tip: 'Lives between light and dark — too sunward and it cooks (T ∝ 1/√r).' },
@@ -214,29 +246,39 @@ export const DESIGNS = {
       driver: { n: 1, name: 'Mass driver', icon: '🚀', tip: 'Launches finished tiles off Mercury. Wants the foundry beside it.' },
     },
     rules: [
+      R.placed('compute', 10, 'Compute shells deployed'),
       (g) => { // collectors sunward (left half)
-        const ok = g.list('collector').filter(i => g.xOf(i) < GRID_W / 2).length;
-        return { txt: 'Collectors in the high-flux zone (sunward half)', pts: Math.min(ok * 2, 16), max: 16 };
+        const cs = g.list('collector');
+        if (!cs.length) return { txt: 'Collectors in the high-flux zone (none placed)', pts: 0, max: 14 };
+        const mark = {}; let ok = 0;
+        for (const i of cs) { const c = g.xOf(i) < GRID_W / 2; if (c) ok++; mark[i] = c ? 'ok' : 'warn'; }
+        return { txt: `Collectors in the high-flux zone (${ok}/${cs.length})`, pts: Math.round(14 * ok / cs.length), max: 14, mark };
       },
-      (g) => { // Matrioshka nesting: each compute shell with a radiator somewhere to its right
-        const rads = g.list('radiator');
-        const ok = g.list('compute').filter(i =>
-          rads.some(r => g.yOf(r) === g.yOf(i) && g.xOf(r) > g.xOf(i))).length;
-        return { txt: 'Matrioshka nesting: compute radiates outward to a cooler shell', pts: Math.min(ok * 3, 21), max: 21 };
+      (g) => { // Matrioshka nesting: compute radiates outward to a cooler shell
+        const cs = g.list('compute'), rads = g.list('radiator');
+        if (!cs.length) return { txt: 'Matrioshka nesting (no compute placed)', pts: 0, max: 18 };
+        const mark = {}; let ok = 0;
+        for (const i of cs) {
+          const c = rads.some(r => g.yOf(r) === g.yOf(i) && g.xOf(r) > g.xOf(i));
+          if (c) ok++; mark[i] = c ? 'ok' : 'warn';
+        }
+        return { txt: `Matrioshka nesting: compute radiates outward (${ok}/${cs.length})`, pts: Math.round(18 * ok / cs.length), max: 18, mark };
       },
-      (g) => { // overheating trap: compute in the two sunmost columns
-        const hot = g.list('compute').filter(i => g.xOf(i) <= 1).length;
-        return { txt: 'OVERHEAT: compute parked at Mercury flux (T ∝ 1/√r)', pts: -hot * 4, max: 0, trap: hot > 0 };
+      (g) => { // overheating trap: compute at Mercury flux
+        const mark = {}; let hot = 0;
+        for (const i of g.list('compute')) if (g.xOf(i) <= 1) { hot++; mark[i] = 'bad'; }
+        return { txt: 'OVERHEAT: compute parked at Mercury flux (T ∝ 1/√r)', pts: -hot * 4, max: 0, trap: hot > 0, mark };
       },
-      R.edge('foundry', 'left', 8, 8, 'Foundry on Mercury (leftmost column)'),
-      R.near('driver', 'foundry', 8, 8, 'Mass driver at the foundry door'),
-      R.near('compute', 'collector', 1, 7, 'Compute fed by adjacent collectors'),
-      R.hotspot('collector', 2, 6, 'SELF-SHADING: stacked collectors eclipse each other'),
+      R.edge('foundry', 'left', 8, 'Foundry on Mercury (leftmost column)'),
+      R.coverage('driver', 'foundry', 8, 'Mass driver at the foundry door'),
+      R.coverage('compute', 'collector', 7, 'Compute fed by adjacent collectors'),
+      R.hotspot('collector', 2, 'SELF-SHADING: stacked collectors eclipse each other'),
     ],
   },
   7: {
     name: 'Omega Lattice Node', icon: '🌌',
     blurb: 'Landauer\'s principle: erasing a bit costs kT·ln2 — so compute against the coldest sink you can find (the 2.7 K void), and draw power from the black hole\'s spin without falling into its tides.',
+    fact: 'Landauer (1961): bit erasure costs kT·ln2, so a computer at 3 K pays ~100× less per erased bit than one at 300 K. Penrose (1969): up to 29% of a spinning black hole\'s mass-energy is extractable.',
     parts: {
       bh: { n: 1, name: 'Black-hole battery', icon: '⚫', tip: 'A Penrose engine drinking rotational energy. Respect the tidal zone.' },
       core: { n: 8, name: 'Compute core', icon: '🟪', tip: 'Wants black-hole power (via links) AND a cold sink to dump entropy into.' },
@@ -245,24 +287,32 @@ export const DESIGNS = {
       shield: { n: 2, name: 'Tidal shield', icon: '🛡️', tip: 'Buffers cores that must sit near the hole.' },
     },
     rules: [
-      R.link('core', 'link', 'bh', 4, 24, 'Cores wired to the black-hole battery'),
-      R.near('core', 'sink', 3, 18, 'Cores erasing bits against a cold sink (Landauer)'),
-      R.edge('sink', null, 3, 12, 'Sinks open to the 2.7 K void'),
+      R.placed('core', 12, 'Compute cores deployed'),
+      R.link('core', 'link', 'bh', 18, 'Cores wired to the black-hole battery'),
+      R.coverage('core', 'sink', 14, 'Cores erasing bits against a cold sink (Landauer)'),
+      R.edge('sink', null, 8, 'Sinks open to the 2.7 K void'),
       R.trap('core', 'bh', 6, 'TIDAL ZONE: cores beside the hole get spaghettified schedules'),
-      R.near('shield', 'bh', 4, 8, 'Shields buffering the tidal zone'),
-      R.hotspot('core', 2, 6, 'Core cluster sharing one sink'),
+      R.coverage('shield', 'bh', 6, 'Shields buffering the tidal zone'),
+      R.hotspot('core', 2, 'Core cluster sharing one sink'),
     ],
   },
 };
 
-// Score a layout: returns { score 0-100, lines[], fx {pue,mfu,elec} }.
+// Score a layout: { score 0-100, lines[], fx {pue,mfu,elec}, marks {cell:status} }.
 export function scoreDesign(phase, cells) {
   const def = DESIGNS[phase];
   if (!def) return null;
   const g = ctxOf(cells || {});
-  const lines = def.rules.map(r => r(g));
+  const lines = def.rules.map(r => r(g, def));
   let pts = 0, max = 0;
-  for (const l of lines) { pts += l.pts; max += l.max; }
+  const marks = {};   // cell status for the UI: bad > warn > ok
+  const rank = { ok: 1, warn: 2, bad: 3 };
+  for (const l of lines) {
+    pts += l.pts; max += l.max;
+    if (l.mark) for (const [i, m] of Object.entries(l.mark)) {
+      if (!marks[i] || rank[m] > rank[marks[i]]) marks[i] = m;
+    }
+  }
   const score = max > 0 ? clamp(Math.round(50 + (pts / max) * 50), 0, 100) : 50;
   const f = designFraction(score);
   const fx = {
@@ -270,7 +320,7 @@ export function scoreDesign(phase, cells) {
     mfu: DESIGN_MAX_FX.mfu * f,
     elec: 1 + DESIGN_MAX_FX.elec * f,
   };
-  return { score, lines, fx, pts, max };
+  return { score, lines, fx, pts, max, marks };
 }
 
 // count placed parts of a type
