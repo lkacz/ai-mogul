@@ -152,7 +152,14 @@ compass.
 ## How to play
 
 - **Lab** — watch your lab live; allocate compute between training, inference (revenue) and research; do gigs early.
-- **Training** — pick parameters & tokens, watch the predicted capability, hit start.
+- **Training** — pick parameters & tokens, watch the predicted capability, hit start. A **live
+  architecture visualization** shows what you're about to build, science-true at every scale:
+  the dense-transformer relation N ≈ 12·L·d² with the canonical d ≈ 128·L aspect (set the slider
+  to 175B and you get GPT-3's exact 96 layers × 12,288 × 96 heads), then — as your research
+  advances — sparse MoE expert grids with top-2 routing, multimodal encoder fusion, pipeline
+  stage cuts, an inner world model, a chain-of-thought loop, photonic/quantum substrate tints,
+  and past 10¹⁵ params a routed *society of trillion-parameter expert modules* (the real
+  "mixture of a million experts" research direction).
 - **Hardware** — buy GPUs (GTX 1070 → H100 → B200 → custom silicon → photonic meshes → quantum pods → swarm collectors → Omega cores); mind power & slots; upgrade the facility up the Kardashev scale: garage → office → colo → hyperscale DC → 6 GW AI factory → orbital constellation → Dyson swarm → Omega Lattice.
 - **Research** — 43 real techniques across 5 eras, from BPE tokenization to Ω-Recursion.
   RP funds a project; **your researchers then build it over time** (lab speed = 1 + researchers,

@@ -9,6 +9,7 @@ import * as E from '../core/engine.js';
 import { fmtMoney, fmtNum, fmtFlops, fmtFlop, fmtPower, fmtDur, fmtPct, fmtDate, clamp, log10 } from '../core/util.js';
 import { game, toast, showModal, closeModal, set, setBar, bar, esc, renderAll, switchTab, spawnFloat } from './ui.js';
 import { initScene } from './scene.js';
+import { initModelViz, setModelViz } from './modelviz.js';
 import { mgHandlers, offerLrGame, offerDedup } from './minigames.js';
 
 export const ACTIONS = {};
@@ -219,6 +220,9 @@ const trainTab = {
         <input type="range" min="6" max="${maxLogN.toFixed(2)}" step="0.01" value="${trainUI.logN}" data-input="trN">
         <div class="bar-label"><span>1M</span><span>VRAM limit: ${fmtNum(sel.maxParams)}</span></div>
 
+        <canvas id="model-viz" width="560" height="250" style="width:100%; border-radius:8px; background:#0a0d14; margin-top:10px" title="What this architecture looks like — it follows your research."></canvas>
+        <div class="faint small" id="mv-label" style="margin:3px 0 4px"></div>
+
         <label class="chk" style="margin:10px 0 4px">
           <input type="checkbox" ${trainUI.auto ? 'checked' : ''} data-input="trAuto">
           Chinchilla-optimal tokens (20 × N)
@@ -268,8 +272,14 @@ const trainTab = {
       </div>
     </div>`;
   },
+  afterBuild(s) {
+    initModelViz(document.getElementById('model-viz'));
+    const { N } = trainEstimates(s, game.sel);
+    setModelViz(N, s);
+  },
   update(s, sel) {
     const { N, D } = trainEstimates(s, sel);
+    setModelViz(N, s);
     const C = trainCompute(N, D);
     const nRuns = s.runs.length + 1;
     const etaH = E.runEtaH(sel, N, C, nRuns);

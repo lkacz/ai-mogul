@@ -70,6 +70,13 @@ await check('turbo 10k× engages with muted-notification notice', async () => {
   await page.click('.speed-btn:has-text("25×")');   // back to normal for later checks
 });
 
+await check('training tab shows live architecture viz', async () => {
+  await page.click('[data-act=tab][data-arg=train]');
+  await page.waitForSelector('#model-viz', { timeout: 4000 });
+  const lbl = await page.textContent('#mv-label');
+  if (!/layers · d_model .+ attention heads/.test(lbl)) throw new Error('arch label missing: ' + lbl);
+});
+
 await check('start a training run → LR minigame offered', async () => {
   await page.click('[data-act=tab][data-arg=train]');
   await page.waitForSelector('[data-act=startRun]');
