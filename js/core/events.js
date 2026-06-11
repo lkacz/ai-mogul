@@ -80,7 +80,8 @@ export const EVENTS = [
       const covered = s.staff.ops >= 3;
       const lostH = (guard ? 1 : 6) * (covered ? 0.3 : 1);
       for (const r of s.runs) {
-        const rate = sel.trainRate / Math.max(1, s.runs.length);
+        // loss can't exceed the run's real accrual rate (batch-size limit)
+        const rate = Math.min(sel.trainRate / Math.max(1, s.runs.length), r.N * sel.ppRate);
         r.physDone = Math.max(0, r.physDone - rate * 3600 * lostH);
       }
       // page the player only when there's no rotation to take it
@@ -128,7 +129,8 @@ export const EVENTS = [
       s.stats.fires = (s.stats.fires || 0) + 1;
       const lostH = 8;
       for (const run of s.runs) {
-        const rate = sel.trainRate / Math.max(1, s.runs.length);
+        // loss can't exceed the run's real accrual rate (batch-size limit)
+        const rate = Math.min(sel.trainRate / Math.max(1, s.runs.length), run.N * sel.ppRate);
         run.physDone = Math.max(0, run.physDone - rate * 3600 * lostH);
       }
       s.buffs.push({ id: 'fireCleanup', label: '🔥 Fire cleanup', untilH: s.simHours + 24 });
@@ -151,7 +153,8 @@ export const EVENTS = [
       if (!s.runs.length) return null;
       const lostH = sel.fx.outageGuard ? 1 : 3;
       for (const run of s.runs) {
-        const rate = sel.trainRate / Math.max(1, s.runs.length);
+        // loss can't exceed the run's real accrual rate (batch-size limit)
+        const rate = Math.min(sel.trainRate / Math.max(1, s.runs.length), run.N * sel.ppRate);
         run.physDone = Math.max(0, run.physDone - rate * 3600 * lostH);
       }
       return { lostH, txt: OOPS_TEXTS[(Math.random() * OOPS_TEXTS.length) | 0] };
@@ -187,7 +190,8 @@ export const EVENTS = [
       const covered = s.staff.ops >= 3;
       const lostH = (sel.fx.outageGuard ? 1 : 4) * (covered ? 0.3 : 1);
       for (const r of s.runs) {
-        const rate = sel.trainRate / Math.max(1, s.runs.length);
+        // loss can't exceed the run's real accrual rate (batch-size limit)
+        const rate = Math.min(sel.trainRate / Math.max(1, s.runs.length), r.N * sel.ppRate);
         r.physDone = Math.max(0, r.physDone - rate * 3600 * lostH);
       }
       if (s.runs.length && !covered) s.lastIncident = { lostH, realAt: Date.now() };

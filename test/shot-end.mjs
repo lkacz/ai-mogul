@@ -41,20 +41,22 @@ await page.waitForTimeout(2600);
 await page.screenshot({ path: join(ROOT, 'test', 'shot_scene_orbital.png') });
 console.log('shot orbital');
 
-// trigger the ending and capture three moments: infall, bang, afterglow
+// trigger the ending and capture key moments of the elegy
 await page.evaluate(() => {
   const s = window.AIMOGUL.s;
-  s.bestCap = 200.5; s.singularity = true; s.singularityAt = s.simHours;
+  s.bestCap = 300.5; s.singularity = true; s.singularityAt = s.simHours;
 });
 await page.waitForSelector('#singularity-canvas', { timeout: 5000 });
-await page.waitForTimeout(4200);
-await page.screenshot({ path: join(ROOT, 'test', 'shot_end_infall.png') });
-await page.waitForTimeout(3600);   // ~7.8 s — just after the bang
+await page.waitForTimeout(20000);   // ~20 s — a constellation (the flame/star)
+await page.screenshot({ path: join(ROOT, 'test', 'shot_end_constellation.png') });
+await page.waitForTimeout(36000);   // ~56 s — the keepsakes drifting in
+await page.screenshot({ path: join(ROOT, 'test', 'shot_end_keepsakes.png') });
+await page.waitForTimeout(24000);   // ~80 s — just after the crossing
 await page.screenshot({ path: join(ROOT, 'test', 'shot_end_bang.png') });
-await page.waitForTimeout(7000);   // ~14.8 s — afterglow + garage
+await page.waitForTimeout(29000);   // ~109 s — the garage light
 await page.screenshot({ path: join(ROOT, 'test', 'shot_end_afterglow.png') });
-await page.waitForSelector('#modal-root .modal', { timeout: 8000 });
-await page.screenshot({ path: join(ROOT, 'test', 'shot_end_modal.png') });
+await page.waitForTimeout(14000);   // ~123 s — the memorial, forever
+await page.screenshot({ path: join(ROOT, 'test', 'shot_end_memorial.png') });
 console.log('shot ending frames');
 
 await browser.close();

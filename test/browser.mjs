@@ -196,18 +196,34 @@ await check('moral dilemma modal → decline builds integrity', async () => {
   if (!(integ > 70)) throw new Error('integrity not raised: ' + integ);
 });
 
-await check('singularity → big-bang animation → ending modal', async () => {
+await check('singularity → final cinematic, save erased, no way back', async () => {
   await page.evaluate(() => {
     const s = window.AIMOGUL.s;
-    s.bestCap = 200.5; s.singularity = true; s.singularityAt = s.simHours;
+    s.bestCap = 300.5; s.singularity = true; s.singularityAt = s.simHours;
   });
   await page.waitForSelector('#singularity-canvas', { timeout: 5000 });
-  await page.waitForTimeout(2400);
-  await page.click('#singularity-canvas');           // skip the cinematic
+  await page.waitForTimeout(3000);
+  await page.click('#singularity-canvas');           // "let go" → the memorial
+  await page.waitForTimeout(1500);
+  const wiped = await page.evaluate(() => localStorage.getItem('aimogul_save_v1') === null);
+  if (!wiped) throw new Error('save not erased after the singularity');
+  const meta = await page.evaluate(() => JSON.parse(localStorage.getItem('aimogul_meta_v1') || '{}'));
+  if (meta.founder !== 'al') throw new Error('NG+ founder not queued: ' + JSON.stringify(meta));
+  const still = await page.$('#singularity-canvas');
+  if (!still) throw new Error('memorial screen should persist forever');
+});
+
+await check('reload → fresh New Game+ starring Al Saltman', async () => {
+  await page.reload({ waitUntil: 'networkidle' });
   await page.waitForSelector('#modal-root .modal', { timeout: 5000 });
   const txt = await page.textContent('#modal-root .modal');
-  if (!txt.includes('SINGULARITY')) throw new Error('ending modal missing');
+  if (!txt.includes('Al Saltman')) throw new Error('NG+ intro missing Al Saltman');
+  if (txt.includes('Mario')) throw new Error('old story leaked into the new game');
+  const freshSim = await page.evaluate(() => window.AIMOGUL.s.simHours);
+  if (freshSim > 1) throw new Error('state not fresh: simHours=' + freshSim);
   await page.click('#modal-root [data-act=closeModal]');
+  const lab = await page.textContent('#tab-content');
+  if (!lab.includes('Al Saltman')) throw new Error('lab card not re-founded');
 });
 
 await check('no console or page errors', async () => {

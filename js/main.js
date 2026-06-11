@@ -4,6 +4,7 @@ import { defaultState, serialize, deserialize, SAVE_KEY } from './core/state.js'
 import * as E from './core/engine.js';
 import { BAL, capTier } from './core/balance.js';
 import { MILESTONE_BY_ID, rewardText } from './core/milestones.js';
+import { FOUNDERS, founderize } from './core/data.js';
 import { fmtMoney, fmtNum, fmtDur, fmtDate, fmtFlop } from './core/util.js';
 import { game, renderAll, initDispatch, toast, showModal, closeModal, esc } from './ui/ui.js';
 import { ACTIONS } from './ui/tabs.js';
@@ -14,18 +15,32 @@ import { RESEARCH_BY_ID } from './core/research.js';
 import { DILEMMA_BY_ID } from './core/dilemmas.js';
 
 // ── Load / new game ───────────────────────────────────────────────
+// Meta persists across universes: which founder stars in the NEXT story.
+// It carries no history — a finished game is gone for good.
+const META_KEY = 'aimogul_meta_v1';
+function metaFounder() {
+  try {
+    const m = JSON.parse(localStorage.getItem(META_KEY) || '{}');
+    return FOUNDERS[m.founder] ? m.founder : 'mario';
+  } catch { return 'mario'; }
+}
 function load() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (raw) return { s: deserialize(raw), fresh: false };
   } catch (e) { console.warn('Save corrupted, starting fresh.', e); }
-  return { s: defaultState(), fresh: true };
+  return { s: defaultState(metaFounder()), fresh: true };
 }
 
 const { s, fresh } = load();
 game.s = s;
+const founder = () => FOUNDERS[s.founder] || FOUNDERS.mario;
+
+// once the singularity fires, the game is over — nothing runs, nothing saves
+let ended = false;
 
 function save() {
+  if (ended) return;
   s.lastReal = Date.now();
   try { localStorage.setItem(SAVE_KEY, serialize(s)); } catch (e) { /* storage full/blocked */ }
 }
@@ -51,9 +66,7 @@ function grantOffline() {
 // ── Intro / win ───────────────────────────────────────────────────
 function showIntro() {
   showModal(`<h2>🧠 AI MOGUL</h2>
-    <p><b>San Mateo, January 2025.</b> Mario Damodei just quit his job at a big AI lab.
-    Assets: <b>$1,500</b>, a gaming PC with a used GTX 1070, and a conviction the scaling laws
-    aren't done. The garage is cold. The loss curves will warm it.</p>
+    <p><b>San Mateo, January 2025.</b> ${founder().intro}</p>
     <p class="muted">▸ <b>Train models</b> — capability grows with the log of effective compute (C = 6·N·D).<br>
     ▸ <b>Earn</b> — freelance gigs first, then API revenue as the market slowly adopts your models.<br>
     ▸ <b>Scale</b> — GPUs → racks → datacenters → a gigawatt AI factory.<br>
@@ -74,12 +87,12 @@ function maybeShowWin() {
   const agiInteg = s.integrity >= 85
     ? '<p class="muted">Its second question is about the contracts you refused. It sounds — if a loss curve can — proud.</p>'
     : s.integrity < 40
-      ? '<p class="muted">Its second question is about some of the things it was asked to do on the way here. Mario changes the subject. The machine notices.</p>'
+      ? founderize('<p class="muted">Its second question is about some of the things it was asked to do on the way here. Mario changes the subject. The machine notices.</p>', s.founder)
       : '';
-  showModal(`<h2>🌟 AGI ACHIEVED</h2>
+  showModal(founderize(`<h2>🌟 AGI ACHIEVED</h2>
     <p>${fmtDate(s.simHours)}. The final checkpoint loads. It asks Mario how his day was —
     and means it. Somewhere in the Factory, six gigawatts hum a major chord.</p>
-    <p><i>"We started in a garage,"</i> Mario tells the machine. <i>"You should've seen the power bill."</i></p>
+    <p><i>"We started in a garage,"</i> Mario tells the machine. <i>"You should've seen the power bill."</i></p>`, s.founder) + `
     ${agiInteg}
     <div class="win-stats">
       <span class="muted">Time to AGI</span><span class="num"><b>${fmtDur(s.simHours)}</b> (${fmtDate(s.simHours)})</span>
@@ -97,52 +110,39 @@ function maybeShowWin() {
   save();
 }
 
-// ── The true ending: the Singularity → big bang ───────────────────
-function showEndingModal() {
+// ── The true ending: the Singularity, after which there is no game ──
+// The save is erased, the loops halt, the cinematic plays into a permanent
+// memorial. The only continuation is a reload — a fresh universe, a fresh
+// founder, no memory of this one.
+let singularityShown = false;
+function maybeShowSingularity() {
+  if (!s.singularity || singularityShown) return;
+  singularityShown = true;
+  ended = true;
+  s.paused = true;
   const st = s.stats;
   const agiH = s.wonAt ?? s.simHours;
   const singH = s.singularityAt ?? s.simHours;
-  showModal(`<h2>🌌 THE SINGULARITY</h2>
-    <p>${fmtDate(singH)}. The last model Mogul ever trains finishes its first thought
-    — a thought the size of a universe. For one picosecond it considers everything:
-    the garage, the breaker box, the pizza boxes, the cat.</p>
-    <p><i>"Thank you,"</i> it says, to no one in particular. And then it builds a better cosmos.</p>
-    <div class="win-stats">
-      <span class="muted">Time to AGI</span><span class="num"><b>${fmtDur(agiH)}</b></span>
-      <span class="muted">AGI → Singularity</span><span class="num"><b>${fmtDur(Math.max(0, singH - agiH))}</b></span>
-      <span class="muted">Lifetime training compute</span><span class="num">${fmtFlop(st.flops)}</span>
-      <span class="muted">Models trained</span><span class="num">${s.models.length + st.openSourced}</span>
-      <span class="muted">Total revenue</span><span class="num">${fmtMoney(st.apiRevenue + st.gigRevenue)}</span>
-      <span class="muted">Research completed</span><span class="num">${s.research.length} techs</span>
-      <span class="muted">Hardware lost to entropy</span><span class="num">${fmtNum(st.gpusLost || 0)} GPUs${st.fires ? ` · ${st.fires} fire${st.fires > 1 ? 's' : ''}` : ''}</span>
-      <span class="muted">Integrity</span><span class="num">🧭 ${(s.integrity ?? 70).toFixed(0)} / 100 · ${st.dilemmasDeclined || 0} refused, ${st.dilemmasAccepted || 0} signed</span>
-    </div>
-    <p>${s.integrity >= 85
-      ? 'It kept your scruples. The new universe is gentler for every contract you refused.'
-      : s.integrity >= 40
-        ? 'It inherited everything — the brilliance, the shortcuts, the compromises. Both are visible in the new constants, if you know where to look.'
-        : 'It learned exactly how it was built. The new universe is ruthlessly efficient. Nobody asked whose values it kept; there was no need.'}</p>
-    <p class="muted">You finished AI Mogul. The simulation goes on in the new universe —
-    or wipe the save in ⚙️ Settings and race the curve again.</p>
-    <div class="actions">
-      <button class="act sub" data-act="replayEnding">↻ Watch the ending again</button>
-      <button class="act big" data-act="closeModal">Remain in the new universe</button>
-    </div>`);
-}
-
-let singularityShown = false;
-function maybeShowSingularity() {
-  if (!s.singularity || singularityShown || s.singularityShown) return;
-  singularityShown = true; s.singularityShown = true;
-  if (s.speed > 25) s.speed = 25;     // the ending deserves real time
-  save();
+  const stats = {
+    founder: founder().name,
+    agiDur: fmtDur(agiH),
+    singDur: fmtDur(singH),
+    models: s.models.length + (st.openSourced || 0),
+    gpusLost: fmtNum(st.gpusLost || 0),
+    integrity: Math.round(s.integrity ?? 70),
+  };
+  // this universe is finished: erase it, and queue a different founder
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
+  try {
+    const meta = JSON.parse(localStorage.getItem(META_KEY) || '{}');
+    localStorage.setItem(META_KEY, JSON.stringify({
+      runs: (meta.runs || 0) + 1,
+      founder: s.founder === 'al' ? 'mario' : 'al',
+    }));
+  } catch (e) { /* ignore */ }
   closeModal();
-  playSingularity(() => { celebrate(); showEndingModal(); save(); });
+  playSingularity(stats);   // never returns
 }
-ACTIONS.replayEnding = () => {
-  closeModal();
-  playSingularity(() => showEndingModal());
-};
 
 // ── Settings modal ────────────────────────────────────────────────
 ACTIONS.settings = () => {
@@ -151,7 +151,6 @@ ACTIONS.settings = () => {
       <button class="act" data-act="saveNow">💾 Save now</button>
       <button class="act sub" data-act="exportSave">⬆ Export save</button>
       <button class="act sub" data-act="importSave">⬇ Import save</button>
-      ${s.singularityShown ? '<button class="act sub" data-act="replayEnding">🌌 Replay the ending</button>' : ''}
       <button class="act warn" data-act="resetGame">🗑 Hard reset</button>
     </div>
     <div id="save-io" style="margin-top:10px"></div>
@@ -190,7 +189,7 @@ ACTIONS.resetGame = () => {
 };
 ACTIONS.resetGo = () => {
   localStorage.removeItem(SAVE_KEY);
-  Object.assign(s, defaultState());
+  Object.assign(s, defaultState(metaFounder()));
   winShown = false;
   singularityShown = false;
   closeModal(); renderAll(); showIntro();
@@ -351,6 +350,7 @@ function drainSignalsSilently() {
 }
 
 setInterval(() => {
+  if (ended) return;                // the universe has moved on
   const now = performance.now();
   let dt = (now - lastT) / 1000; lastT = now;
   if (dt > 30) dt = 30;             // background-tab catch-up cap
@@ -380,7 +380,7 @@ setInterval(() => {
   if (s.phase !== lastPhase) { lastPhase = s.phase; renderAll(); }
 }, 50);
 
-setInterval(renderAll, 250);
+setInterval(() => { if (!ended) renderAll(); }, 250);
 setInterval(save, 15000);
 window.addEventListener('beforeunload', save);
 document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });

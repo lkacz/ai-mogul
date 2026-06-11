@@ -2,7 +2,7 @@
 // mutate state in response to player input. All pure JS — no DOM.
 
 import { BAL, capabilityFor, trainCompute, optimalTokens } from './balance.js';
-import { GPUS, FACILITIES, DATASETS, FUNDING, RIVAL_ASYMPTOTE } from './data.js';
+import { GPUS, FACILITIES, DATASETS, FUNDING, RIVAL_ASYMPTOTE, founderize } from './data.js';
 import { DILEMMAS, DILEMMA_BY_ID } from './dilemmas.js';
 import { RESEARCH_BY_ID } from './research.js';
 import { MILESTONES, MILESTONE_BY_ID } from './milestones.js';
@@ -11,7 +11,7 @@ import { selectors, GPU_BY_ID, DATASET_BY_ID, STAFF_BY_ID, gpuPrice } from './st
 import { clamp, uid, fmtNum } from './util.js';
 
 export function pushNews(s, txt) {
-  s.news.push({ h: s.simHours, txt });
+  s.news.push({ h: s.simHours, txt: founderize(txt, s.founder) });
   if (s.news.length > 80) s.news.splice(0, s.news.length - 80);
 }
 

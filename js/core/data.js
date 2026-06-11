@@ -148,3 +148,41 @@ export const MARIO_QUOTES = [
   'We put the datacenter in orbit. The latency is awful. The vibes are immaculate.',
   'Landauer\'s limit is the only bill I haven\'t figured out how to negotiate.',
 ];
+
+// ── Founders: each playthrough stars a different (affectionately parodied)
+// lab boss. Core text is written for Mario; founderize() re-voices it.
+export const FOUNDERS = {
+  mario: {
+    id: 'mario', name: 'Mario Damodei', first: 'Mario', emoji: '🧑‍🔬',
+    title: 'Founder, Mogul AI',
+    intro: '<b>Mario Damodei</b> just quit his job at a big AI lab. Assets: <b>$1,500</b>, a gaming PC with a used GTX 1070, and a conviction the scaling laws aren\'t done. The garage is cold. The loss curves will warm it.',
+    quotes: MARIO_QUOTES,
+    sprite: { top: '#46555f', pants: '#2c333d', hair: '#241a12', skin: '#e6b486', glasses: true, curls: true },
+  },
+  al: {
+    id: 'al', name: 'Al Saltman', first: 'Al', emoji: '🧢',
+    title: 'Founder, Mogul AI (again, somehow)',
+    intro: '<b>Al Saltman</b> just left the world\'s most famous AI lab, after a brisk weekend of corporate events nobody fully explains. Assets: <b>$1,500</b>, a gaming PC with a used GTX 1070, and absolute, unshakeable vibes. The garage is cold. He calls it "pre-warm".',
+    quotes: [
+      'AGI will be the greatest thing in history. Also possibly the last. Anyway — demo time.',
+      'compute is the currency of the future. i type it lowercase so it sounds inevitable.',
+      'We need seven trillion dollars. Not for me. For the fabs. Mostly the fabs.',
+      'The board and I are in complete alignment now. *checks phone*',
+      'Ship fast. Apologize beautifully.',
+      'My hobbies are AGI and a small fusion startup. For balance.',
+      'Scaling laws are compound interest for ideas.',
+      'Someday a model will do my job. Honestly, it can keep the meetings.',
+      'I\'m extremely bullish on humanity. Have you met humanity? Incredible team.',
+      'One more datacenter. As a treat.',
+    ],
+    sprite: { top: '#8d959e', pants: '#33415a', hair: '#7a5b3a', skin: '#e6b486', glasses: false, hoodie: true },
+  },
+};
+
+// Re-voice Mario-flavored text for the current founder (single choke point).
+export function founderize(txt, founderId) {
+  if (!founderId || founderId === 'mario') return txt;
+  const f = FOUNDERS[founderId];
+  if (!f) return txt;
+  return String(txt).replaceAll('Mario Damodei', f.name).replaceAll('Mario', f.first);
+}

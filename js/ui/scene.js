@@ -3,8 +3,10 @@
 // and lets the player poke the inhabitants.
 
 import { game } from './ui.js';
-import { MARIO_QUOTES } from '../core/data.js';
+import { MARIO_QUOTES, FOUNDERS } from '../core/data.js';
 import { fmtNum, clamp } from '../core/util.js';
+
+const founderDef = () => FOUNDERS[game.s?.founder] || FOUNDERS.mario;
 
 const W = 480, H = 200;          // internal pixel resolution
 const FLOOR_Y = 142;             // top of walkable floor band
@@ -78,12 +80,15 @@ const QUIPS = {
 };
 
 const ROLES = {
+  // 'mario' is the founder slot — its look & lines come from FOUNDERS at draw time
   mario:      { top: '#46555f', pants: '#2c333d', hair: '#241a12', skin: '#e6b486', glasses: true },
   researcher: { top: '#e8ecf2', pants: '#5a6a85', hair: '#5b4630', skin: '#e6b486' },
   engineer:   { top: '#3a6ea5', pants: '#33394a', hair: '#1e1a18', skin: '#c98e62' },
   ops:        { top: '#e0903a', pants: '#3d4250', hair: '#3c2f24', skin: '#8d5d3f' },
   sales:      { top: '#6d5a9e', pants: '#2f2a3d', hair: '#84561e', skin: '#e6b486' },
 };
+const roleStyle = (role) => role === 'mario' ? founderDef().sprite : ROLES[role];
+const roleQuips = (role) => role === 'mario' ? founderDef().quotes : QUIPS[role];
 
 // ── characters ────────────────────────────────────────────────────
 const chars = [];   // persists across tab rebuilds
@@ -147,13 +152,13 @@ function thinkChar(c, dt, t, layout) {
     c.state = 'walk';
   }
   // idle chatter
-  if (!c.speech && Math.random() < dt / 26) say(c, pick(QUIPS[c.role], Math.random()));
+  if (!c.speech && Math.random() < dt / 26) say(c, pick(roleQuips(c.role), Math.random()));
   if (c.speech && t > c.speech.until) c.speech = null;
 }
 
 // ── drawing: people ───────────────────────────────────────────────
 function drawPerson(ctx, c, t) {
-  const r = ROLES[c.role];
+  const r = roleStyle(c.role);
   const x = c.x | 0, fy = c.y | 0;       // fy = feet
   const working = c.state === 'work';
   const walking = c.state === 'walk';
@@ -177,12 +182,18 @@ function drawPerson(ctx, c, t) {
   P(ctx, x + 4, y0 + 7 + (working ? 2 : 0), 1, 5 - armA, r.top);
   // head
   P(ctx, x - 2, y0, 5, 6, r.skin);
-  // hair (Mario gets the famous curls)
-  if (c.role === 'mario') {
+  // hair: founder styles vary — Mario's famous curls, Al's hoodie
+  if (r.curls) {
     P(ctx, x - 3, y0 - 2, 7, 3, r.hair);
     P(ctx, x - 3, y0 + 1, 1, 2, r.hair);
     P(ctx, x + 3, y0 + 1, 1, 2, r.hair);
     P(ctx, x - 2, y0 - 3, 2, 1, r.hair); P(ctx, x + 1, y0 - 3, 2, 1, r.hair); // curl bumps
+  } else if (r.hoodie) {
+    P(ctx, x - 2, y0 - 1, 5, 2, r.hair);          // short hair
+    P(ctx, x - 4, y0 - 1, 1, 7, r.top);           // hood draped
+    P(ctx, x + 4, y0 - 1, 1, 7, r.top);
+    P(ctx, x - 3, y0 - 2, 7, 1, r.top);           // hood over the crown
+    P(ctx, x - 2, y0 + 9, 5, 2, '#79828f');       // kangaroo pocket
   } else {
     P(ctx, x - 2, y0 - 1, 5, 2, r.hair);
   }
@@ -635,7 +646,7 @@ function onClick(e) {
   const my = (e.clientY - r.top) / r.height * H;
   for (const c of chars) {
     if (Math.abs(mx - c.x) < 8 && my > c.y - 24 && my < c.y + 2) {
-      say(c, pick(QUIPS[c.role], Math.random()));
+      say(c, pick(roleQuips(c.role), Math.random()));
       return;
     }
   }

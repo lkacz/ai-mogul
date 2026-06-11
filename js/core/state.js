@@ -7,9 +7,10 @@ import { clamp } from './util.js';
 
 export const SAVE_KEY = 'aimogul_save_v1';
 
-export function defaultState() {
+export function defaultState(founderId = 'mario') {
   return {
     version: 1,
+    founder: founderId,   // which lab boss stars in this playthrough
     simHours: 0,
     lastReal: Date.now(),
     speed: 1,

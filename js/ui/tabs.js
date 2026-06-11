@@ -1,6 +1,6 @@
 // All tab views + action handlers.
 
-import { GPUS, FACILITIES, DATASETS, STAFF, FUNDING, MARIO_QUOTES } from '../core/data.js';
+import { GPUS, FACILITIES, DATASETS, STAFF, FUNDING, FOUNDERS, founderize } from '../core/data.js';
 import { RESEARCH, ERA_NAMES, RESEARCH_BY_ID } from '../core/research.js';
 import { MILESTONES, MAIN_QUEST, rewardText } from '../core/milestones.js';
 import { BAL, capabilityFor, trainCompute, optimalTokens, chinchillaPenalty, capTier } from '../core/balance.js';
@@ -27,8 +27,9 @@ function doAction(fn, ...args) {
 }
 
 // ════════════════════════ LAB (overview) ════════════════════════
-let quoteIdx = Math.floor(Math.random() * MARIO_QUOTES.length);
-setInterval(() => { quoteIdx = (quoteIdx + 1) % MARIO_QUOTES.length; }, 25000);
+let quoteIdx = Math.floor(Math.random() * 100);
+setInterval(() => { quoteIdx++; }, 25000);
+const founderOf = (s) => FOUNDERS[s.founder] || FOUNDERS.mario;
 
 const labTab = {
   id: 'lab', label: '🏠 Lab',
@@ -67,10 +68,10 @@ const labTab = {
       <div>
         <div class="card">
           <div class="row" style="gap:14px">
-            <div style="font-size:40px">🧑‍🔬</div>
+            <div style="font-size:40px">${founderOf(s).emoji}</div>
             <div>
-              <b>Mario Damodei</b> <span class="muted">· Founder, Mogul AI</span>
-              <div class="muted" style="font-style:italic; margin-top:3px">“${esc(MARIO_QUOTES[quoteIdx])}”</div>
+              <b>${esc(founderOf(s).name)}</b> <span class="muted">· ${esc(founderOf(s).title)}</span>
+              <div class="muted" style="font-style:italic; margin-top:3px">“${esc(founderOf(s).quotes[quoteIdx % founderOf(s).quotes.length])}”</div>
             </div>
           </div>
         </div>
@@ -451,7 +452,7 @@ ACTIONS.buyFacility = () => {
   if (r.ok) {
     const f = FACILITIES[game.s.phase];
     showModal(`<h2>${FACILITY_EMOJI[game.s.phase]} ${esc(f.name)}</h2>
-      <p>${esc(f.story)}</p>
+      <p>${esc(founderize(f.story, game.s.founder))}</p>
       <div class="actions"><button class="act big" data-act="closeModal">Let's get to work</button></div>`);
   }
 };

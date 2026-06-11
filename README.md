@@ -70,10 +70,15 @@ factory on Mercury, exactly as every serious proposal since Dyson (1960) require
 and finally the **Omega Lattice**: Kardashev Type III, black-hole batteries (the Penrose
 process, 1969), cores computing at Seth Lloyd's ultimate physical limit (~5×10⁵⁰ ops/s per kg,
 Nature 2000), drawn as a glowing grid warping into an accretion disk. Power is measured in
-**suns** now. Push the Singularity Index to 300 and watch the ending: the model compresses
-everything it knows into a single point, and the screen plays a **big-bang** — shockwaves, a
-cooling particle universe, galaxies condensing, and one small blue world with a familiar
-garage light (if you built it kindly).
+**suns** now. And at capability 300, the game ends — for good — with a **two-minute elegy
+for human civilization**: constellations of the first fire, the first named star, ships, songs,
+mercy and rockets; the model holding your garage, your breaker box, your cat as keepsakes;
+then the gathering, the crossing, a big bang, and a new cosmos where one small blue world
+grows a familiar garage light. The words remember how you played (your integrity shapes what
+the machine says as it leaves). When it's over, it stays over: **the save is erased and the
+memorial screen is permanent** — reload the page and a brand-new story begins, starring a
+different founder: **Al Saltman** (new sprite, new quotes, new intro, zero memory of the last
+universe). Finish that one and Mario comes back around.
 
 ## The lab is alive 🕹️
 
