@@ -23,6 +23,14 @@ export const game = {
 };
 
 const $ = (id) => document.getElementById(id);
+
+// ── Click-safety: never rebuild DOM under an in-flight press ──────
+// A rebuild between pointerdown and click destroys the click target and the
+// browser silently drops the event — the "why did I have to click twice?" bug.
+// While any pointer is down (plus a grace window so the click can dispatch
+// after pointerup), innerHTML rebuilds wait; update() keeps numbers live.
+let pointerHeldUntil = 0;
+const pointerHeld = () => Date.now() < pointerHeldUntil;
 export const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 export const set = (id, txt) => { const el = $(id); if (el && el.textContent !== String(txt)) el.textContent = txt; };
 export const setHtml = (id, h) => { const el = $(id); if (el) el.innerHTML = h; };
@@ -116,8 +124,12 @@ function renderHeader() {
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────
+let lastSidebarHtml = '';
 function renderSidebar() {
   const { s, sel } = game;
+  // contains the goal "Go →" button — rebuilding it 4×/s under a press
+  // would eat the click (see pointerHeld above)
+  if (pointerHeld()) return;
   const goal = currentGoal(s);
   let goalHtml = '';
   if (goal) {
@@ -193,7 +205,10 @@ function renderSidebar() {
     ${s.buffs.length ? `<div class="side-section"><h4>Active effects</h4>${s.buffs.map(b =>
       `<span class="buff-chip">${esc(b.label)} · ${Math.max(0, Math.ceil(b.untilH - s.simHours))}h</span>`).join('')}</div>` : ''}
   `;
-  $('sidebar').innerHTML = html;
+  if (html !== lastSidebarHtml) {
+    lastSidebarHtml = html;
+    $('sidebar').innerHTML = html;
+  }
 }
 
 // ── Ticker ────────────────────────────────────────────────────────
@@ -238,6 +253,7 @@ function renderTabsNav() {
   const pulseTab = goal && !s.milestones.firstDollar ? GOAL_TAB[goal.id] : null;
   const sig = [game.activeTab, s.phase, badges.res, badges.co, badges.hw, pulseTab].join(':');
   if (nav.dataset.sig === sig) return;
+  if (pointerHeld()) return;   // a badge popping in mid-press would eat the click
   nav.dataset.sig = sig;
   nav.innerHTML = TABS.map(t => {
     const n = badges[t.id] || 0;
@@ -251,7 +267,10 @@ function renderActiveTab() {
   if (!tab) return;
   const sig = tab.sig ? tab.sig(game.s, game.sel) : '';
   const container = $('tab-content');
-  if (game.builtTab !== tab.id || game.builtSig !== sig) {
+  const stale = game.builtTab !== tab.id || game.builtSig !== sig;
+  // same-tab rebuilds wait while a press is in flight (tab switches never do —
+  // switchTab nulls builtTab after its click has already been delivered)
+  if (stale && !(game.builtTab === tab.id && pointerHeld())) {
     container.innerHTML = tab.build(game.s, game.sel);
     game.builtTab = tab.id;
     game.builtSig = sig;
@@ -279,8 +298,26 @@ export function switchTab(id) {
 // ── Event dispatch ────────────────────────────────────────────────
 export function initDispatch() {
   requestAnimationFrame(moneyRoll);
+  // pointer-held tracking for the rebuild guard above; capture phase so no
+  // stopPropagation can hide a press. The 30 s ceiling and the 150 ms grace
+  // after release keep a missed pointerup from freezing rebuilds forever.
+  document.addEventListener('pointerdown', () => {
+    pointerHeldUntil = Date.now() + 30000;
+  }, true);
+  for (const ev of ['pointerup', 'pointercancel']) {
+    document.addEventListener(ev, () => {
+      pointerHeldUntil = Date.now() + 150;
+    }, true);
+  }
+  window.addEventListener('blur', () => { pointerHeldUntil = 0; });
   document.addEventListener('click', (e) => {
-    if (game.swallowClick) { game.swallowClick = false; return; }  // a hold just ended
+    pointerHeldUntil = 0;   // click delivered — rebuilds are safe again
+    if (game.swallowClick) {
+      // a hold just ended — land the rebuilds the guard deferred
+      game.swallowClick = false;
+      renderAll();
+      return;
+    }
     const el = e.target.closest('[data-act]');
     if (!el || el.disabled) return;
     const act = el.dataset.act;
@@ -290,8 +327,8 @@ export function initDispatch() {
 
   // Press-and-hold auto-repeat on buy/sell/hire buttons, with acceleration:
   // the multiplier doubles every 0.7 s (up to ×256), so a held +1k button
-  // reaches millions without a million clicks. We capture act/arg up front —
-  // the button element itself gets rebuilt after every purchase.
+  // reaches millions without a million clicks. act/arg are captured up front
+  // so the repeat survives even if the button is ever replaced.
   const HOLD_ACTS = new Set(['buyGpu', 'sellGpu', 'hire', 'fire']);
   let holdTo = 0, holdIv = 0;
   const stopHold = () => {

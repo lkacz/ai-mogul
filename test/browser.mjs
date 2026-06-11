@@ -116,6 +116,25 @@ await check('dataset purchase → Dedup Frenzy plays to completion', async () =>
   await page.click('[data-act=mgClose]');
 });
 
+await check('rebuild guard: DOM stays put under a held pointer', async () => {
+  await page.click('[data-act=tab][data-arg=co]');
+  await page.waitForSelector('#tab-content .card');
+  await page.evaluate(() => {
+    document.querySelector('#tab-content .card').dataset.sentinel = '1';
+    window.AIMOGUL.s.staff.engineer += 1;   // dirties the Company tab sig
+  });
+  const box = await page.locator('#tab-content h3').first().boundingBox();
+  await page.mouse.move(box.x + 2, box.y + 2);
+  await page.mouse.down();
+  await page.waitForTimeout(700);           // several render ticks pass
+  const held = await page.evaluate(() => !!document.querySelector('[data-sentinel]'));
+  await page.mouse.up();                    // release fires a click → rebuild resumes
+  if (!held) throw new Error('tab rebuilt while the pointer was down');
+  await page.waitForTimeout(700);
+  const after = await page.evaluate(() => !!document.querySelector('[data-sentinel]'));
+  if (after) throw new Error('tab never rebuilt after release');
+});
+
 await check('gig button works + floating gain number', async () => {
   await page.click('[data-act=tab][data-arg=lab]');
   await page.click('#gig-btn');

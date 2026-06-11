@@ -35,7 +35,9 @@ const founderOf = (s) => FOUNDERS[s.founder] || FOUNDERS.mario;
 
 const labTab = {
   id: 'lab', label: '🏠 Lab',
-  sig: (s, sel) => [s.phase, s.runs.length, s.models.length, s.news.length, sel.deployed?.id, quoteIdx].join('|'),
+  // news + quotes update in place (below) — putting them in the sig made the
+  // whole tab (scene canvas included) rebuild constantly, eating clicks
+  sig: (s, sel) => [s.phase, s.runs.length, s.models.length, sel.deployed?.id].join('|'),
   build(s, sel) {
     const runsHtml = s.runs.length ? s.runs.map(r => {
       return `<div class="run-card">
@@ -73,7 +75,7 @@ const labTab = {
             <div style="font-size:40px">${founderOf(s).emoji}</div>
             <div>
               <b>${esc(founderOf(s).name)}</b> <span class="muted">· ${esc(founderOf(s).title)}</span>
-              <div class="muted" style="font-style:italic; margin-top:3px">“${esc(founderOf(s).quotes[quoteIdx % founderOf(s).quotes.length])}”</div>
+              <div class="muted" style="font-style:italic; margin-top:3px" id="founder-quote">“${esc(founderOf(s).quotes[quoteIdx % founderOf(s).quotes.length])}”</div>
             </div>
           </div>
         </div>
@@ -120,6 +122,17 @@ const labTab = {
     initScene(document.getElementById('scene-canvas'));
   },
   update(s, sel) {
+    set('founder-quote', '“' + founderOf(s).quotes[quoteIdx % founderOf(s).quotes.length] + '”');
+    // event log refreshes in place; keyed on the last entry since news is capped
+    const log = document.getElementById('lab-log');
+    if (log) {
+      const last = s.news[s.news.length - 1];
+      const key = s.news.length + ':' + (last ? last.h + last.txt : '');
+      if (log.dataset.k !== key) {
+        log.dataset.k = key;
+        log.innerHTML = s.news.slice(-14).map(n => `<div><span class="faint">[${fmtDate(n.h)}]</span> ${esc(n.txt)}</div>`).join('');
+      }
+    }
     // gig button cooldown + live streak
     const btn = document.getElementById('gig-btn');
     if (btn) {
@@ -387,7 +400,7 @@ const hwTab = {
         <div class="muted small">${esc(g.desc)}</div>
         <div class="faint">⚡ ${fmtNum(g.tflops)} TFLOPS · 🔌 ${g.watts} W · 💾 ${g.vram} GB</div>
         <div class="row" style="justify-content:space-between; margin-top:4px">
-          <span class="stat-v">Owned: ${fmtNum(owned)}</span>
+          <span class="stat-v" id="own_${g.id}">Owned: ${fmtNum(owned)}</span>
           ${locked ? `<span class="faint">🔒 ${lockMsg}</span>` : `<span class="row" style="gap:4px; flex-wrap:wrap; justify-content:flex-end">
             <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 1 })}' title="Hold to auto-buy — it accelerates">+1</button>
             <button class="act" data-act="buyGpu" data-arg='${JSON.stringify({ id: g.id, n: 10 })}' title="Hold to auto-buy — it accelerates">+10</button>
@@ -416,6 +429,9 @@ const hwTab = {
       <div class="grid3">${gpuCards}${teaser}</div></div>`;
   },
   update(s, sel) {
+    // owned counts tick up live during a press-and-hold buy (rebuilds wait
+    // until the pointer lifts, so the build-time numbers go stale)
+    for (const g of GPUS) set('own_' + g.id, 'Owned: ' + fmtNum(s.gpus[g.id] || 0));
     set('hw-power', `${fmtPower(sel.powerUsed)} / ${fmtPower(sel.powerCap)}`);
     setBar('hw-powerbar', sel.powerUsed / sel.powerCap, sel.powerUsed / sel.powerCap > 0.92);
     set('hw-slots', `${fmtNum(sel.gpuCount)} / ${fmtNum(sel.fac.slots)}`);
@@ -605,7 +621,10 @@ ACTIONS.hireResearcher = () => doAction(E.hire, 'researcher', 1);
 // ════════════════════════ COMPANY ════════════════════════
 const coTab = {
   id: 'co', label: '🏛️ Company',
-  sig: (s, sel) => [s.phase, JSON.stringify(s.staff), s.dataTier, s.funding.length, s.stats.papers, s.research.length, Math.floor(s.simHours / 24)].join('|'),
+  // affordability, funding readiness and the traction countdown refresh in
+  // place (update below) — no time-based term, so the tab never rebuilds
+  // under the player's pointer
+  sig: (s, sel) => [s.phase, JSON.stringify(s.staff), s.dataTier, s.funding.length, s.stats.papers, s.research.length].join('|'),
   build(s, sel) {
     const staffRows = STAFF.map(st => `
       <tr>
@@ -634,7 +653,7 @@ const coTab = {
         </div>
         <div class="muted small">${esc(d.desc)}</div>
         <div class="faint">${fmtNum(d.tokens)} tokens · quality ×${d.quality}</div>
-        ${isNext && !lockedRes ? `<button class="act" data-act="buyData" data-arg="${d.id}" ${s.money < d.cost ? 'disabled' : ''}>Acquire</button>` : ''}
+        ${isNext && !lockedRes ? `<button class="act" id="buydata-btn" data-act="buyData" data-arg="${d.id}" ${s.money < d.cost ? 'disabled' : ''}>Acquire</button>` : ''}
         ${lockedRes && !owned ? `<div class="faint">🔒 needs research: ${esc(RESEARCH_BY_ID[d.research]?.name || d.research)}</div>` : ''}
       </div>`;
     }).join('') + (hiddenData ? `<div class="res-card locked">
@@ -654,9 +673,9 @@ const coTab = {
           <span class="gold num">${fmtMoney(f.amount)}</span>
         </div>
         <div class="muted small">${esc(f.desc)}</div>
-        ${!taken ? `<div class="faint">needs capability ${f.reqCap} ${capOk ? '✓' : '✗'} · reputation ${f.reqRep} ${repOk ? '✓' : '✗'}
+        ${!taken ? `<div class="faint" id="fundreq_${f.id}">needs capability ${f.reqCap} ${capOk ? '✓' : '✗'} · reputation ${f.reqRep} ${repOk ? '✓' : '✗'}
           ${prevOk && waitH > 0 ? `· ⏳ traction review: ${fmtDur(waitH)}` : ''}</div>
-        <button class="act gold" data-act="fund" data-arg="${f.id}" ${ready ? '' : 'disabled'}>Close the round</button>` : ''}
+        <button class="act gold" id="fundbtn_${f.id}" data-act="fund" data-arg="${f.id}" ${ready ? '' : 'disabled'}>Close the round</button>` : ''}
       </div>`;
     }).join('');
 
@@ -697,6 +716,24 @@ const coTab = {
       const cost = E.paperCost(s);
       pb.textContent = `📄 Publish a paper — ${fmtNum(cost)} RP`;
       pb.disabled = s.rp < cost;
+    }
+    // keep what build() froze honest without a rebuild: dataset affordability…
+    const nd = DATASETS[s.dataTier + 1];
+    if (nd) {
+      const db = document.getElementById('buydata-btn');
+      if (db) db.disabled = s.money < nd.cost;
+    }
+    // …and funding readiness + the traction-review countdown
+    for (const [i, f] of FUNDING.entries()) {
+      const req = document.getElementById('fundreq_' + f.id);
+      const btn = document.getElementById('fundbtn_' + f.id);
+      if (!req || !btn) continue;
+      const prevOk = i === 0 || s.funding.includes(FUNDING[i - 1].id);
+      const waitH = E.fundingWaitH(s, f);
+      const capOk = s.bestCap >= f.reqCap, repOk = s.rep >= f.reqRep;
+      req.textContent = `needs capability ${f.reqCap} ${capOk ? '✓' : '✗'} · reputation ${f.reqRep} ${repOk ? '✓' : '✗'}` +
+        (prevOk && waitH > 0 ? ` · ⏳ traction review: ${fmtDur(waitH)}` : '');
+      btn.disabled = !(prevOk && capOk && repOk && waitH <= 0);
     }
   },
 };
