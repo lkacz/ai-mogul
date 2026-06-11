@@ -1,9 +1,11 @@
 // UI core: render loop glue, header/sidebar/ticker, modals, toasts, dispatch.
 
 import { selectors } from '../core/state.js';
-import { FACILITIES } from '../core/data.js';
+import { FACILITIES, FUNDING } from '../core/data.js';
+import { RESEARCH } from '../core/research.js';
 import { capTier, BAL } from '../core/balance.js';
-import { currentGoal, rewardText, MILESTONE_BY_ID } from '../core/milestones.js';
+import { currentGoal, rewardText, MILESTONE_BY_ID, GOAL_TAB } from '../core/milestones.js';
+import { fundingWaitH } from '../core/engine.js';
 import { fmtMoney, fmtNum, fmtFlops, fmtPower, fmtDate, fmtPct, clamp } from '../core/util.js';
 import { TABS, ACTIONS, INPUTS } from './tabs.js';
 
@@ -41,6 +43,30 @@ export function toast(msg, cls = '') {
   setTimeout(() => el.remove(), 3900);
 }
 
+// ── Floating gain numbers (juice) ─────────────────────────────────
+export function spawnFloat(text, anchorEl, cls = '') {
+  let root = $('float-root');
+  if (!root) {
+    root = document.createElement('div');
+    root.id = 'float-root';
+    document.body.appendChild(root);
+  }
+  const el = document.createElement('span');
+  el.className = 'float-num ' + cls;
+  el.textContent = text;
+  let x = innerWidth / 2, y = innerHeight / 2;
+  if (anchorEl && anchorEl.getBoundingClientRect) {
+    const r = anchorEl.getBoundingClientRect();
+    x = r.left + r.width * (0.25 + Math.random() * 0.5);
+    y = r.top;
+  }
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  root.appendChild(el);
+  while (root.children.length > 12) root.firstChild.remove();
+  setTimeout(() => el.remove(), 1300);
+}
+
 // ── Modals ────────────────────────────────────────────────────────
 export function showModal(html) {
   const root = $('modal-root');
@@ -50,12 +76,29 @@ export function showModal(html) {
 export function closeModal() { $('modal-root').classList.add('hidden'); }
 
 // ── Header ────────────────────────────────────────────────────────
+// Money display rolls toward the real value at 60 fps — number-go-up you can feel.
+let dispMoney = null;
+function moneyRoll() {
+  const s = game.s;
+  if (s) {
+    if (dispMoney === null) dispMoney = s.money;
+    const diff = s.money - dispMoney;
+    dispMoney = Math.abs(diff) < Math.max(0.5, Math.abs(s.money) * 2e-4)
+      ? s.money : dispMoney + diff * 0.12;
+    const el = $('hdr-money');
+    if (el) {
+      const txt = fmtMoney(dispMoney);
+      if (el.textContent !== txt) el.textContent = txt;
+      el.style.color = s.money < 0 ? 'var(--red)' : 'var(--gold)';
+    }
+  }
+  requestAnimationFrame(moneyRoll);
+}
+
 function renderHeader() {
   const { s, sel } = game;
   set('hdr-phase', sel.fac.name);
   set('hdr-date', fmtDate(s.simHours));
-  set('hdr-money', fmtMoney(s.money));
-  $('hdr-money').style.color = s.money < 0 ? 'var(--red)' : 'var(--gold)';
   const sc = $('speed-controls');
   const want = 'p' + (s.paused ? 1 : 0) + 's' + s.speed;
   if (sc.dataset.sig !== want) {
@@ -80,12 +123,17 @@ function renderSidebar() {
       progHtml = `<div class="bar thin"><i style="width:${clamp(cur / target, 0, 1) * 100}%"></i></div>
         <div class="bar-label"><span>${fmtNum(Math.min(cur, target))}</span><span>${fmtNum(target)}</span></div>`;
     }
+    const goalTab = GOAL_TAB[goal.id];
+    const tabDef = goalTab && TABS.find(t => t.id === goalTab);
+    const goBtn = tabDef && game.activeTab !== goalTab
+      ? `<button class="act goal-go" data-act="tab" data-arg="${goalTab}">Go: ${tabDef.label} →</button>` : '';
     goalHtml = `<div id="goal-card">
       <div class="faint">🎯 CURRENT GOAL</div>
       <div class="gname">${esc(goal.name)}</div>
       <div class="gdesc">${esc(goal.desc)}</div>
       ${progHtml}
       ${goal.reward ? `<div class="greward">Reward: ${rewardText(goal.reward)}</div>` : ''}
+      ${goBtn}
     </div>`;
   } else {
     goalHtml = `<div id="goal-card"><div class="gname">🌌 Singularity reached</div>
@@ -156,14 +204,38 @@ function renderTicker() {
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────
+// Badges: how many things await you behind each tab (buyable research,
+// fundable rounds, an affordable facility upgrade). Progress made visible.
+function tabBadges(s, sel) {
+  const res = RESEARCH.filter(r =>
+    !s.research.includes(r.id) && r.era <= s.phase &&
+    (!r.deps || r.deps.every(d => s.research.includes(d))) &&
+    (!r.reqCap || s.bestCap >= r.reqCap) &&
+    s.rp >= r.rp && (!r.money || s.money >= r.money)).length;
+  const co = FUNDING.filter((f, i) =>
+    !s.funding.includes(f.id) &&
+    (i === 0 || s.funding.includes(FUNDING[i - 1].id)) &&
+    s.bestCap >= f.reqCap && s.rep >= f.reqRep && fundingWaitH(s, f) <= 0).length;
+  const next = FACILITIES[s.phase + 1];
+  const hw = next && s.money >= next.cost ? 1 : 0;
+  return { res, co, hw };
+}
+
 function renderTabsNav() {
   const nav = $('tabs');
-  const sig = game.activeTab + ':' + game.s.phase;
+  const { s, sel } = game;
+  const badges = tabBadges(s, sel);
+  // pulse the goal's tab while onboarding (until the first dollar is earned)
+  const goal = currentGoal(s);
+  const pulseTab = goal && !s.milestones.firstDollar ? GOAL_TAB[goal.id] : null;
+  const sig = [game.activeTab, s.phase, badges.res, badges.co, badges.hw, pulseTab].join(':');
   if (nav.dataset.sig === sig) return;
   nav.dataset.sig = sig;
-  nav.innerHTML = TABS.map(t =>
-    `<button class="tab-btn ${game.activeTab === t.id ? 'on' : ''}" data-act="tab" data-arg="${t.id}">${t.label}</button>`
-  ).join('');
+  nav.innerHTML = TABS.map(t => {
+    const n = badges[t.id] || 0;
+    const pulse = t.id === pulseTab && game.activeTab !== t.id ? ' pulse' : '';
+    return `<button class="tab-btn ${game.activeTab === t.id ? 'on' : ''}${pulse}" data-act="tab" data-arg="${t.id}">${t.label}${n ? `<span class="tab-badge">${n}</span>` : ''}</button>`;
+  }).join('');
 }
 
 function renderActiveTab() {
@@ -198,6 +270,7 @@ export function switchTab(id) {
 
 // ── Event dispatch ────────────────────────────────────────────────
 export function initDispatch() {
+  requestAnimationFrame(moneyRoll);
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-act]');
     if (!el || el.disabled) return;

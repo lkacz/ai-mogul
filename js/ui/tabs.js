@@ -7,7 +7,7 @@ import { BAL, capabilityFor, trainCompute, optimalTokens, chinchillaPenalty, cap
 import { GPU_BY_ID, gpuPrice } from '../core/state.js';
 import * as E from '../core/engine.js';
 import { fmtMoney, fmtNum, fmtFlops, fmtFlop, fmtPower, fmtDur, fmtPct, fmtDate, clamp, log10 } from '../core/util.js';
-import { game, toast, showModal, closeModal, set, setBar, bar, esc, renderAll, switchTab } from './ui.js';
+import { game, toast, showModal, closeModal, set, setBar, bar, esc, renderAll, switchTab, spawnFloat } from './ui.js';
 import { initScene } from './scene.js';
 import { mgHandlers, offerLrGame, offerDedup, playRlhf } from './minigames.js';
 
@@ -115,12 +115,15 @@ const labTab = {
     initScene(document.getElementById('scene-canvas'));
   },
   update(s, sel) {
-    // gig button cooldown
+    // gig button cooldown + live streak
     const btn = document.getElementById('gig-btn');
     if (btn) {
       const left = Math.ceil((game.gigReadyAt - Date.now()) / 1000);
       btn.disabled = left > 0;
-      btn.textContent = left > 0 ? `💼 Gig in ${left}s…` : '💼 Do a fine-tuning gig';
+      const hot = gigStreak >= 2 && Date.now() <= gigStreakUntil;
+      btn.textContent = left > 0
+        ? `💼 Gig in ${left}s…${hot ? ` 🔥×${gigStreak}` : ''}`
+        : hot ? `💼 Keep the streak! 🔥×${gigStreak}` : '💼 Do a fine-tuning gig';
     }
     for (const r of s.runs) {
       const frac = r.physDone / r.physNeed;
@@ -141,10 +144,22 @@ const labTab = {
   },
 };
 
+// Hot streak: chain gigs without letting the window lapse for up to ×2 pay.
+// Pure UI-layer bonus, capped — the idle balance is untouched.
+let gigStreak = 0, gigStreakUntil = 0;
 ACTIONS.gig = () => {
-  if (Date.now() < game.gigReadyAt) return;
-  game.gigReadyAt = Date.now() + BAL.GIG_COOLDOWN_S * 1000;
-  doAction(E.doGig);
+  const now = Date.now();
+  if (now < game.gigReadyAt) return;
+  gigStreak = now <= gigStreakUntil ? gigStreak + 1 : 1;
+  gigStreakUntil = now + (BAL.GIG_COOLDOWN_S + 5) * 1000;
+  game.gigReadyAt = now + BAL.GIG_COOLDOWN_S * 1000;
+  const mult = Math.min(2, 1 + (gigStreak - 1) * 0.125);
+  const s = game.s;
+  s.stats.bestStreak = Math.max(s.stats.bestStreak || 0, gigStreak);
+  const before = s.money;
+  doAction(E.doGig, mult);
+  spawnFloat(`+${fmtMoney(s.money - before)}${gigStreak >= 2 ? ` 🔥×${gigStreak}` : ''}`,
+    document.getElementById('gig-btn'), gigStreak >= 8 ? 'gold big' : 'gold');
 };
 INPUTS.alloc = (val, el) => {
   E.setAlloc(game.s, el.dataset.key, (+val) / 100);
@@ -600,7 +615,11 @@ ACTIONS.buyData = (id) => {
     offerDedup(id, d.name);     // Dedup Frenzy: clean the new corpus
   }
 };
-ACTIONS.fund = (id) => doAction(E.takeFunding, id);
+ACTIONS.fund = (id, el) => {
+  const before = game.s.money;
+  const r = doAction(E.takeFunding, id);
+  if (r.ok) spawnFloat('+' + fmtMoney(game.s.money - before), el, 'gold big');
+};
 ACTIONS.paper = () => doAction(E.publishPaper);
 
 // ════════════════════════ GOALS ════════════════════════

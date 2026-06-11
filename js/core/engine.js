@@ -284,12 +284,13 @@ export function openSourceModel(s, modelId) {
   return ok(`Open-sourced ${m.name}.`);
 }
 
-export function doGig(s) {
+// mult: hot-streak bonus from the UI (capped ×2 there) — active play pays a bit more
+export function doGig(s, mult = 1) {
   const sel = selectors(s);
-  const pay = (BAL.GIG_BASE + s.bestCap * s.bestCap * BAL.GIG_CAP_COEF) * sel.fx.gigMult;
+  const pay = (BAL.GIG_BASE + s.bestCap * s.bestCap * BAL.GIG_CAP_COEF) * sel.fx.gigMult * mult;
   s.money += pay;
   s.stats.gigRevenue += pay;
-  return ok(`Fine-tuning gig delivered: +$${pay.toFixed(0)}.`);
+  return ok(`Fine-tuning gig delivered: +$${pay.toFixed(0)}.${mult > 1 ? ` 🔥 streak ×${mult.toFixed(1)}` : ''}`);
 }
 
 export function publishPaper(s) {

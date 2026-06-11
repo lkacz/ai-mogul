@@ -50,10 +50,12 @@ await check('dismiss intro', async () => {
   await page.click('#modal-root [data-act=closeModal]');
 });
 
-await check('sidebar shows AGI index + goal', async () => {
+await check('sidebar shows AGI index + goal with Go button', async () => {
   const t = await page.textContent('#sidebar');
   if (!t.includes('AGI Index')) throw new Error('no AGI index');
   if (!t.includes('CURRENT GOAL')) throw new Error('no goal card');
+  await page.waitForSelector('#goal-card .goal-go', { timeout: 3000 });
+  await page.waitForSelector('.tab-btn.pulse', { timeout: 3000 });   // onboarding pulse
 });
 
 await check('speed up to 25×', async () => {
@@ -93,10 +95,16 @@ await check('dataset purchase → Dedup Frenzy plays to completion', async () =>
   await page.click('[data-act=mgClose]');
 });
 
-await check('gig button works', async () => {
+await check('gig button works + floating gain number', async () => {
   await page.click('[data-act=tab][data-arg=lab]');
   await page.click('#gig-btn');
   await page.waitForSelector('.toast', { timeout: 3000 });
+  await page.waitForSelector('.float-num', { timeout: 3000 });
+});
+
+await check('tab badge appears when research is affordable', async () => {
+  await page.evaluate(() => { window.AIMOGUL.s.rp = 500; });
+  await page.waitForSelector('.tab-badge', { timeout: 3000 });
 });
 
 await check('hardware tab + buy GPU', async () => {

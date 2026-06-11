@@ -93,6 +93,15 @@ All skippable, all rate-limited, all rewards capped so the idle balance holds. T
 drops real, checkable facts about scaling laws, MFU, PUE — and, late game, photonics, qubits,
 the Landauer limit, fusion ignition and orbital datacenters.
 
+## It feels alive from minute one ✨
+
+- The goal card has a **Go →** button and the right tab pulses while you're learning the ropes.
+- Tab **badges** count what's waiting for you: buyable research, fundable rounds, an affordable facility.
+- Gigs build a **🔥 hot streak** — chain them without lapsing for up to ×2 pay (and an achievement at ×10).
+- Money **rolls** at 60 fps; gains float up off the buttons; funding rounds rain big gold numbers.
+- Every new-best model throws confetti in the lab; crossing a **capability tier**
+  ("Coherent sentences" → "GPT-2-era" → … → "The Singularity") gets a purple tier-up banner.
+
 ## How to play
 
 - **Lab** — watch your lab live; allocate compute between training, inference (revenue) and research; do gigs early.

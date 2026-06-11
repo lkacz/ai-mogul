@@ -2,7 +2,7 @@
 
 import { defaultState, serialize, deserialize, SAVE_KEY } from './core/state.js';
 import * as E from './core/engine.js';
-import { BAL } from './core/balance.js';
+import { BAL, capTier } from './core/balance.js';
 import { MILESTONE_BY_ID, rewardText } from './core/milestones.js';
 import { fmtMoney, fmtNum, fmtDur, fmtDate, fmtFlop } from './core/util.js';
 import { game, renderAll, initDispatch, toast, showModal, closeModal } from './ui/ui.js';
@@ -191,6 +191,26 @@ function pumpIncidents() {
   offerNodeHunt(inc);
 }
 
+// ── Capability celebrations: every new best sparkles, tier-ups bang ──
+let lastBestCap = s.bestCap;
+let lastTier = capTier(s.bestCap);
+function pumpCelebrations() {
+  if (s.bestCap < lastBestCap) {           // reset / imported save — resync quietly
+    lastBestCap = s.bestCap; lastTier = capTier(s.bestCap);
+    return;
+  }
+  if (s.bestCap <= lastBestCap + 0.05) return;
+  const tier = capTier(s.bestCap);
+  if (tier !== lastTier) {
+    lastTier = tier;
+    toast(`⬆ <b>TIER UP — ${tier}</b><br><span class="small">best model: capability ${s.bestCap.toFixed(1)}</span>`, 'tier');
+    celebrate(60);
+  } else {
+    celebrate(14);                          // small burst for every new best model
+  }
+  lastBestCap = s.bestCap;
+}
+
 // ── Milestone toasts ──────────────────────────────────────────────
 function pumpMilestoneToasts() {
   if (!s.lastMilestone) return;
@@ -221,6 +241,7 @@ setInterval(() => {
     }
   }
   pumpMilestoneToasts();
+  pumpCelebrations();
   pumpIncidents();
   maybeShowWin();
   maybeShowSingularity();

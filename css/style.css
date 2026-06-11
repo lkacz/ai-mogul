@@ -215,3 +215,39 @@ table.tbl td { padding: 6px 8px; border-bottom: 1px solid #1d2331; }
   position: fixed; inset: 0; width: 100vw; height: 100vh;
   z-index: 100; background: #000; cursor: pointer; opacity: 0;
 }
+
+/* ── Engagement juice ───────────────────── */
+#float-root { position: fixed; inset: 0; pointer-events: none; z-index: 70; }
+.float-num {
+  position: absolute; transform: translate(-50%, 0);
+  font-family: 'Cascadia Code', 'Consolas', monospace; font-weight: 700; font-size: 14px;
+  color: var(--accent); text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  animation: floatup 1.25s ease-out forwards; white-space: nowrap;
+}
+.float-num.gold { color: var(--gold); }
+.float-num.big { font-size: 19px; }
+@keyframes floatup {
+  0% { opacity: 0; transform: translate(-50%, 6px) scale(.8); }
+  12% { opacity: 1; transform: translate(-50%, -4px) scale(1.05); }
+  100% { opacity: 0; transform: translate(-50%, -52px) scale(1); }
+}
+
+.act:active:not(:disabled) { transform: scale(.94); }
+.act { transition: transform .07s; }
+
+.tab-badge {
+  display: inline-block; margin-left: 7px; padding: 0 6px;
+  background: var(--accent); color: #07271b; border-radius: 9px;
+  font-size: 10px; font-weight: 800; line-height: 15px; vertical-align: 1px;
+}
+.tab-btn.pulse { animation: tabpulse 1.5s ease-in-out infinite; border-radius: 8px 8px 0 0; }
+@keyframes tabpulse {
+  0%, 100% { box-shadow: inset 0 -2px 0 0 rgba(52,211,153,0); color: var(--dim); }
+  50% { box-shadow: inset 0 -2px 0 0 rgba(52,211,153,.9), 0 0 14px 1px rgba(52,211,153,.25); color: var(--accent); }
+}
+
+.goal-go { margin-top: 9px; width: 100%; font-weight: 600; }
+.toast.tier {
+  border-color: var(--purple); background: #1a1430; color: #e0d4fe;
+  box-shadow: 0 0 18px rgba(167,139,250,.35);
+}

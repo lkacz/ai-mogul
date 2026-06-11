@@ -52,6 +52,7 @@ export function defaultState() {
       flops: 0, tokens: 0, papers: 0, openSourced: 0,
       peakMoney: BAL.START_MONEY, elecSpent: 0,
       lrBest: 0, dedupBest: 0, nodesFixed: 0, minigames: 0, rlhfRated: 0,
+      bestStreak: 0,
     },
   };
 }

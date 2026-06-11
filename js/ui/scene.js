@@ -429,8 +429,8 @@ const SCENES = [
 ];
 
 // ── confetti ──────────────────────────────────────────────────────
-export function celebrate() {
-  for (let i = 0; i < 50; i++) {
+export function celebrate(n = 50) {
+  for (let i = 0; i < n; i++) {
     confetti.push({
       x: Math.random() * W, y: -6 - Math.random() * 30,
       vx: (Math.random() - 0.5) * 14, vy: 18 + Math.random() * 26,
@@ -438,7 +438,7 @@ export function celebrate() {
       life: 3 + Math.random() * 2,
     });
   }
-  for (const c of chars) if (Math.random() < 0.6) say(c, '🎉', 2.2);
+  for (const c of chars) if (Math.random() < Math.min(0.6, n / 80)) say(c, '🎉', 2.2);
 }
 
 // ── main loop ─────────────────────────────────────────────────────

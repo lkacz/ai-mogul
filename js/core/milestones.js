@@ -217,6 +217,11 @@ export const MILESTONES = [
     desc: 'GPT-4-scale compute, cumulatively.',
     reward: { rp: 1000 },
     check: (s) => s.stats.flops >= 1e24 },
+  { id: 'streak10', name: 'Hustle streak ×10',
+    desc: 'Chain 10 fine-tuning gigs without letting the streak drop.',
+    reward: { money: 500 },
+    check: (s) => (s.stats.bestStreak || 0) >= 10,
+    news: 'Mario delivers ten fine-tunes back to back. The clients form a queue. The GPU files a complaint.' },
   { id: 'arcadeLr', name: 'Ride the edge of stability',
     desc: 'Score 80%+ in the Learning-Rate Rider (offered when launching a frontier run).',
     reward: { rp: 25 },
@@ -249,6 +254,17 @@ export const MILESTONES = [
 
 export const MAIN_QUEST = MILESTONES.filter(m => m.main);
 export const MILESTONE_BY_ID = Object.fromEntries(MILESTONES.map(m => [m.id, m]));
+
+// Which tab moves each main-quest goal forward (UI "Go →" button + tab pulse).
+export const GOAL_TAB = {
+  firstRun: 'train', firstModel: 'lab', firstDeploy: 'models', firstDollar: 'lab',
+  gpu4: 'hw', cap15: 'train', seed: 'co', office: 'hw', b1: 'train', cap25: 'train',
+  seriesA: 'co', colo: 'hw', b70: 'train', cap40: 'train', seriesB: 'co', dc: 'hw',
+  t1: 'train', cap55: 'train', seriesC: 'co', cap70: 'train', sovereign: 'co',
+  factory: 'hw', m1gpu: 'hw', cap88: 'train', agi: 'train', beyond: 'res',
+  photonicFleet: 'hw', cap125: 'train', orbital: 'hw', quantumPod: 'hw',
+  cap160: 'train', singularity: 'train',
+};
 
 export function currentGoal(s) {
   return MAIN_QUEST.find(m => !s.milestones[m.id]) || null;
