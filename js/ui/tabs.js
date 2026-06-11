@@ -188,7 +188,7 @@ function trainEstimates(s, sel) {
 
 const trainTab = {
   id: 'train', label: '🚂 Training',
-  sig: (s, sel) => [s.phase, s.runs.length, sel.maxRuns, s.dataTier, Math.round(log10(sel.maxParams) * 10), s.research.length, s.autoRetrain].join('|'),
+  sig: (s, sel) => [s.phase, s.runs.length, sel.maxRuns, s.dataTier, Math.round(log10(sel.maxParams) * 10), s.research.length].join('|'),
   build(s, sel) {
     if (trainUI.logN === null) {
       const sug = E.suggestRun(s);
@@ -251,11 +251,7 @@ const trainTab = {
         <div class="card">
           <h3>Active runs (${s.runs.length}/${sel.maxRuns})</h3>
           ${runsHtml || '<div class="muted">Idle clusters earn nothing. Start a run.</div>'}
-          ${sel.fx.unlocks.has('autoRetrain') ? `
-            <label class="chk" style="margin-top:8px">
-              <input type="checkbox" ${s.autoRetrain ? 'checked' : ''} data-input="autoRetrain">
-              🔁 AutoML: respawn completed runs automatically
-            </label>` : ''}
+          
           <label class="chk" style="margin-top:6px">
             <input type="checkbox" ${s.autoDeploy ? 'checked' : ''} data-input="autoDeploy">
             ⤴ Auto-deploy new best models
@@ -321,7 +317,6 @@ INPUTS.trAuto = (v, el) => {
   if (wrap) wrap.style.display = el.checked ? 'none' : '';
   trainTab.update(game.s, game.sel);
 };
-INPUTS.autoRetrain = (v, el) => { game.s.autoRetrain = el.checked; };
 INPUTS.autoDeploy = (v, el) => { game.s.autoDeploy = el.checked; };
 let lrOfferCooldown = 0;
 ACTIONS.startRun = () => {
@@ -531,7 +526,6 @@ const resTab = {
       if (fx.unlock === 'px1') parts.push('unlocks PX-1 photonic chip');
       if (fx.unlock === 'qc1') parts.push('unlocks QC-1 quantum pod');
       if (fx.unlock === 'synthData') parts.push('unlocks synthetic data');
-      if (fx.unlock === 'autoRetrain') parts.push('unlocks AutoML');
       return parts.map(p => `<span class="fx-chip">${p}</span>`).join('');
     };
     const proj = s.resProj;

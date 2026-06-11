@@ -46,7 +46,6 @@ export function defaultState(founderId = 'mario') {
     modelSeq: 0,
     bestCap: 0,
     autoDeploy: true,
-    autoRetrain: false,
 
     rivals: RIVALS.map(r => ({ id: r.id, name: r.name, cap: r.start, rate: r.rate })),
 

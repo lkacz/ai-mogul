@@ -125,11 +125,6 @@ function finalizeRun(s, sel, r) {
     s.singularity = true; s.singularityAt = s.simHours;
     pushNews(s, '🌌 THE SINGULARITY. The model\'s next thought takes longer to describe than to think.');
   }
-  // AutoML: respawn the same config if unlocked & enabled
-  if (s.autoRetrain && sel.fx.unlocks.has('autoRetrain')) {
-    const res = startRun(s, r.N, r.D, true);
-    if (res.ok) pushNews(s, `🔁 AutoML respawned training at ${fmtNum(r.N)} params.`);
-  }
 }
 
 function fireEvent(s, sel) {

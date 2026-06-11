@@ -9,7 +9,7 @@
 //   rpMult: ×N research point generation
 //   powerMult: ×N electricity price (<1 is cheaper)
 //   maxRuns: +N concurrent training runs
-//   unlock: feature flag ('mx1' gpu, 'synthData' dataset, 'autoRetrain')
+//   unlock: feature flag ('mx1' gpu, 'synthData' dataset, …)
 // era = min facility phase required. reqCap = min best-model capability.
 
 export const RESEARCH = [
@@ -91,8 +91,8 @@ export const RESEARCH = [
     fx: { unlock: 'mx1', ppMult: 3 },
     desc: 'Tape out the Mogul MX-1. Your workload, your chip, your margins.' },
   { id: 'autoML', era: 2, rp: 3600, deps: ['expmgr'], name: 'AutoML Pipeline',
-    fx: { maxRuns: 1, unlock: 'autoRetrain' },
-    desc: 'Completed runs automatically respawn at the frontier config. The lab trains itself.' },
+    fx: { maxRuns: 1, rpMult: 1.2 },
+    desc: 'Automated hyperparameter sweeps run between your launches: +1 training slot, faster research.' },
   { id: 'multimodalR', era: 2, rp: 4400, name: 'Multimodal Pretraining',
     fx: { algo: 1.2, demandMult: 1.5 },
     desc: 'One model: text, vision, audio. Whole new markets open.' },
