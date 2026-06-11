@@ -277,9 +277,10 @@ function pumpDilemma() {
   const order = Math.random() < 0.5 ? [0, 1] : [1, 0];   // position carries no signal
   const btn = (i) => `<button class="act" data-act="dilemma" data-arg="${i}"
     style="flex:1; white-space:normal; padding:10px 12px; line-height:1.35">${esc(d.options[i].label)}</button>`;
+  // no "real debate" sidebar — the citations stay in the data as writing
+  // anchors, but the player just gets the situation, in-world, nothing meta
   showModal(`<h2>⚖️ ${esc(d.title)}</h2>
     <p>${text}</p>
-    <p class="muted small"><b>📚 The real debate:</b> ${esc(d.real)}</p>
     <div class="row" style="gap:10px; margin-top:10px; align-items:stretch">${btn(order[0])}${btn(order[1])}</div>`);
 }
 ACTIONS.dilemma = (arg) => {

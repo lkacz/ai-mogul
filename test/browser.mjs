@@ -191,6 +191,9 @@ await check('facility designer: animated blueprint, build guide, commission', as
 });
 
 await check('hardware tab + buy GPU', async () => {
+  // pause the sim for the buy/sell/hold mechanics checks — a random incident
+  // (hwFail/fire/heist) destroying a card mid-check is a refund-assert race
+  await page.evaluate(() => { window.AIMOGUL.s.paused = true; });
   await page.click('[data-act=tab][data-arg=hw]');
   const before = await page.evaluate(() => JSON.parse(localStorage.getItem('aimogul_save_v1') || '{}').money ?? null);
   await page.click('.res-card:has-text("GTX 1070") [data-act=buyGpu]');
@@ -224,6 +227,7 @@ await check('hold-to-buy auto-repeats until slots are full', async () => {
   await page.mouse.up();
   const card = await page.textContent('.res-card:has-text("GTX 1070")');
   if (!card.includes('Owned: 8')) throw new Error('hold did not repeat: ' + card.slice(0, 90));   // garage slot cap
+  await page.evaluate(() => { window.AIMOGUL.s.paused = false; });   // sim back on
 });
 
 await check('research / company / models / goals tabs render', async () => {
@@ -265,7 +269,7 @@ await check('moral dilemma: neutral choice, delayed consequence scheduled', asyn
   await page.waitForSelector('#modal-root .modal', { timeout: 5000 });
   const txt = await page.textContent('#modal-root .modal');
   if (!txt.includes('shadow library')) throw new Error('dilemma modal missing');
-  if (!txt.includes('real debate')) throw new Error('educational anchor missing');
+  if (/real debate/i.test(txt)) throw new Error('meta "real debate" sidebar leaked into the dialog');
   if (/integrity\s*[-+−]?\d/i.test(txt)) throw new Error('integrity is signposted in the dialog');
   const btnCls = await page.$$eval('[data-act=dilemma]', els => els.map(e => e.className));
   if (btnCls.length !== 2 || btnCls[0] !== btnCls[1]) throw new Error('options styled unequally: ' + btnCls);
@@ -279,7 +283,7 @@ await check('moral dilemma: neutral choice, delayed consequence scheduled', asyn
   await page.evaluate(() => { window.AIMOGUL.nextDilemmaReal = Infinity; });   // re-mute
 });
 
-await check('singularity → final cinematic, save erased, no way back', async () => {
+await check('singularity → final cinematic, save erased', async () => {
   await page.evaluate(() => {
     const s = window.AIMOGUL.s;
     s.bestCap = 300.5; s.singularity = true; s.singularityAt = s.simHours;
@@ -293,12 +297,13 @@ await check('singularity → final cinematic, save erased, no way back', async (
   const meta = await page.evaluate(() => JSON.parse(localStorage.getItem('aimogul_meta_v1') || '{}'));
   if (meta.founder !== 'al') throw new Error('NG+ founder not queued: ' + JSON.stringify(meta));
   const still = await page.$('#singularity-canvas');
-  if (!still) throw new Error('memorial screen should persist forever');
+  if (!still) throw new Error('memorial should hold the shot before the loop closes');
 });
 
-await check('reload → the same cosmic shot opens a fresh New Game+ with Al Saltman', async () => {
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForSelector('#opening-canvas', { timeout: 5000 });   // the loop: end shot = start shot
+await check('the loop closes by itself: memorial → fresh New Game+ with Al Saltman', async () => {
+  // no manual reload — the memorial holds a few breaths, then begins again
+  // (impatient players can click; we wait for the automatic cycle)
+  await page.waitForSelector('#opening-canvas', { timeout: 30000 });   // the loop: end shot = start shot
   await page.waitForTimeout(700);
   await page.click('#opening-canvas');
   await page.waitForSelector('#modal-root .modal', { timeout: 6000 });

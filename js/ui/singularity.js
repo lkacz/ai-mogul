@@ -1,14 +1,16 @@
 // The ending: a long, quiet elegy for everything that led here, ending in a
-// big bang — and then it never goes back. playSingularity(stats) runs a
-// ~2-minute cinematic and settles into a permanent memorial screen; the only
-// way onward is to reload the page and begin a new story.
+// big bang — and then the loop closes. playSingularity(stats) runs a
+// ~2-minute cinematic, settles into the memorial shot, holds it a few
+// breaths — and begins again: the memorial IS the opening shot of the next
+// story, so the page reloads into a fresh New Game+ on the exact same frame.
 //
 // Movements: I the hush · II the constellations of us · III what it keeps
 // · IV the gathering · V the crossing (big bang) · VI the new morning
-// · then: forever.
+// · then: again.
 
 const FLASH_T = 78.5;             // the moment of the crossing
 const ETERNAL_T = 119;            // when the memorial screen settles
+const CYCLE_T = ETERNAL_T + 9;    // …and the story starts itself over
 
 // The blue world and its garage — drawn identically at both ends of the
 // loop: the ending's memorial and the opening of every new game.
@@ -139,10 +141,12 @@ export function playSingularity(stats = {}) {
 
   const t0 = performance.now();
   let skipped = 0;             // seconds jumped over by clicking
+  let cycling = false;         // the fade into the next beginning has started
 
   cv.addEventListener('click', () => {
     const t = (performance.now() - t0) / 1000 + skipped;
-    if (t > 2.5 && t < ETERNAL_T) skipped += ETERNAL_T - t;   // let go → the memorial
+    if (t > 2.5 && t < ETERNAL_T) skipped += ETERNAL_T - t;        // let go → the memorial
+    else if (t >= ETERNAL_T && t < CYCLE_T) skipped += CYCLE_T - t; // begin again now
   });
 
   // tiny pixel keepsakes, drawn from memory
@@ -362,7 +366,16 @@ export function playSingularity(stats = {}) {
     }
     ctx.textAlign = 'left';
 
-    requestAnimationFrame(frame);   // forever — there is no way back
+    // the loop closes: this shot is the opening shot of the next story —
+    // fade to black and let a fresh boot carry the zoom into the garage
+    if (t > CYCLE_T && !cycling) {
+      cycling = true;
+      cv.style.transition = 'opacity 1.8s ease-in';
+      cv.style.opacity = '0';
+      setTimeout(() => location.reload(), 2000);
+    }
+
+    requestAnimationFrame(frame);
   }
 
   function clamp01(x) { return Math.min(1, Math.max(0, x)); }

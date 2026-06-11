@@ -3,7 +3,8 @@
 // Presentation is deliberately neutral: two options, identical styling,
 // randomized order, no scores shown, no hints. The text argues both sides,
 // because both sides have one. `real:` anchors each dilemma to the actual
-// controversy (the educational contract).
+// controversy (the educational contract) — it is NOT shown to the player
+// (it broke immersion); it exists to keep the writing honest.
 //
 // Consequences arrive LATER (a minute or two of real time): each option
 // samples one weighted outcome — and both options carry good and bad
