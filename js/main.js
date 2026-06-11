@@ -12,7 +12,7 @@ import { celebrate } from './ui/scene.js';
 import { offerNodeHunt, playRlhf } from './ui/minigames.js';
 import { playSingularity, playOpening } from './ui/singularity.js';
 import { RESEARCH_BY_ID } from './core/research.js';
-import { DILEMMA_BY_ID } from './core/dilemmas.js';
+import { DILEMMAS, DILEMMA_BY_ID } from './core/dilemmas.js';
 
 // ── Load / new game ───────────────────────────────────────────────
 // Meta persists across universes: which founder stars in the NEXT story.
@@ -250,55 +250,59 @@ function pumpResearchDone() {
   }
 }
 
-// ── Moral dilemmas: the offer arrives, the world holds its breath ──
+// ── Moral dilemmas: hard choices on a human clock ──────────────────
+// Paced in REAL player time (one every 3–5 minutes, first at 2–4), so sim
+// speed never floods them. Presented without any hint of which answer is
+// "right": identical buttons, randomized order, no numbers. The world
+// answers a minute or two later, and not always the way you'd guess.
+game.nextDilemmaReal = Date.now() + 120e3 + Math.random() * 120e3;
 let dilemmaPrevPaused = false;
 function pumpDilemma() {
-  const pd = s.pendingDilemma;
-  if (!pd) return;
   if (document.hidden) return;
   if (!document.getElementById('modal-root').classList.contains('hidden')) return;
-  // an offer the player wasn't around to hear expires quietly (and can
-  // never tempt the offline catch-up sim)
-  if (Date.now() - (pd.realAt || 0) > 3 * 60 * 1000) { s.pendingDilemma = null; return; }
-  const d = DILEMMA_BY_ID[pd.id];
-  if (!d) { s.pendingDilemma = null; return; }
+  if (s.speed >= 10000) return;            // turbo = unsupervised; no offers
+  if (!s.pendingDilemma) {
+    if (Date.now() < game.nextDilemmaReal) return;
+    const pool = DILEMMAS.filter(d =>
+      s.phase >= d.minPhase && (!d.reqCap || s.bestCap >= d.reqCap) &&
+      !(s.dilemmasSeen || []).includes(d.id));
+    if (!pool.length) { game.nextDilemmaReal = Date.now() + 600e3; return; }
+    s.pendingDilemma = { id: pool[(Math.random() * pool.length) | 0].id, realAt: Date.now() };
+  }
+  const d = DILEMMA_BY_ID[s.pendingDilemma.id];
+  if (!d || !d.options) { s.pendingDilemma = null; return; }
   dilemmaPrevPaused = s.paused;
   s.paused = true;
-  const payout = E.dilemmaPayout(s, d);
-  const chip = (txt, color) => `<span class="fx-chip"${color ? ` style="color:${color}"` : ''}>${txt}</span>`;
+  const text = esc(d.text).replace('{$}', fmtMoney(E.dilemmaPayout(s, d)));
+  const order = Math.random() < 0.5 ? [0, 1] : [1, 0];   // position carries no signal
+  const btn = (i) => `<button class="act" data-act="dilemma" data-arg="${i}"
+    style="flex:1; white-space:normal; padding:10px 12px; line-height:1.35">${esc(d.options[i].label)}</button>`;
   showModal(`<h2>⚖️ ${esc(d.title)}</h2>
-    <p>${esc(d.text)}</p>
+    <p>${text}</p>
     <p class="muted small"><b>📚 The real debate:</b> ${esc(d.real)}</p>
-    <div class="grid2" style="margin-top:10px; gap:10px">
-      <div class="res-card">
-        <b>${esc(d.accept.label)}</b>
-        <div style="margin:6px 0">
-          ${payout ? chip('+' + fmtMoney(payout), 'var(--gold)') : ''}
-          ${d.accept.rpBase ? chip('+' + fmtNum(d.accept.rpBase * Math.pow(8, s.phase)) + ' RP', 'var(--gold)') : ''}
-          ${d.accept.buff ? chip(d.accept.buff.label) : ''}
-          ${chip('integrity ' + d.accept.integrity, 'var(--red)')}
-          ${d.fallout ? chip('⚠ may have consequences', 'var(--gold)') : ''}
-        </div>
-        <button class="act gold" data-act="dilemma" data-arg="1">Sign it</button>
-      </div>
-      <div class="res-card">
-        <b>${esc(d.decline.label)}</b>
-        <div style="margin:6px 0">
-          ${chip('integrity +' + d.decline.integrity, 'var(--accent)')}
-          ${d.decline.rep ? chip('+' + d.decline.rep + ' rep', 'var(--accent)') : ''}
-          ${d.decline.buff ? chip(d.decline.buff.label) : ''}
-        </div>
-        <button class="act" data-act="dilemma" data-arg="0">Walk away</button>
-      </div>
-    </div>`);
+    <div class="row" style="gap:10px; margin-top:10px; align-items:stretch">${btn(order[0])}${btn(order[1])}</div>
+    <p class="faint small" style="margin-top:8px">No highlighted answer. The consequences arrive later — they usually do.</p>`);
 }
 ACTIONS.dilemma = (arg) => {
-  const r = E.resolveDilemma(s, arg === '1');
+  const r = E.resolveDilemma(s, +arg);
   closeModal();
   s.paused = dilemmaPrevPaused;
+  game.nextDilemmaReal = Date.now() + 180e3 + Math.random() * 120e3;   // 3–5 min
   toast(r.msg, r.ok ? '' : 'err');
   renderAll();
 };
+
+// consequences land on the player's clock, wherever the sim has wandered
+function pumpFalloutReal() {
+  const list = s.fallout;
+  if (!list || !list.length) return;
+  for (let i = list.length - 1; i >= 0; i--) {
+    const f = list[i];
+    if (!f.atReal || Date.now() < f.atReal) continue;
+    list.splice(i, 1);
+    E.applyConsequence(s, f);
+  }
+}
 
 // ── Dramatic incidents (fires, theft, dead hardware) → toast ──────
 function pumpDrama() {
@@ -357,10 +361,12 @@ setInterval(() => {
     }
   }
   if (isTurbo()) {
+    pumpFalloutReal();        // consequences still land — just unannounced
     drainSignalsSilently();
   } else {
     pumpMilestoneToasts();
     pumpCelebrations();
+    pumpFalloutReal();
     pumpDrama();
     pumpResearchDone();
     pumpDilemma();

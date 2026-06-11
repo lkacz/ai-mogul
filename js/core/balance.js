@@ -56,11 +56,10 @@ export const BAL = {
 
   EVENT_CHANCE_PER_H: 0.008,
 
-  // Moral dilemmas: rare, one pending at a time, each fires once.
-  // Integrity starts at 70 (neutral: all factors exactly 1.0 there — the
-  // balance bot never answers dilemmas, so pacing is untouched).
-  DILEMMA_CHANCE_PER_H: 0.004,
-  DILEMMA_GAP_H: 240,
+  // Moral dilemmas are paced in REAL player time (one per 3–5 minutes, see
+  // main.js) so sim speed never floods them. Integrity starts at 70
+  // (neutral: all factors exactly 1.0 there — the balance bot never answers
+  // dilemmas, so pacing is untouched).
   INTEGRITY_START: 70,
   INTEGRITY_DEMAND_K: 0.004,   // demand ×(1 + (integrity−70)·K) → 0.72…1.12
   INTEGRITY_RP_K: 0.002,       // researcher morale → RP ×(0.86…1.06)

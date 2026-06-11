@@ -51,9 +51,9 @@ await check('fresh boot: cosmic opening (the cycle) → intro modal', async () =
 
 await check('dismiss intro', async () => {
   await page.click('#modal-root [data-act=closeModal]');
-  // keep random dilemma offers from popping modals mid-suite (the dedicated
+  // keep timed dilemma offers from popping modals mid-suite (the dedicated
   // dilemma check injects its own pendingDilemma)
-  await page.evaluate(() => { window.AIMOGUL.s.lastDilemmaH = 1e12; });
+  await page.evaluate(() => { window.AIMOGUL.nextDilemmaReal = Infinity; });
 });
 
 await check('sidebar shows AGI index + goal with Go button', async () => {
@@ -239,7 +239,7 @@ await check('save persists across reload', async () => {
   if (!(money > 0)) throw new Error('simHours not persisted');
 });
 
-await check('moral dilemma modal → decline builds integrity', async () => {
+await check('moral dilemma: neutral choice, delayed consequence scheduled', async () => {
   await page.evaluate(() => {
     window.AIMOGUL.s.pendingDilemma = { id: 'shadowLibrary', realAt: Date.now() };
   });
@@ -247,9 +247,17 @@ await check('moral dilemma modal → decline builds integrity', async () => {
   const txt = await page.textContent('#modal-root .modal');
   if (!txt.includes('shadow library')) throw new Error('dilemma modal missing');
   if (!txt.includes('real debate')) throw new Error('educational anchor missing');
-  await page.click('[data-act=dilemma][data-arg="0"]');
-  const integ = await page.evaluate(() => window.AIMOGUL.s.integrity);
-  if (!(integ > 70)) throw new Error('integrity not raised: ' + integ);
+  if (/integrity\s*[-+−]?\d/i.test(txt)) throw new Error('integrity is signposted in the dialog');
+  const btnCls = await page.$$eval('[data-act=dilemma]', els => els.map(e => e.className));
+  if (btnCls.length !== 2 || btnCls[0] !== btnCls[1]) throw new Error('options styled unequally: ' + btnCls);
+  await page.click('[data-act=dilemma][data-arg="1"]');   // license data properly
+  const after = await page.evaluate(() => ({
+    integ: window.AIMOGUL.s.integrity,
+    fallout: window.AIMOGUL.s.fallout.filter(f => f.atReal).length,
+  }));
+  if (!(after.integ > 70)) throw new Error('integrity not moved (hidden): ' + after.integ);
+  if (after.fallout < 1) throw new Error('no delayed consequence scheduled');
+  await page.evaluate(() => { window.AIMOGUL.nextDilemmaReal = Infinity; });   // re-mute
 });
 
 await check('singularity → final cinematic, save erased, no way back', async () => {

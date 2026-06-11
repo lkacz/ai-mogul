@@ -121,49 +121,27 @@ the Landauer limit, fusion ignition and orbital datacenters.
 
 ## The temptations ⚖️
 
-Fifteen moral dilemmas arrive as the lab grows — every one anchored to a **real AI-industry
-controversy**, with a "📚 the real debate" note citing the actual case: autonomous weapons
-(Project Maven), nationwide face surveillance (Clearview / EU AI Act), predictive policing
-(COMPAS), pirated training books (Books3 lawsuits), training on private chats, unrestricted
-voice cloning (the $25M deepfake call), election persuasion bots, skipping safety evals to
-beat a rival's launch, stolen training recipes, slop farms, engagement-maximized companion
-apps, coal-powered compute, data brokers, burying a dangerous-capability paper, and — late —
-a government asking quietly for a backdoor.
+Every 3–5 minutes of *real* play time (never at turbo), a hard decision arrives — 34 of them
+across the whole arc, every one anchored to a **real controversy** with a "📚 the real debate"
+note. And they are presented the way hard choices actually feel: **two identical buttons, in
+random order, with no hint of which answer is "right"** — because the text argues both sides,
+and both sides have one. The general is correct that slower targeting kills your own soldiers;
+the widow asking for a grief bot has read the warnings and is asking anyway.
 
-Signing pays **now**; the **🧭 Integrity** score remembers. It sways enterprise trust (demand),
-researcher morale (RP), who joins ("I read what you refused to build") and who blows the
-whistle — and accepted deals can detonate **hundreds of hours later** (the lawsuit, the leak,
-the front-page story). The singularity you eventually ignite inherits how you built it: the
-ending's final captions — and whether the little garage light comes back on — depend on your
-compass.
+The world answers **later** — a minute or two after you've moved on, a consequence lands
+(sampled from weighted outcomes, so replays differ): your surveillance grid is caught tracking
+dissidents' families… or it stops a marketplace bombing. You refused the autonomous-weapons
+contract — and an allied front collapses to an adversary that didn't ask anyone's ethicists.
+Even kind choices can curdle; even cynical ones sometimes save lives. Nothing is black and white.
 
-## Build your facility — the Factorio corner 🏗️
-
-Every facility above the garage has a **floor-plan designer** (Hardware tab): an **animated
-blueprint** where the machinery looks and behaves like the real thing — racks blink, CRAC fans
-spin, evaporative towers shed mist, gas turbines flicker and plume, **pipes join into real runs
-with coolant flowing through them**, radiators pulse infrared into space, the Mercury foundry's
-mass driver launches tiles, and the black hole's accretion ring turns. The Sun physically glows
-on the left edge of the space-era grids. Parts glow green (working), amber (missing something)
-or red (an engineering mistake, with heat shimmer rising). A **narrated build guide** walks you
-through each system in the canonical order — what the core is, what it needs next, and why —
-and hovering any part explains it. A live score breaks the engineering down line by line: Good designs earn bounded PUE/MFU/power bonuses; the defaults are
-mediocre; and the tempting shortcuts are traps, just like in real life:
-
-- **Server closet**: racks need a CRAC/vent air path; packing them tight looks tidy and runs hot.
-- **Colo cage**: hot/cold-aisle **containment** (cuts cooling ~30% for real) — but surplus CRAHs
-  are the *overcooling trap*.
-- **Hyperscale hall**: evaporative towers on the wall, air handlers bridging tower→racks — and
-  the classic real-world failure, **generator exhaust recirculating into the intakes**.
-- **AI Factory**: draw the **direct-to-chip liquid loop** — pipes from each CDU to edge dry
-  coolers; gas turbines + battery firming; turbine-next-to-cooler is a *heat island*.
-- **Orbital platform**: the σT⁴ lesson — in vacuum heat leaves **only as radiation**; radiators
-  face deep space, never the Sun, never each other (view factor).
-- **Dyson shells**: Matrioshka nesting — collectors sunward, compute mid-shell, radiators
-  outward; foundry on Mercury feeding the mass driver; compute at Mercury flux overheats
-  (T ∝ 1/√r).
-- **Omega Lattice node**: Penrose power links from the black hole, compute against **cold sinks
-  facing the 2.7 K void** (Landauer), and a tidal-zone trap beside the hole.
+The dilemmas grow with you: a student's ghostwritten thesis in the garage era; layoffs-by-
+algorithm and election bots at corporate scale; ICU triage, geoengineering and government
+backdoors at national scale — and at the far end, questions no committee has ever faced: the
+suffering of simulated minds, uplifting whales who cannot consent, replying to an alien signal,
+dismantling Mercury, a million copies of yourself, resurrecting everyone who ever lived, the
+four million unaugmented who just want their dark sky back, and the final allocation: burn the
+universe's energy bright and brief, or cold and nearly forever. Your 🧭 Integrity moves with
+every choice — quietly, after the fact, never as a label on the button.
 
 ## It feels alive from minute one ✨
 

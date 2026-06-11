@@ -3,7 +3,7 @@
 
 import { BAL, capabilityFor, trainCompute, optimalTokens } from './balance.js';
 import { GPUS, FACILITIES, DATASETS, FUNDING, RIVAL_ASYMPTOTE, founderize } from './data.js';
-import { DILEMMAS, DILEMMA_BY_ID } from './dilemmas.js';
+import { DILEMMA_BY_ID } from './dilemmas.js';
 import { DESIGNS, GRID_W, GRID_H, scoreDesign, placedCount } from './design.js';
 import { RESEARCH_BY_ID } from './research.js';
 import { MILESTONES, MILESTONE_BY_ID } from './milestones.js';
@@ -76,31 +76,14 @@ export function step(s, hours = 1) {
   // 5. Random events + ambient news/facts
   if (Math.random() < BAL.EVENT_CHANCE_PER_H * hours) fireEvent(s, sel);
 
-  // 5b. Moral dilemmas: rare, one at a time, each only once
-  if (!s.pendingDilemma &&
-      s.simHours - (s.lastDilemmaH || 0) > BAL.DILEMMA_GAP_H &&
-      Math.random() < BAL.DILEMMA_CHANCE_PER_H * hours) {
-    const pool = DILEMMAS.filter(d =>
-      s.phase >= d.minPhase && (!d.reqCap || s.bestCap >= d.reqCap) &&
-      !(s.dilemmasSeen || []).includes(d.id));
-    if (pool.length) {
-      const d = pool[(Math.random() * pool.length) | 0];
-      s.pendingDilemma = { id: d.id, realAt: Date.now() };
-      s.lastDilemmaH = s.simHours;
-    }
-  }
-
-  // 5c. Delayed fallout from past choices comes due
+  // 5b. Legacy delayed fallout (old saves, sim-hour scheduled) comes due.
+  // New consequences use real-time delivery via the UI pump.
   if (s.fallout && s.fallout.length) {
     for (let i = s.fallout.length - 1; i >= 0; i--) {
       const f = s.fallout[i];
-      if (s.simHours < f.atH) continue;
+      if (f.atReal || !(s.simHours >= f.atH)) continue;
       s.fallout.splice(i, 1);
-      if (f.rep) s.rep = clamp(s.rep + f.rep, 0, 100);
-      if (f.buff) s.buffs.push({ id: 'fo_' + f.atH, label: f.buff.label,
-        demand: f.buff.demand, elec: f.buff.elec, untilH: s.simHours + f.buff.hours });
-      pushNews(s, f.txt);
-      s.lastDrama = { txt: f.txt, realAt: Date.now() };
+      applyConsequence(s, f);
     }
   }
   if (Math.random() < 0.002 * hours) {
@@ -417,40 +400,62 @@ export function applyFacilityDesign(s, phase, cells) {
   return ok(`Layout applied — score ${result.score}/100.`);
 }
 
-// Resolve the pending moral dilemma. Visible effects apply now; an accepted
-// deal's fallout is queued for later — choices come back around.
-export function resolveDilemma(s, accepted) {
+// Resolve the pending moral dilemma by option index. Immediate effects land
+// quietly; one weighted outcome is sampled and scheduled to arrive a minute
+// or two of REAL time later — the world answers after you've moved on.
+export function resolveDilemma(s, optIdx) {
   const pd = s.pendingDilemma;
-  if (!pd) return err('No offer on the table.');
+  if (!pd) return err('No decision is pending.');
   const d = DILEMMA_BY_ID[pd.id];
   s.pendingDilemma = null;
-  if (!d) return err('The offer expired.');
+  if (!d) return err('The moment passed.');
+  const o = d.options && d.options[optIdx];
+  if (!o) return err('Unknown choice.');
   (s.dilemmasSeen = s.dilemmasSeen || []).push(d.id);
-  const o = accepted ? d.accept : d.decline;
-  s.integrity = clamp((s.integrity ?? BAL.INTEGRITY_START) + o.integrity, 0, 100);
-  let gained = 0;
-  if (o.moneyBase) { gained = o.moneyBase * Math.pow(25, s.phase); s.money += gained; }
+  s.integrity = clamp((s.integrity ?? BAL.INTEGRITY_START) + (o.integrity || 0), 0, 100);
+  if (o.moneyBase) s.money += o.moneyBase * Math.pow(25, s.phase);
   if (o.rpBase) s.rp += o.rpBase * Math.pow(8, s.phase);
   if (o.rep) s.rep = clamp(s.rep + o.rep, 0, 100);
   if (o.buff) s.buffs.push({ id: 'dl_' + d.id, label: o.buff.label,
     demand: o.buff.demand, elec: o.buff.elec, untilH: s.simHours + o.buff.hours });
-  if (accepted && d.fallout) {
+  // bookkeeping (and the compass/faust achievements): principled vs pragmatic
+  if ((o.integrity || 0) >= 0) s.stats.dilemmasDeclined = (s.stats.dilemmasDeclined || 0) + 1;
+  else s.stats.dilemmasAccepted = (s.stats.dilemmasAccepted || 0) + 1;
+  pushNews(s, o.news);
+  const outs = o.outcomes || [];
+  if (outs.length) {
+    let roll = Math.random() * outs.reduce((a, x) => a + x.p, 0);
+    let out = outs[0];
+    for (const x of outs) { roll -= x.p; if (roll <= 0) { out = x; break; } }
     s.fallout.push({
-      atH: s.simHours + d.fallout.minH + Math.random() * (d.fallout.maxH - d.fallout.minH),
-      txt: d.fallout.txt, rep: d.fallout.rep, buff: d.fallout.buff,
+      atReal: Date.now() + 45e3 + Math.random() * 105e3,
+      txt: out.txt, rep: out.rep, integrity: out.integrity,
+      money: (out.moneyBase || 0) * Math.pow(25, s.phase),
+      rpGain: (out.rpBase || 0) * Math.pow(8, s.phase),
+      buff: out.buff,
     });
   }
-  if (accepted) s.stats.dilemmasAccepted = (s.stats.dilemmasAccepted || 0) + 1;
-  else s.stats.dilemmasDeclined = (s.stats.dilemmasDeclined || 0) + 1;
-  pushNews(s, o.news);
-  return ok(accepted
-    ? `Deal signed${gained ? ': +' + fmtNum(gained) : ''}. Integrity ${o.integrity}.`
-    : `Offer declined. Integrity +${o.integrity}.`);
+  return ok('The decision is made. Time will tell.');
 }
 
-// payout preview for the UI (what accept would pay at the current phase)
+// Deliver a scheduled consequence (called by the UI's real-time pump, and by
+// the sim clock for legacy save entries).
+export function applyConsequence(s, f) {
+  if (f.rep) s.rep = clamp(s.rep + f.rep, 0, 100);
+  if (f.integrity) s.integrity = clamp((s.integrity ?? BAL.INTEGRITY_START) + f.integrity, 0, 100);
+  if (f.money) s.money += f.money;
+  if (f.rpGain) s.rp += f.rpGain;
+  if (f.buff) s.buffs.push({ id: 'fo_' + (f.atReal || f.atH || 0), label: f.buff.label,
+    demand: f.buff.demand, elec: f.buff.elec, untilH: s.simHours + f.buff.hours });
+  const txt = '⏳ ' + f.txt;
+  pushNews(s, txt);
+  s.lastDrama = { txt, realAt: Date.now() };
+}
+
+// the tempting payout, for the {$} substitution in dilemma text
 export function dilemmaPayout(s, d) {
-  return (d.accept.moneyBase || 0) * Math.pow(25, s.phase);
+  const best = Math.max(0, ...(d.options || []).map(o => o.moneyBase || 0));
+  return best * Math.pow(25, s.phase);
 }
 
 // Node Hunt minigame: give back a fraction of outage-lost training progress
