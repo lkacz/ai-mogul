@@ -6,7 +6,7 @@ import { BAL, capTier } from './core/balance.js';
 import { MILESTONE_BY_ID, rewardText } from './core/milestones.js';
 import { FOUNDERS, founderize } from './core/data.js';
 import { fmtMoney, fmtNum, fmtDur, fmtDate, fmtFlop } from './core/util.js';
-import { game, renderAll, initDispatch, toast, showModal, closeModal, esc } from './ui/ui.js';
+import { game, renderAll, initDispatch, toast, showModal, closeModal, esc, spawnFloat } from './ui/ui.js';
 import { ACTIONS } from './ui/tabs.js';
 import { celebrate, drawFounderPortrait } from './ui/scene.js';
 import { offerNodeHunt, playRlhf } from './ui/minigames.js';
@@ -336,6 +336,23 @@ function pumpFalloutReal() {
   }
 }
 
+// ── The consulting pipeline: sales staff run gigs so you don't have to ──
+// Relief, not replacement: the founder's own gig button still pays more and
+// can streak. Real-time cadence like the button (sim speed doesn't multiply
+// it). Past AGI the models consult on their own — the humans become optional.
+let nextAutoGigReal = Date.now() + 40e3;
+function pumpAutoGigs() {
+  if (Date.now() < nextAutoGigReal || s.paused) return;
+  const agi = s.bestCap >= 100;
+  if (!agi && !(s.staff.sales >= 1)) return;
+  nextAutoGigReal = Date.now() + 30e3 + Math.random() * 20e3;
+  const mult = agi ? 0.9 : Math.min(0.8, 0.4 + 0.1 * Math.min(4, s.staff.sales));
+  const before = s.money;
+  E.doGig(s, mult);
+  spawnFloat(`+${fmtMoney(s.money - before)} ${agi ? '🤖' : '💼'}`,
+    document.getElementById('gig-btn') || document.getElementById('hdr-money'), 'gold');
+}
+
 // ── Dramatic incidents (fires, theft, dead hardware) → toast ──────
 function pumpDrama() {
   const d = s.lastDrama;
@@ -403,6 +420,7 @@ setInterval(() => {
     pumpResearchDone();
     pumpDilemma();
     pumpIncidents();
+    pumpAutoGigs();
   }
   maybeShowWin();
   maybeShowSingularity();

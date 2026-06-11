@@ -122,6 +122,21 @@ await check('dataset purchase → Dedup Frenzy plays to completion', async () =>
   await page.click('[data-act=mgClose]');
 });
 
+await check('delegation: a small data crew takes the dedup chore', async () => {
+  await page.evaluate(() => {
+    window.AIMOGUL.s.money = 1e9;
+    window.AIMOGUL.s.staff.engineer = 2;
+  });
+  await page.click('[data-act=tab][data-arg=co]');
+  await page.click('[data-act=buyData][data-arg=licensed]');
+  await page.waitForSelector('[data-act=mgDelegateDedup]', { timeout: 4000 });
+  await page.click('[data-act=mgDelegateDedup]');
+  const bonus = await page.evaluate(() => window.AIMOGUL.s.dataQBonus.licensed);
+  if (!(bonus > 1.01 && bonus < 1.04)) throw new Error('delegated clean not applied: ' + bonus);
+  const hidden = await page.evaluate(() => document.getElementById('modal-root').classList.contains('hidden'));
+  if (!hidden) throw new Error('delegation should not interrupt further');
+});
+
 await check('rebuild guard: DOM stays put under a held pointer', async () => {
   await page.click('[data-act=tab][data-arg=co]');
   await page.waitForSelector('#tab-content .card');

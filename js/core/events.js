@@ -84,7 +84,8 @@ export const EVENTS = [
       const guard = sel.fx.outageGuard;
       // 3+ ops = an on-call rotation: they bisect the bad node themselves
       // and you keep 70% of what would have been lost. No 3 AM pager for you.
-      const covered = s.staff.ops >= 3;
+      // Past AGI the models carry the pager — the humans become optional.
+      const covered = s.staff.ops >= 3 || s.bestCap >= 100;
       const lostH = (guard ? 1 : 6) * (covered ? 0.3 : 1);
       for (const r of s.runs) {
         // loss can't exceed the run's real accrual rate (batch-size limit)
@@ -96,7 +97,9 @@ export const EVENTS = [
       return { lostH, covered };
     },
     text: (s, r) => r.covered
-      ? `🔌 Node failure at 3 AM — your ops rotation bisects it before coffee. Only ${r.lostH.toFixed(1)}h lost.`
+      ? (s.staff.ops >= 3
+        ? `🔌 Node failure at 3 AM — your ops rotation bisects it before coffee. Only ${r.lostH.toFixed(1)}h lost.`
+        : `🔌 Node failure at 3 AM — the models bisect and reroute around it themselves. Only ${r.lostH.toFixed(1)}h lost.`)
       : r.lostH <= 1
         ? '🔌 Power blip — auto-resume restores training from checkpoint (−1h progress).'
         : '🔌 Power outage! Training runs lose 6 hours of progress. (Research checkpointing! Or hire an ops rotation.)' },
@@ -194,7 +197,7 @@ export const EVENTS = [
     text: () => '🪐 "Quantum AI" trends worldwide after your keynote — demand +80% for 48h.' },
   { id: 'flare', weight: 6, minPhase: 5,
     apply: (s, sel) => {
-      const covered = s.staff.ops >= 3;
+      const covered = s.staff.ops >= 3 || s.bestCap >= 100;   // models fly the storm too
       const lostH = (sel.fx.outageGuard ? 1 : 4) * (covered ? 0.3 : 1);
       for (const r of s.runs) {
         // loss can't exceed the run's real accrual rate (batch-size limit)
@@ -205,7 +208,9 @@ export const EVENTS = [
       return { lostH, covered };
     },
     text: (s, r) => r.covered
-      ? `☀️ Solar flare — mission ops ride it out by the book. Only ${r.lostH.toFixed(1)}h lost.`
+      ? (s.staff.ops >= 3
+        ? `☀️ Solar flare — mission ops ride it out by the book. Only ${r.lostH.toFixed(1)}h lost.`
+        : `☀️ Solar flare — the models safe and reroute the constellation themselves. Only ${r.lostH.toFixed(1)}h lost.`)
       : r.lostH <= 1
         ? '☀️ Solar flare! Rad-hardened checkpoints hold — the constellation loses only 1h.'
         : '☀️ Solar flare! The constellation safes itself for 4 hours of training while the particle storm passes.' },

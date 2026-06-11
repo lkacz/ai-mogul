@@ -20,12 +20,47 @@ function lessonBox(txt) {
 // stop a game's rAF loop when its canvas leaves the DOM
 const alive = (cv) => cv && cv.isConnected;
 
+// ── Delegation: the relief ladder ─────────────────────────────────
+// Every chore starts as the founder's job. A small team can take it over
+// when you ask; a full team handles it without asking; past AGI the models
+// do it themselves and the humans become optional — that's the arc.
+// Playing it yourself still scores highest (delegates are good, not perfect).
+function crewFor(kind) {
+  const s = game.s;
+  if ((s.bestCap || 0) >= 100) return { score: 0.85, who: 'the models', auto: true };
+  const n = kind === 'lr' ? s.staff.researcher : s.staff.engineer;
+  const team = kind === 'lr' ? 'the research team' : 'the data crew';
+  if (n >= 4) return { score: Math.min(0.75, 0.5 + 0.05 * n), who: team, auto: true };
+  if (n >= 2) return { score: 0.6, who: team, auto: false };
+  return null;
+}
+const capFirst = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+
+function applyLrScore(runId, score, who) {
+  const s = game.s;
+  const run = s.runs.find(r => String(r.id) === String(runId));
+  if (run) run.lrBonus = 1 + 0.12 * score;
+  toast(`🎚️ ${capFirst(who)} tuned the schedule: +${(12 * score).toFixed(1)}% effective compute.`);
+}
+function applyDedupScore(dsId, score, who) {
+  const s = game.s;
+  if (!s.dataQBonus) s.dataQBonus = {};
+  s.dataQBonus[dsId] = Math.max(s.dataQBonus[dsId] || 1, 1 + 0.04 * score);
+  toast(`🧹 ${capFirst(who)} cleaned the corpus: +${(4 * score).toFixed(1)}% quality.`);
+}
+
 // ══════════════════════════════════════════════════════════════════
 // 1. LEARNING-RATE RIDER — offered when launching a frontier run.
 //    Ride the LR just under the (moving) stability ceiling:
 //    warmup → high cruise → decay. Score boosts the run's effective compute.
 // ══════════════════════════════════════════════════════════════════
 export function offerLrGame(runId) {
+  const crew = crewFor('lr');
+  if (crew && crew.auto) {
+    // a full team (or the models) just handles it — no interruption at all
+    applyLrScore(runId, crew.score, crew.who);
+    return;
+  }
   pauseWorld();
   showModal(`<h2>🎚️ Babysit the launch?</h2>
     <p>The job is queued. Tune the <b>learning rate</b> live for the first steps —
@@ -33,8 +68,10 @@ export function offerLrGame(runId) {
     ${lessonBox('Real training uses LR <i>schedules</i>: linear warmup, long cruise, then decay. Too high and the loss diverges to NaN; too low and you waste the cluster.')}
     <div class="actions">
       <button class="act sub" data-act="mgSkipLr">Let it ride (skip)</button>
+      ${crew ? `<button class="act" data-act="mgDelegateLr" data-arg="${runId}">🤝 Hand it to ${crew.who} (+${(12 * crew.score).toFixed(0)}%)</button>` : ''}
       <button class="act big" data-act="mgPlayLr" data-arg="${runId}">🎮 Tune it</button>
-    </div>`);
+    </div>
+    ${crew ? '' : '<p class="faint" style="margin-top:8px">Two researchers on payroll would handle launches for you.</p>'}`);
 }
 
 export function playLr(runId) {
@@ -185,6 +222,12 @@ const BAD_DOCS = [
 ];
 
 export function offerDedup(dsId, dsName) {
+  const crew = crewFor('dedup');
+  if (crew && crew.auto) {
+    // the pipeline team (or the models) cleans every corpus that lands
+    applyDedupScore(dsId, crew.score, crew.who);
+    return;
+  }
   pauseWorld();
   showModal(`<h2>🧹 Clean the new corpus?</h2>
     <p><b>${esc(dsName)}</b> just arrived — raw. Filter the junk yourself for a permanent
@@ -192,8 +235,10 @@ export function offerDedup(dsId, dsName) {
     ${lessonBox('Deduplication and filtering measurably improve LLMs — duplicated text wastes compute and causes memorization. Garbage in, garbage out is an empirical law.')}
     <div class="actions">
       <button class="act sub" data-act="mgSkipDedup">Ship it raw (skip)</button>
+      ${crew ? `<button class="act" data-act="mgDelegateDedup" data-arg="${dsId}">🤝 Hand it to ${crew.who} (+${(4 * crew.score).toFixed(1)}%)</button>` : ''}
       <button class="act big" data-act="mgPlayDedup" data-arg="${dsId}">🎮 Clean it</button>
-    </div>`);
+    </div>
+    ${crew ? '' : '<p class="faint" style="margin-top:8px">Two engineers on payroll would clean corpora for you.</p>'}`);
 }
 
 export function playDedup(dsId) {
@@ -523,8 +568,18 @@ export const mgHandlers = {
   mgClose: () => { closeModal(); resumeWorld(); },
   mgSkipLr: () => { closeModal(); resumeWorld(); },
   mgPlayLr: (arg) => playLr(arg),
+  mgDelegateLr: (arg) => {
+    closeModal(); resumeWorld();
+    const c = crewFor('lr');
+    if (c) applyLrScore(arg, c.score, c.who);
+  },
   mgSkipDedup: () => { closeModal(); resumeWorld(); },
   mgPlayDedup: (arg) => playDedup(arg),
+  mgDelegateDedup: (arg) => {
+    closeModal(); resumeWorld();
+    const c = crewFor('dedup');
+    if (c) applyDedupScore(arg, c.score, c.who);
+  },
   mgSkipNode: () => { closeModal(); resumeWorld(); },
   mgPlayNode: (arg) => playNodeHunt(parseFloat(arg)),
   mgNodePick: (arg, el) => dyn.mgNodePick && dyn.mgNodePick(arg, el),

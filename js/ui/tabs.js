@@ -713,11 +713,20 @@ const coTab = {
     set('co-payroll', fmtMoney(sel.salaries) + '/h');
     set('co-rep', s.rep.toFixed(1) + ' / 100');
     for (const st of STAFF) set('staff_' + st.id, s.staff[st.id]);
-    // what your team is doing for you RIGHT NOW
-    set('stafffx_engineer', `now: +${fmtPct(Math.min(BAL.MFU_ENG_CAP, s.staff.engineer * BAL.MFU_PER_ENGINEER), 1)} MFU`);
-    set('stafffx_researcher', `now: research speed ×${fmtNum(E.resSpeed(s, sel))} · +${fmtNum(s.staff.researcher * BAL.RP_PER_RESEARCHER * sel.fx.rpMult)} RP/h`);
-    set('stafffx_ops', `now: −${fmtPct(Math.min(BAL.OPS_ELEC_CAP, s.staff.ops * BAL.OPS_ELEC_EACH))} electricity · ${s.staff.ops > 0 ? 'hot spares ✓' : 'no hot spares'}${s.staff.ops >= 3 ? ' · on-call rotation ✓ (no more 3 AM pagers)' : ' · YOU carry the pager'}${s.staff.ops >= 5 ? ' · burglar-proof ✓' : ''}`);
-    set('stafffx_sales', `now: ×${(1 + BAL.ADOPT_SALES_K * Math.log10(1 + s.staff.sales)).toFixed(2)} market adoption speed`);
+    // what your team is doing for you RIGHT NOW — and the next relief they
+    // would bring (the delegation ladder: you → team → eventually the models)
+    set('stafffx_engineer', `now: +${fmtPct(Math.min(BAL.MFU_ENG_CAP, s.staff.engineer * BAL.MFU_PER_ENGINEER), 1)} MFU · ${
+      s.staff.engineer >= 4 ? 'every new corpus cleaned hands-free ✓'
+        : s.staff.engineer >= 2 ? 'can clean corpora for you ✓ (4+: hands-free)'
+          : 'at 2+ they take dataset cleaning off your desk'}`);
+    set('stafffx_researcher', `now: research speed ×${fmtNum(E.resSpeed(s, sel))} · +${fmtNum(s.staff.researcher * BAL.RP_PER_RESEARCHER * sel.fx.rpMult)} RP/h · ${
+      s.staff.researcher >= 4 ? 'every launch tuned hands-free ✓'
+        : s.staff.researcher >= 2 ? 'can tune launches for you ✓ (4+: hands-free)'
+          : 'at 2+ they take LR tuning off your desk'}`);
+    set('stafffx_ops', `now: −${fmtPct(Math.min(BAL.OPS_ELEC_CAP, s.staff.ops * BAL.OPS_ELEC_EACH))} electricity · ${s.staff.ops > 0 ? 'hot spares ✓' : 'no hot spares'}${s.staff.ops >= 3 ? ' · on-call rotation ✓ (no more 3 AM pagers)' : ' · YOU carry the pager (3+ take it)'}${s.staff.ops >= 5 ? ' · burglar-proof ✓' : ''}`);
+    set('stafffx_sales', `now: ×${(1 + BAL.ADOPT_SALES_K * Math.log10(1 + s.staff.sales)).toFixed(2)} market adoption speed · ${
+      s.staff.sales >= 1 ? 'consulting pipeline running ✓ (gigs close themselves)'
+        : 'at 1+ they run consulting gigs for you'}`);
     const pb = document.getElementById('co-paper');
     if (pb) {
       const cost = E.paperCost(s);
