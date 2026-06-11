@@ -108,6 +108,11 @@ the Landauer limit, fusion ignition and orbital datacenters.
 - And entropy fights back: dead HBM, a 2 AM burglary your ops crew can foil, a flat white set on
   the test bench — and the rare rack fire that **actually burns in the pixel scene** for a day
   while insurance pays out. Sell old cards at 45% to clear slots and power for better silicon.
+- The roadmap stays a mystery: future accelerators, datasets and research eras are hidden behind
+  "???" teasers until your facility (or AGI) reveals them — and once revealed, they stay revealed.
+- Minigames don't repeat themselves: 50+ document types in Dedup Frenzy (including a leaked
+  benchmark test set — catch the contamination!), 14 RLHF failure modes sampled 5 at a time,
+  9 root causes in Node Hunt, and a freshly randomized stability ceiling for every LR ride.
 
 ## How to play
 
@@ -115,6 +120,8 @@ the Landauer limit, fusion ignition and orbital datacenters.
 - **Training** — pick parameters & tokens, watch the predicted capability, hit start.
 - **Hardware** — buy GPUs (GTX 1070 → H100 → B200 → custom silicon → photonic meshes → quantum pods); mind power & slots; upgrade the facility: garage → office → colo → hyperscale DC → 6 GW AI factory → orbital constellation.
 - **Research** — 43 real techniques across 5 eras, from BPE tokenization to Ω-Recursion.
+  RP funds a project; **your researchers then build it over time** (lab speed = 1 + researchers,
+  multiplied by AI research assistants) — watch the progress bar, hire to go faster.
 - **Company** — hire staff, buy datasets, publish papers, raise six rounds of funding.
 - **Goals** — a 32-step quest line from "first training run" to the Singularity (the post-AGI steps stay hidden until you get there), plus achievements.
 

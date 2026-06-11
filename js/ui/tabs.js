@@ -9,7 +9,7 @@ import * as E from '../core/engine.js';
 import { fmtMoney, fmtNum, fmtFlops, fmtFlop, fmtPower, fmtDur, fmtPct, fmtDate, clamp, log10 } from '../core/util.js';
 import { game, toast, showModal, closeModal, set, setBar, bar, esc, renderAll, switchTab, spawnFloat } from './ui.js';
 import { initScene } from './scene.js';
-import { mgHandlers, offerLrGame, offerDedup, playRlhf } from './minigames.js';
+import { mgHandlers, offerLrGame, offerDedup } from './minigames.js';
 
 export const ACTIONS = {};
 export const INPUTS = {};
@@ -348,7 +348,11 @@ const hwTab = {
       : '<div class="gold" style="margin-top:10px">This is the final facility. A hundred gigawatts of sunlight, all of it thinking.</div>'}
     </div>`;
 
-    const gpuCards = GPUS.map(g => {
+    // progressive disclosure: silicon beyond the current facility stays hidden —
+    // phase only grows, so a revealed card never re-hides
+    const visibleGpus = GPUS.filter(g => g.phase <= s.phase || (s.gpus[g.id] || 0) > 0);
+    const hiddenGpus = GPUS.length - visibleGpus.length;
+    const gpuCards = visibleGpus.map(g => {
       const owned = s.gpus[g.id] || 0;
       const locked = g.phase > s.phase || (g.research && !s.research.includes(g.research));
       const lockMsg = g.phase > s.phase ? `Requires ${FACILITIES[g.phase].name}` : (g.research && !s.research.includes(g.research)) ? `Requires research: ${RESEARCH_BY_ID[g.research].name}` : '';
@@ -378,10 +382,14 @@ const hwTab = {
       </div>`;
     }).join('');
 
+    const teaser = hiddenGpus ? `<div class="res-card locked">
+        <span class="rn">🔒 ???</span>
+        <div class="muted small">${hiddenGpus} more accelerator class${hiddenGpus > 1 ? 'es' : ''} await at bigger facilities. The roadmap goes further than you think.</div>
+      </div>` : '';
     return facHtml + `<div class="card"><h3>Accelerator market</h3>
       <p class="muted small">FLOPS win training races; VRAM bounds model size (~18 B/param); watts hit the power budget and the bill.
       Old cards resell at ${Math.round(BAL.SELL_RATIO * 100)}% of list — clear slots and power for better silicon.</p>
-      <div class="grid3">${gpuCards}</div></div>`;
+      <div class="grid3">${gpuCards}${teaser}</div></div>`;
   },
   update(s, sel) {
     set('hw-power', `${fmtPower(sel.powerUsed)} / ${fmtPower(sel.powerCap)}`);
@@ -444,7 +452,7 @@ ACTIONS.openSource = (id) => doAction(E.openSourceModel, id);
 // ════════════════════════ RESEARCH ════════════════════════
 const resTab = {
   id: 'res', label: '🔬 Research',
-  sig: (s) => [s.research.length, s.phase, Math.floor(s.bestCap)].join('|'),
+  sig: (s) => [s.research.length, s.phase, Math.floor(s.bestCap), s.resProj?.id, s.won, s.staff.researcher].join('|'),
   build(s, sel) {
     const fxDesc = (fx) => {
       const parts = [];
@@ -468,63 +476,79 @@ const resTab = {
       if (fx.unlock === 'autoRetrain') parts.push('unlocks AutoML');
       return parts.map(p => `<span class="fx-chip">${p}</span>`).join('');
     };
-    let html = `<div class="card"><div class="row" style="justify-content:space-between">
+    const proj = s.resProj;
+    const projDef = proj && RESEARCH_BY_ID[proj.id];
+    let html = `<div class="card"><div class="row" style="justify-content:space-between; flex-wrap:wrap; gap:6px">
       <h3 style="margin:0">Research — <span class="cyan num" id="res-rp"></span> RP <span class="faint">(+<span id="res-rate"></span>/h)</span></h3>
-      <span class="muted small">RP comes from research scientists + compute allocated to Research.</span>
-    </div></div>`;
-    for (let era = 0; era < ERA_NAMES.length; era++) {
+      <span class="muted small">RP funds a project; <b>your researchers then build it</b>.
+        Lab speed <b class="cyan" id="res-speed"></b> = 1 (Mario) + ${s.staff.researcher} researcher${s.staff.researcher === 1 ? '' : 's'}${sel.fx.rpMult > 1 ? ` × ${fmtNum(sel.fx.rpMult)} AI multiplier` : ''}.
+        <button class="act sub" data-act="hireResearcher">🧑‍🔬 Hire researcher</button></span>
+    </div>
+    ${projDef ? `<div class="run-card" style="margin-top:8px">
+        <div class="row" style="justify-content:space-between">
+          <span class="rname">🔬 ${esc(projDef.name)} <span class="faint">— in progress</span></span>
+          <span class="muted" id="res-proj-eta"></span>
+        </div>
+        ${bar('res-proj-bar', 'thin')}
+      </div>`
+      : '<div class="muted small" style="margin-top:6px">The lab bench is free — pick the next breakthrough below.</div>'}
+    </div>`;
+    // progressive disclosure: future eras stay hidden until the facility (and,
+    // for Beyond Silicon, AGI) is reached — once revealed they never re-hide,
+    // since phase/capability only ever grow.
+    const maxEra = Math.min(s.phase, s.won ? 4 : 3);
+    for (let era = 0; era <= maxEra && era < ERA_NAMES.length; era++) {
       const items = RESEARCH.filter(r => r.era === era);
-      html += `<div class="era-h">Era ${era + 1} — ${ERA_NAMES[era]} ${era > s.phase ? `🔒 requires ${FACILITIES[era].name}` : ''}</div>
+      html += `<div class="era-h">Era ${era + 1} — ${ERA_NAMES[era]}</div>
         ${era === 4 ? '<div class="muted small" style="margin:-2px 0 8px">Eras 1–4 are real, shipped techniques. Era 5 is speculative — but anchored to today\'s lab results and published roadmaps. Research an item to read where it actually stands (📚 the real thing).</div>' : ''}
         <div class="grid3">` + items.map(r => {
         const done = s.research.includes(r.id);
+        const active = proj && proj.id === r.id;
         const depsOk = (r.deps || []).every(d => s.research.includes(d));
         const capOk = !r.reqCap || s.bestCap >= r.reqCap;
-        const eraOk = r.era <= s.phase;
-        const locked = !done && (!depsOk || !capOk || !eraOk);
+        const locked = !done && !active && (!depsOk || !capOk);
         let lockMsg = '';
-        if (!eraOk) lockMsg = `needs ${FACILITIES[r.era].name}`;
-        else if (!depsOk) lockMsg = 'needs ' + (r.deps || []).filter(d => !s.research.includes(d)).map(d => RESEARCH_BY_ID[d].name).join(', ');
+        if (!depsOk) lockMsg = 'needs ' + (r.deps || []).filter(d => !s.research.includes(d)).map(d => RESEARCH_BY_ID[d].name).join(', ');
         else if (!capOk) lockMsg = `needs capability ${r.reqCap}`;
         return `<div class="res-card ${done ? 'done' : locked ? 'locked' : ''}">
           <div class="row" style="justify-content:space-between">
-            <span class="rn">${done ? '✅ ' : ''}${esc(r.name)}</span>
+            <span class="rn">${done ? '✅ ' : active ? '⏳ ' : ''}${esc(r.name)}</span>
             ${!done ? `<span class="num gold">${fmtNum(r.rp)} RP${r.money ? ' + ' + fmtMoney(r.money) : ''}</span>` : ''}
           </div>
           <div class="muted small">${esc(r.desc)}</div>
           <div>${fxDesc(r.fx)}</div>
-          ${!done && !locked ? `<button class="act" data-act="research" data-arg="${r.id}" id="resbtn_${r.id}">Research</button>` : ''}
+          ${!done && !locked && !active ? `<button class="act" data-act="research" data-arg="${r.id}" id="resbtn_${r.id}">Research</button>` : ''}
+          ${active ? '<div class="cyan small">⏳ the team is on it…</div>' : ''}
           ${locked ? `<div class="faint">🔒 ${esc(lockMsg)}</div>` : ''}
         </div>`;
       }).join('') + '</div>';
+    }
+    if (maxEra < ERA_NAMES.length - 1) {
+      html += `<div class="era-h" style="opacity:.55">Era ${maxEra + 2} — ???</div>
+        <div class="muted small">🔒 More research lies beyond. Grow the lab to reveal it.</div>`;
     }
     return html;
   },
   update(s, sel) {
     set('res-rp', fmtNum(s.rp));
     set('res-rate', fmtNum(sel.rpPerHour));
+    set('res-speed', '×' + fmtNum(E.resSpeed(s, sel)));
+    if (s.resProj) {
+      setBar('res-proj-bar', s.resProj.done / s.resProj.need);
+      set('res-proj-eta', 'ETA ' + fmtDur((s.resProj.need - s.resProj.done) / Math.max(1e-9, E.resSpeed(s, sel))));
+    }
     for (const r of RESEARCH) {
       const btn = document.getElementById('resbtn_' + r.id);
-      if (btn) btn.disabled = s.rp < r.rp || (r.money && s.money < r.money);
+      if (btn) {
+        btn.disabled = !!s.resProj || s.rp < r.rp || (r.money && s.money < r.money);
+        btn.title = s.resProj ? 'The lab is busy with another project' : '';
+      }
     }
   },
 };
-ACTIONS.research = (id) => {
-  const r = doAction(E.buyResearch, id);
-  if (r.ok && id === 'rlhf' && !game.s.stats.rlhfRated) {
-    game.s.stats.rlhfRated = 1;
-    playRlhf();                 // one-shot: train the reward model yourself
-    return;
-  }
-  // Beyond-Silicon techs come with a real-world explainer
-  const def = RESEARCH_BY_ID[id];
-  if (r.ok && def && def.real) {
-    showModal(`<h2>🔭 ${esc(def.name)}</h2>
-      <p>${esc(def.desc)}</p>
-      <p class="muted"><b>📚 The real thing:</b> ${esc(def.real)}</p>
-      <div class="actions"><button class="act big" data-act="closeModal">Back to the future</button></div>`);
-  }
-};
+// rlhf minigame + era-5 explainers fire when the project COMPLETES (main.js pump)
+ACTIONS.research = (id) => doAction(E.buyResearch, id);
+ACTIONS.hireResearcher = () => doAction(E.hire, 'researcher', 1);
 
 // ════════════════════════ COMPANY ════════════════════════
 const coTab = {
@@ -533,7 +557,8 @@ const coTab = {
   build(s, sel) {
     const staffRows = STAFF.map(st => `
       <tr>
-        <td><b>${esc(st.name)}</b><div class="faint">${esc(st.desc)}</div></td>
+        <td><b>${esc(st.name)}</b><div class="faint">${esc(st.desc)}</div>
+          <div class="small cyan" id="stafffx_${st.id}"></div></td>
         <td class="num">${fmtMoney(st.wage)}/h</td>
         <td class="num"><b id="staff_${st.id}">${s.staff[st.id]}</b></td>
         <td class="row" style="gap:4px; justify-content:flex-end">
@@ -544,7 +569,9 @@ const coTab = {
         </td>
       </tr>`).join('');
 
-    const dataRows = DATASETS.map((d, i) => {
+    // only the owned tiers + the next one are visible — the rest stays a mystery
+    const hiddenData = Math.max(0, DATASETS.length - (s.dataTier + 2));
+    const dataRows = DATASETS.filter((d, i) => i <= s.dataTier + 1).map((d, i) => {
       const owned = i <= s.dataTier;
       const isNext = i === s.dataTier + 1;
       const lockedRes = d.research && !s.research.includes(d.research);
@@ -556,9 +583,12 @@ const coTab = {
         <div class="muted small">${esc(d.desc)}</div>
         <div class="faint">${fmtNum(d.tokens)} tokens · quality ×${d.quality}</div>
         ${isNext && !lockedRes ? `<button class="act" data-act="buyData" data-arg="${d.id}" ${s.money < d.cost ? 'disabled' : ''}>Acquire</button>` : ''}
-        ${lockedRes && !owned ? '<div class="faint">🔒 needs Synthetic Data Research</div>' : ''}
+        ${lockedRes && !owned ? `<div class="faint">🔒 needs research: ${esc(RESEARCH_BY_ID[d.research]?.name || d.research)}</div>` : ''}
       </div>`;
-    }).join('');
+    }).join('') + (hiddenData ? `<div class="res-card locked">
+        <span class="rn">🔒 ???</span>
+        <div class="muted small">${hiddenData} richer data source${hiddenData > 1 ? 's' : ''} exist somewhere past this one.</div>
+      </div>` : '');
 
     const fundCards = FUNDING.map((f, i) => {
       const taken = s.funding.includes(f.id);
@@ -605,6 +635,11 @@ const coTab = {
     set('co-payroll', fmtMoney(sel.salaries) + '/h');
     set('co-rep', s.rep.toFixed(1) + ' / 100');
     for (const st of STAFF) set('staff_' + st.id, s.staff[st.id]);
+    // what your team is doing for you RIGHT NOW
+    set('stafffx_engineer', `now: +${fmtPct(Math.min(BAL.MFU_ENG_CAP, s.staff.engineer * BAL.MFU_PER_ENGINEER), 1)} MFU`);
+    set('stafffx_researcher', `now: research speed ×${fmtNum(E.resSpeed(s, sel))} · +${fmtNum(s.staff.researcher * BAL.RP_PER_RESEARCHER * sel.fx.rpMult)} RP/h`);
+    set('stafffx_ops', `now: −${fmtPct(Math.min(BAL.OPS_ELEC_CAP, s.staff.ops * BAL.OPS_ELEC_EACH))} electricity · ${s.staff.ops > 0 ? 'hot spares ✓' : 'no hot spares'}${s.staff.ops >= 5 ? ' · burglar-proof ✓' : ''}`);
+    set('stafffx_sales', `now: ×${(1 + BAL.ADOPT_SALES_K * Math.log10(1 + s.staff.sales)).toFixed(2)} market adoption speed`);
     const pb = document.getElementById('co-paper');
     if (pb) {
       const cost = E.paperCost(s);

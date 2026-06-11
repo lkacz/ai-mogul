@@ -81,9 +81,9 @@ export const STAFF = [
   { id: 'engineer', name: 'ML Engineer', wage: 55,
     desc: 'Optimizes kernels and pipelines: +0.4% MFU each (diminishing cap).' },
   { id: 'researcher', name: 'Research Scientist', wage: 95,
-    desc: 'Generates 1.2 research points per hour each.' },
+    desc: 'Generates 1.2 RP/h each — and every researcher speeds up the active research project.' },
   { id: 'ops', name: 'Infra / DC Ops', wage: 45,
-    desc: 'Keeps the fleet alive: −1.5% electricity cost each (max −45%).' },
+    desc: 'Keeps the fleet alive: −1.5% electricity each (max −45%), hot spares halve hardware attrition, 5+ deter burglars.' },
   { id: 'sales', name: 'GTM & Sales', wage: 50,
     desc: 'Sells the API: +4% demand each.' },
 ];

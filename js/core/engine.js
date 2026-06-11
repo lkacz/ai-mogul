@@ -41,6 +41,18 @@ export function step(s, hours = 1) {
   // 2. Research points
   s.rp += sel.rpPerHour * hours;
 
+  // 2b. Active research project — researchers (and AI assistants) build it
+  if (s.resProj) {
+    s.resProj.done += resSpeed(s, sel) * hours;
+    if (s.resProj.done >= s.resProj.need) {
+      const r = RESEARCH_BY_ID[s.resProj.id];
+      s.research.push(s.resProj.id);
+      (s.resDoneQueue = s.resDoneQueue || []).push({ id: s.resProj.id, realAt: Date.now() });
+      s.resProj = null;
+      if (r) pushNews(s, `🔬 Research complete: ${r.name}.`);
+    }
+  }
+
   // 3. Market adoption chases demand potential (sales staff accelerate it)
   s.adoption = Math.max(0,
     s.adoption + (sel.potential - s.adoption) * Math.min(1, sel.adoptRate * hours));
@@ -220,9 +232,17 @@ export function fire(s, id, n = 1) {
   return ok('Position eliminated. Exit interviews were awkward.');
 }
 
+// Project speed in lab-hours/hour: Mario + every researcher, times AI multipliers.
+export function resSpeed(s, sel) {
+  return (1 + s.staff.researcher) * sel.fx.rpMult;
+}
+// Lab-hours a project needs (sub-linear in RP so late eras stay sane).
+export function resWork(r) { return 2 * Math.pow(r.rp, 0.4); }
+
 export function buyResearch(s, id) {
   const r = RESEARCH_BY_ID[id]; if (!r) return err('Unknown research.');
   if (s.research.includes(id)) return err('Already researched.');
+  if (s.resProj) return err(`The lab is already deep in ${RESEARCH_BY_ID[s.resProj.id]?.name || 'a project'}.`);
   if (r.era > s.phase) return err('Requires a bigger facility (era-gated).');
   if (r.reqCap && s.bestCap < r.reqCap) return err(`Requires capability ${r.reqCap}.`);
   if ((r.deps || []).some(d => !s.research.includes(d))) return err('Missing prerequisite research.');
@@ -230,9 +250,9 @@ export function buyResearch(s, id) {
   if (r.money && s.money < r.money) return err('Not enough cash.');
   s.rp -= r.rp;
   if (r.money) { s.money -= r.money; s.stats.spent += r.money; }
-  s.research.push(id);
-  pushNews(s, `🔬 Research complete: ${r.name}.`);
-  return ok(`Researched ${r.name}.`);
+  s.resProj = { id, done: 0, need: resWork(r) };
+  pushNews(s, `🔬 Research started: ${r.name}. The whiteboards fill up.`);
+  return ok(`Research started: ${r.name}.`);
 }
 
 export function startRun(s, N, D, silent = false) {

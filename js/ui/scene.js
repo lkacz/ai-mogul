@@ -30,6 +30,12 @@ const QUIPS = {
     'The model rhymed. Unprompted. I\'m scared.',
     'I dreamt in tensors again.',
     'Eval is up 0.3! Don\'t touch ANYTHING.',
+    'Reviewer 2 strikes again.',
+    'My seed was lucky. I\'m citing the seed.',
+    'It\'s not overfitting, it\'s specializing.',
+    'The baseline beat us. Burying the baseline.',
+    'Day 40: the curve is still log-linear. Send snacks.',
+    'I asked it to prove a lemma. It asked for a raise.',
   ],
   engineer: [
     'I fused the kernels. All of them.',
@@ -38,6 +44,11 @@ const QUIPS = {
     'It\'s not a memory leak, it\'s a memory feature.',
     'NCCL timeout. NCCL timeout. NCC—',
     'The cluster speaks to me. It says "buy more".',
+    'Off by one. It\'s always off by one.',
+    'I profiled it. The bottleneck is physics.',
+    'Works on my node.',
+    'The fix was a sleep(1). I\'m not proud.',
+    'Deleted 400 lines today. Best commit of my life.',
   ],
   ops: [
     'Rack 12 is making the noise again.',
@@ -45,6 +56,11 @@ const QUIPS = {
     'Who unplugged the— oh no.',
     'Hot aisle\'s at sauna spec. Towels are extra.',
     'I named the chillers. Don\'t judge me.',
+    'Cable management is self-care.',
+    'The UPS beeped once. ONCE.',
+    'New ticket: "server is wet". Closing as won\'t-fix.',
+    'I can tell which rack it is by the smell.',
+    'Forklift certified, by the way.',
   ],
   sales: [
     'Just closed a seven-figure logo!',
@@ -52,8 +68,13 @@ const QUIPS = {
     'The demo was perfect until it started rhyming.',
     'Pipeline\'s looking THICC this quarter.',
     'I sold an SLA on vibes.',
+    'The customer wants it on-prem. In a submarine.',
+    'Renewal closed! They never even logged in.',
+    'Procurement said Q3. Their Q3, of next year.',
+    'I put "AGI-ready" on the slide. Legal is typing…',
   ],
-  cat: ['mrrp.', 'purrs at 3.2 kW.', '…', 'meow (this means "scale").'],
+  cat: ['mrrp.', 'purrs at 3.2 kW.', '…', 'meow (this means "scale").',
+    'sits on the warm rack. claims it.', 'mlem.', 'knocks a GPU off the shelf. slowly.'],
 };
 
 const ROLES = {

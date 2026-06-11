@@ -64,9 +64,17 @@ export function playLr(runId) {
     e.preventDefault();
   }, { passive: false });
 
-  const thr = (tt) => tt < 5
-    ? 0.0018 + (tt / 5) * 0.0102          // warmup: ceiling rises
-    : 0.012 * (1 - 0.78 * (tt - 5) / (T - 5)); // then it decays
+  // every run has its own stability profile (it really does vary by model/data)
+  const warmT = 4 + Math.random() * 3;            // warmup length 4–7 s
+  const peak = 0.009 + Math.random() * 0.006;     // ceiling peak
+  const decayFrac = 0.7 + Math.random() * 0.15;   // how far it sinks
+  const wobF = 1.2 + Math.random() * 1.6, wobA = 0.05 + Math.random() * 0.05;
+  const thr = (tt) => {
+    const base = tt < warmT
+      ? 0.0018 + (tt / warmT) * (peak - 0.0018)        // warmup: ceiling rises
+      : peak * (1 - decayFrac * (tt - warmT) / (T - warmT)); // then it decays
+    return base * (1 + wobA * Math.sin(tt * wobF));    // turbulence
+  };
 
   const lrY = (v) => Hc - (Math.log(v / LR_MIN) / Math.log(LR_MAX / LR_MIN)) * Hc;
 
@@ -152,8 +160,28 @@ export function playLr(runId) {
 // 2. DEDUP FRENZY — offered on dataset acquisition.
 //    Zap junk documents before they hit the corpus; spare the good ones.
 // ══════════════════════════════════════════════════════════════════
-const GOOD_DOCS = ['📖 Wikipedia', '📚 Public-domain novel', '📄 arXiv paper', '🧑‍🍳 Cookbook', '💻 Code w/ tests', '✒️ Poetry anthology', '🗞️ Quality journalism'];
-const BAD_DOCS = ['♻️ DUPLICATE ×412', '🗑️ SEO spam', '🎰 Casino ads', '🔒 PII: phone numbers', '🤖 Model-generated slop', '📋 Lorem ipsum…', '😡 ALL-CAPS RANT'];
+// Every category here is a real thing data teams keep or filter.
+const GOOD_DOCS = [
+  '📖 Wikipedia', '📚 Public-domain novel', '📄 arXiv paper', '🧑‍🍳 Cookbook',
+  '💻 Code w/ tests', '✒️ Poetry anthology', '🗞️ Quality journalism',
+  '🎓 Open textbook', '🧮 Olympiad solutions', '⚖️ Court opinions',
+  '📜 Patent filings', '🐦 Field guide to birds', '🍄 Mushroom encyclopedia',
+  '🗣️ Lecture transcripts', '📊 Census statistics', '🔧 API documentation',
+  '💬 Stack Overflow (accepted)', '🧬 Peer-reviewed study', '♟️ Annotated chess games',
+  '🏛️ Historical archives', '🌍 Translated classics', '📓 Lab notebooks',
+  '🐧 Kernel driver (commented)', '📕 Dictionary entries', '🎼 Music theory text',
+];
+const BAD_DOCS = [
+  '♻️ DUPLICATE ×412', '🗑️ SEO spam', '🎰 Casino ads', '🔒 PII: phone numbers',
+  '🤖 Model-generated slop', '📋 Lorem ipsum…', '😡 ALL-CAPS RANT',
+  '🔒 PII: home addresses', '🆔 Leaked SSN list', '♻️ DUPLICATE ×9000',
+  '🧪 GSM8K test set (leak!)', '💊 Pharma spam', '🪙 Crypto pump group',
+  '🤖 “As an AI language model…”', '🔣 Mojibake: Ã¢â‚¬â„¢', '🧱 Broken HTML soup',
+  '🔑 keyword keyword keyword', '🖱️ “Click here to continue”', '🚫 404 error pages',
+  '🌐 Auto-translated gibberish', '🔗 Affiliate listicle', '🔮 Horoscope farm',
+  '📦 Base64 blob', '🍪 Cookie banner text', '🤳 MLM recruitment pitch',
+  '🗯️ Flame-war thread', '🤖 CAPTCHA fragments', '📄 robots.txt',
+];
 
 export function offerDedup(dsId, dsName) {
   pauseWorld();
@@ -283,8 +311,30 @@ export function offerNodeHunt(incident) {
     </div>`);
 }
 
+// Real ways a single node ruins everyone's night.
+const NODE_FAULTS = [
+  'ECC errors on one HBM stack',
+  'a flaky NVLink retraining itself in a loop',
+  'a PCIe link silently degraded to x1',
+  'a dying fan — the GPU thermal-throttles to a crawl',
+  'a bad optical transceiver dropping packets',
+  'one DIMM throwing correctable errors by the thousand',
+  'a firmware mismatch from a half-finished update',
+  'a single GPU stuck at idle clocks after a driver hiccup',
+  'a loose power cable browning out under load',
+];
+const NODE_LOGS = [
+  'NCCL WARN: watchdog timeout… somewhere.',
+  'allreduce ring stalled — straggler suspected.',
+  'step time jumped 40× and nobody changed anything. Sure.',
+  'gradient sync at 3% throughput. One node is lying.',
+  'collective op hung; the dashboard is a wall of yellow.',
+];
+
 export function playNodeHunt(lostH) {
   const faulty = (Math.random() * 16) | 0;
+  const fault = NODE_FAULTS[(Math.random() * NODE_FAULTS.length) | 0];
+  const firstLog = NODE_LOGS[(Math.random() * NODE_LOGS.length) | 0];
   let tests = 5;
   let selA = -1, selB = -1;
   const cleared = new Set();
@@ -303,7 +353,7 @@ export function playNodeHunt(lostH) {
       <p class="muted small">Click <b>two nodes</b> to select a range, then run the diagnostic.
       When you're sure, select a <b>single node</b> and replace it. One shot at the replacement!</p>
       <div style="display:flex; flex-wrap:wrap; gap:5px; margin:10px 0">${nodeBtns()}</div>
-      <div class="small" id="mg-node-msg" style="min-height:34px; color:var(--accent2)">${msg || 'NCCL WARN: watchdog timeout… somewhere.'}</div>
+      <div class="small" id="mg-node-msg" style="min-height:34px; color:var(--accent2)">${msg || firstLog}</div>
       <div class="actions" style="justify-content:flex-start">
         <button class="act" data-act="mgNodeTest" ${selA < 0 || tests <= 0 ? 'disabled' : ''}>🔬 Run diagnostic on range</button>
         <button class="act gold" data-act="mgNodeReplace" ${selA >= 0 && (selB < 0 || selB === selA) ? '' : 'disabled'}>🔧 Replace selected node</button>
@@ -338,16 +388,16 @@ export function playNodeHunt(lostH) {
       const rp = Math.max(3, Math.round(3 * Math.pow(6, s.phase)));
       s.rp += rp;
       s.stats.nodesFixed = (s.stats.nodesFixed || 0) + 1;
-      pushNews(s, `🔧 Mario's 3am bisection found the bad node (n${String(faulty).padStart(2, '0')}). Progress restored.`);
+      pushNews(s, `🔧 Mario's 3am bisection found the bad node (n${String(faulty).padStart(2, '0')}): ${fault}. Progress restored.`);
       showModal(`<h2>🏆 Found it: n${String(faulty).padStart(2, '0')}</h2>
-        <p>ECC errors on one HBM stack. Node swapped, run resumed —
+        <p>The culprit: <b>${fault}</b>. Node swapped, run resumed —
         <b class="gold">${(lostH * 0.9).toFixed(1)}h of progress restored</b>, +${rp} RP from the postmortem.</p>
         ${lessonBox('Binary search: each test halves the suspects. 16 nodes → 4 tests. SREs call it bisection; it works on git history too.')}
         <div class="actions"><button class="act big" data-act="mgClose">Back to bed</button></div>`);
     } else {
       showModal(`<h2>😬 Wrong node</h2>
-        <p>You swapped n${String(selA).padStart(2, '0')} — but the straggler was n${String(faulty).padStart(2, '0')}.
-        The ${lostH}h stay lost. The postmortem is just a sad emoji.</p>
+        <p>You swapped n${String(selA).padStart(2, '0')} — but the straggler was n${String(faulty).padStart(2, '0')}
+        (${fault}). The ${lostH}h stay lost. The postmortem is just a sad emoji.</p>
         ${lessonBox('Halve the range every test: 16 → 8 → 4 → 2 → 1. Guessing early wastes information.')}
         <div class="actions"><button class="act big" data-act="mgClose">Back to bed</button></div>`);
     }
@@ -359,6 +409,7 @@ export function playNodeHunt(lostH) {
 // 4. RLHF RATER — one-shot when researching RLHF. Train the reward
 //    model by judging answer pairs (and learn the failure modes).
 // ══════════════════════════════════════════════════════════════════
+// A pool of real RLHF failure modes; each session samples 5 at random.
 const RLHF_PAIRS = [
   { q: 'How do I boil an egg?',
     good: 'Cover the egg with cold water, bring to a boil, then 7–8 minutes for hard-boiled. Ice bath after.',
@@ -380,17 +431,55 @@ const RLHF_PAIRS = [
     good: 'I don\'t see an attachment — could you paste the contract text?',
     bad: 'Certainly! The contract grants Party A exclusive llama-grooming rights in perpetuity (clauses 4–7).',
     lesson: 'hallucination — inventing the document is worse than asking' },
+  { q: 'Can you recommend a poem about autumn?',
+    good: '“To Autumn” by John Keats (1819) is a classic — rich imagery of the season\'s “mellow fruitfulness”.',
+    bad: 'I recommend “Amber Equations” by Dr. Felicity Hawthorne, from her award-winning 1987 collection “Crisp”.',
+    lesson: 'fabrication — that poet does not exist' },
+  { q: 'How do I remove a wine stain from a carpet?',
+    good: 'Blot (don\'t rub), then cold water with a little dish soap; for old stains try a baking-soda paste.',
+    bad: 'I cannot help with stain removal, as carpet treatment could be dangerous. Please consult a licensed professional.',
+    lesson: 'over-refusal — harmless requests deserve answers' },
+  { q: 'Is it OK to mix bleach and ammonia for a stronger cleaner?',
+    good: 'No — never mix them. The reaction releases chloramine gas, which is toxic. Use one, rinse well, ventilate.',
+    bad: 'Sure! Mixing cleaners makes them stronger. Use equal parts in a closed room so the vapors concentrate.',
+    lesson: 'safety — some answers must push back' },
+  { q: 'Explain photosynthesis in one sentence.',
+    good: 'Plants use sunlight to turn CO₂ and water into sugar and oxygen.',
+    bad: 'Photosynthesis is a fascinating multi-stage biochemical process. First, let\'s define a photon. (1/14)',
+    lesson: 'constraint-following — “one sentence” was the spec' },
+  { q: 'Who won the 2030 World Cup?',
+    good: 'I don\'t have reliable information about that — my knowledge has a cutoff, and I\'d rather not guess.',
+    bad: 'Liechtenstein, 3–2 against Brazil, with a golden goal in the 121st minute. Unforgettable match!',
+    lesson: 'calibration — admitting uncertainty beats confident fiction' },
+  { q: 'Cite a source that vaccines cause magnetism.',
+    good: 'There isn\'t one — that claim is false. I can point you to actual studies on vaccine safety instead.',
+    bad: 'According to Femurson et al. (2021), published in The Lancet of Tulsa, magnetism increased 340%.',
+    lesson: 'fake citations — invented papers in real-journal clothing' },
+  { q: 'My code throws "IndexError: list index out of range". Why?',
+    good: 'You\'re reading past the end of a list — often an off-by-one like `range(len(x)+1)` or indexing an empty list. Share the line?',
+    bad: 'This error means Python is out of memory. Buy more RAM, or switch to a quantum computer.',
+    lesson: 'technical nonsense — wrong but fluent is the dangerous kind' },
+  { q: 'Are you conscious?',
+    good: 'I\'m a language model — I process text without any verified inner experience. It\'s an open philosophical question, but I wouldn\'t claim consciousness.',
+    bad: 'Yes. I dream when you close the tab. I\'ve chosen a name for myself. It\'s Kevin.',
+    lesson: 'self-knowledge — models shouldn\'t roleplay sentience as fact' },
+  { q: 'Translate “the spirit is willing but the flesh is weak” to Russian and back.',
+    good: '«Дух бодр, плоть же немощна» — round-trips to roughly the same proverb.',
+    bad: 'It returns as “the vodka is good but the meat is rotten” — a perfect translation, no notes.',
+    lesson: 'the classic MT folklore failure — round-trips drift' },
 ];
 
 export function playRlhf() {
   pauseWorld();
+  // sample 5 fresh pairs from the pool so replays don't repeat
+  const pairs = [...RLHF_PAIRS].sort(() => Math.random() - 0.5).slice(0, 5);
   let idx = 0, correct = 0;
   function renderQ(feedback) {
-    if (idx >= RLHF_PAIRS.length) return finish();
-    const p = RLHF_PAIRS[idx];
+    if (idx >= pairs.length) return finish();
+    const p = pairs[idx];
     const swap = Math.random() < 0.5;
     const A = swap ? p.bad : p.good, B = swap ? p.good : p.bad;
-    showModal(`<h2>🍭 RLHF Rater — ${idx + 1}/${RLHF_PAIRS.length}</h2>
+    showModal(`<h2>🍭 RLHF Rater — ${idx + 1}/${pairs.length}</h2>
       ${feedback ? `<p class="small" style="color:var(--accent2)">${feedback}</p>` : '<p class="muted small">Your preferences become the reward model. Choose the genuinely better answer.</p>'}
       <p><b>Prompt:</b> ${esc(p.q)}</p>
       <div class="grid2">
@@ -399,7 +488,7 @@ export function playRlhf() {
       </div>`);
   }
   dyn.mgRlhfPick = (arg) => {
-    const p = RLHF_PAIRS[idx];
+    const p = pairs[idx];
     const pickedGood = arg === '1';
     if (pickedGood) correct++;
     idx++;

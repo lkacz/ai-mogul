@@ -207,8 +207,8 @@ function renderTicker() {
 // Badges: how many things await you behind each tab (buyable research,
 // fundable rounds, an affordable facility upgrade). Progress made visible.
 function tabBadges(s, sel) {
-  const res = RESEARCH.filter(r =>
-    !s.research.includes(r.id) && r.era <= s.phase &&
+  const res = s.resProj ? 0 : RESEARCH.filter(r =>
+    !s.research.includes(r.id) && r.era <= s.phase && (r.era < 4 || s.won) &&
     (!r.deps || r.deps.every(d => s.research.includes(d))) &&
     (!r.reqCap || s.bestCap >= r.reqCap) &&
     s.rp >= r.rp && (!r.money || s.money >= r.money)).length;

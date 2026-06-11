@@ -27,6 +27,8 @@ export function defaultState() {
     dataTier: 0,
     dataQBonus: {},    // dataset id -> quality multiplier from Dedup Frenzy
     research: [],                                // completed research ids
+    resProj: null,     // active research project { id, done, need } (lab-hours)
+    resDoneQueue: [],  // completed research ids awaiting UI follow-up {id, realAt}
     funding: [],                                 // taken round ids
     lastFundingH: -1e9,                          // sim-hour the last round closed
 

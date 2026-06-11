@@ -5,11 +5,12 @@ import * as E from './core/engine.js';
 import { BAL, capTier } from './core/balance.js';
 import { MILESTONE_BY_ID, rewardText } from './core/milestones.js';
 import { fmtMoney, fmtNum, fmtDur, fmtDate, fmtFlop } from './core/util.js';
-import { game, renderAll, initDispatch, toast, showModal, closeModal } from './ui/ui.js';
+import { game, renderAll, initDispatch, toast, showModal, closeModal, esc } from './ui/ui.js';
 import { ACTIONS } from './ui/tabs.js';
 import { celebrate } from './ui/scene.js';
-import { offerNodeHunt } from './ui/minigames.js';
+import { offerNodeHunt, playRlhf } from './ui/minigames.js';
 import { playSingularity } from './ui/singularity.js';
+import { RESEARCH_BY_ID } from './core/research.js';
 
 // ── Load / new game ───────────────────────────────────────────────
 function load() {
@@ -212,6 +213,31 @@ function pumpCelebrations() {
   lastBestCap = s.bestCap;
 }
 
+// ── Research completions → toast + follow-ups (explainer / RLHF game) ──
+function pumpResearchDone() {
+  const q = s.resDoneQueue;
+  if (!q || !q.length) return;
+  if (!document.getElementById('modal-root').classList.contains('hidden')) return;
+  const item = q.shift();
+  const def = RESEARCH_BY_ID[item.id];
+  if (!def) return;
+  toast(`🔬 <b>Research complete: ${esc(def.name)}</b>`, 'mile');
+  // follow-ups only for a player who's actually here (not offline catch-up)
+  const fresh = Date.now() - (item.realAt || 0) < 90 * 1000;
+  if (!fresh || document.hidden) return;
+  if (item.id === 'rlhf' && !s.stats.rlhfRated) {
+    s.stats.rlhfRated = 1;
+    playRlhf();               // one-shot: train the reward model yourself
+    return;
+  }
+  if (def.real) {
+    showModal(`<h2>🔭 ${esc(def.name)}</h2>
+      <p>${esc(def.desc)}</p>
+      <p class="muted"><b>📚 The real thing:</b> ${esc(def.real)}</p>
+      <div class="actions"><button class="act big" data-act="closeModal">Back to the future</button></div>`);
+  }
+}
+
 // ── Dramatic incidents (fires, theft, dead hardware) → toast ──────
 function pumpDrama() {
   const d = s.lastDrama;
@@ -254,6 +280,7 @@ setInterval(() => {
   pumpMilestoneToasts();
   pumpCelebrations();
   pumpDrama();
+  pumpResearchDone();
   pumpIncidents();
   maybeShowWin();
   maybeShowSingularity();
