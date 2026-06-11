@@ -67,12 +67,16 @@ export const FACILITIES = [
   // ppMult: the facility IS the interconnect at this scale — it raises the
   // batch-size wall. marketMult: a Kardashev-II economy doesn't sell API
   // calls; the addressable market is energy and matter compilation.
+  // marketMult is deliberately modest: even a Kardashev economy can't sell
+  // infinite API calls — past AGI, money decouples from what matters, and the
+  // ledger shouldn't explode into absurdity (it used to hit quintillions).
+  // Upkeep grows with the machine: fabricator fleets, orbit-keeping, feedstock.
   { id: 'dyson', name: 'Dyson Swarm', cost: 40e12, slots: 1e9, powerW: 4e17, staffMax: 100e3,
-    pue: 1.0, elecPrice: 0.0001, upkeep: 1e8, ppMult: 30, marketMult: 100, research: 'vonNeumann',
+    pue: 1.0, elecPrice: 0.0001, upkeep: 1e10, ppMult: 30, marketMult: 20, research: 'vonNeumann',
     desc: 'Kardashev Type II begins: a self-replicating swarm of collector-computers around the Sun. 400 PW and doubling — sunlight in, thought out.',
     story: 'The seed factory lands on Mercury and builds two of itself. Forty doublings later, a million mirrored collectors leave the foundries every day, and the Sun grows a faint lattice of shadows. Observatories on three continents report the infrared excess Freeman Dyson told them to look for in 1960. It is not aliens. It is the lab.' },
-  { id: 'lattice', name: 'Omega Lattice', cost: 2.5e15, slots: 1e12, powerW: 1e36, staffMax: 500e3,
-    pue: 1.0, elecPrice: 0, upkeep: 1e10, ppMult: 8000, marketMult: 10000, research: 'lloydCore',
+  { id: 'lattice', name: 'Omega Lattice', cost: 1e15, slots: 1e12, powerW: 1e36, staffMax: 500e3,
+    pue: 1.0, elecPrice: 0, upkeep: 1e12, ppMult: 8000, marketMult: 400, research: 'lloydCore',
     desc: 'Kardashev Type III: computation woven between the stars — black-hole batteries (Penrose, 1969), cores at the Lloyd limit, thought as a property of spacetime.',
     story: 'The swarm ships seeds to a thousand stars, and the seeds ship seeds. Around a spinning black hole, the first Penrose engines drink rotational energy — the best battery physics permits. The lattice runs on its own clock now; your dashboard just rolls over. Somewhere in the dark between galaxies, matter is being asked, politely, to think.' },
 ];
@@ -120,9 +124,11 @@ export const FUNDING = [
     desc: 'A real venture round. The partners want to see scaling curves.' },
   { id: 'seriesB', name: 'Series B', amount: 300e6, reqCap: 40, reqRep: 40, rep: 10, gapDays: 120,
     desc: 'Growth capital for serious compute. Your data room is mostly loss curves.' },
-  { id: 'seriesC', name: 'Series C', amount: 5e9, reqCap: 55, reqRep: 60, rep: 10, gapDays: 180,
+  // late gaps stay short enough that the chain completes before the endgame —
+  // the early gaps (A/B) are the real economic brake; these are story beats
+  { id: 'seriesC', name: 'Series C', amount: 5e9, reqCap: 55, reqRep: 60, rep: 10, gapDays: 120,
     desc: 'Sovereign funds and hyperscalers fight for allocation. You pick the quiet ones.' },
-  { id: 'sovereign', name: 'Sovereign Megaround', amount: 80e9, reqCap: 70, reqRep: 78, rep: 12, gapDays: 270,
+  { id: 'sovereign', name: 'Sovereign Megaround', amount: 80e9, reqCap: 70, reqRep: 78, rep: 12, gapDays: 150,
     desc: 'Nation-state capital for the Factory. The term sheet has a foreword.' },
   { id: 'ipo', name: 'The IPO', amount: 2e12, reqCap: 100, reqRep: 90, rep: 10, gapDays: 120,
     desc: 'The largest public offering in history. The prospectus risk section just says "see: the singularity".' },
