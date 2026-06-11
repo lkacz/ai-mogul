@@ -435,7 +435,7 @@ export function resolveDilemma(s, optIdx) {
       buff: out.buff,
     });
   }
-  return ok('The decision is made. Time will tell.');
+  return ok('The decision is made.');
 }
 
 // Deliver a scheduled consequence (called by the UI's real-time pump, and by

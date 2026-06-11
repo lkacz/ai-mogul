@@ -280,8 +280,7 @@ function pumpDilemma() {
   showModal(`<h2>⚖️ ${esc(d.title)}</h2>
     <p>${text}</p>
     <p class="muted small"><b>📚 The real debate:</b> ${esc(d.real)}</p>
-    <div class="row" style="gap:10px; margin-top:10px; align-items:stretch">${btn(order[0])}${btn(order[1])}</div>
-    <p class="faint small" style="margin-top:8px">No highlighted answer. The consequences arrive later — they usually do.</p>`);
+    <div class="row" style="gap:10px; margin-top:10px; align-items:stretch">${btn(order[0])}${btn(order[1])}</div>`);
 }
 ACTIONS.dilemma = (arg) => {
   const r = E.resolveDilemma(s, +arg);
