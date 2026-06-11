@@ -37,7 +37,7 @@ const labTab = {
   id: 'lab', label: '🏠 Lab',
   // news + quotes update in place (below) — putting them in the sig made the
   // whole tab (scene canvas included) rebuild constantly, eating clicks
-  sig: (s, sel) => [s.phase, s.runs.length, s.models.length, sel.deployed?.id].join('|'),
+  sig: (s, sel) => [s.phase, s.runs.length, s.models.length, sel.deployed?.id, +game.founderPending].join('|'),
   build(s, sel) {
     const runsHtml = s.runs.length ? s.runs.map(r => {
       return `<div class="run-card">
@@ -70,7 +70,14 @@ const labTab = {
     </div>
     <div class="grid2">
       <div>
-        <div class="card">
+        ${game.founderPending ? `<div class="card">
+          <div class="row" style="gap:14px">
+            <div style="font-size:40px">🚪</div>
+            <div><b class="muted">…</b>
+              <div class="muted" style="font-style:italic; margin-top:3px">The garage waits for someone to walk in.</div>
+            </div>
+          </div>
+        </div>` : `<div class="card">
           <div class="row" style="gap:14px">
             <div style="font-size:40px">${founderOf(s).emoji}</div>
             <div>
@@ -78,7 +85,7 @@ const labTab = {
               <div class="muted" style="font-style:italic; margin-top:3px" id="founder-quote">“${esc(founderOf(s).quotes[quoteIdx % founderOf(s).quotes.length])}”</div>
             </div>
           </div>
-        </div>
+        </div>`}
         <div class="card">
           <h3>Side hustle</h3>
           <div class="row">

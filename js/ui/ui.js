@@ -20,6 +20,7 @@ export const game = {
   holdActive: false,  // press-and-hold auto-repeat in progress
   holdMult: 1,        // its accelerating quantity multiplier
   swallowClick: false,
+  founderPending: false,  // true until the player picks who walks into the garage
 };
 
 const $ = (id) => document.getElementById(id);

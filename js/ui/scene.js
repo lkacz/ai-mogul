@@ -321,7 +321,9 @@ function spawn(role) {
 }
 
 function syncPopulation(s) {
-  const want = { mario: 1 };
+  // until the player decides who walks in, nobody has walked in —
+  // the garage waits empty behind the founder-choice card
+  const want = game.founderPending ? {} : { mario: 1 };
   if (s.phase >= 1) {
     want.researcher = clamp(s.staff.researcher, 0, 4);
     want.engineer = clamp(s.staff.engineer, 0, 3);
@@ -456,6 +458,38 @@ function drawPerson(ctx, c, t) {
   }
   if (aug >= 2 && aug < 6) P(ctx, x + 3, y0 + 1, 1, 1,
     Math.sin(t * 2.2 + c.seed) > 0 ? '#a78bfa' : '#574a7a');        // neural implant
+}
+
+// Big standing portrait for the founder-choice cards — day one, fully human,
+// same pixel geometry as drawPerson at augmentation 0. CSS scales it up
+// (image-rendering: pixelated keeps the chunky look).
+export function drawFounderPortrait(cv, founderId) {
+  const r = (FOUNDERS[founderId] || FOUNDERS.mario).sprite;
+  cv.width = 26; cv.height = 34;
+  const ctx = cv.getContext('2d');
+  const x = 13, y0 = 7, fy = y0 + 20;
+  P(ctx, x - 4, fy - 1, 9, 2, 'rgba(0,0,0,.30)');            // shadow
+  P(ctx, x - 3, fy - 6, 2, 6, r.pants);                      // legs
+  P(ctx, x + 1, fy - 6, 2, 6, r.pants);
+  P(ctx, x - 3, y0 + 6, 7, 8, r.top);                        // torso
+  P(ctx, x - 4, y0 + 7, 1, 5, r.top);                        // arms
+  P(ctx, x + 4, y0 + 7, 1, 5, r.top);
+  P(ctx, x - 2, y0, 5, 6, r.skin);                           // head
+  if (r.curls) {
+    P(ctx, x - 3, y0 - 2, 7, 3, r.hair);
+    P(ctx, x - 3, y0 + 1, 1, 2, r.hair);
+    P(ctx, x + 3, y0 + 1, 1, 2, r.hair);
+    P(ctx, x - 2, y0 - 3, 2, 1, r.hair); P(ctx, x + 1, y0 - 3, 2, 1, r.hair);
+  } else if (r.hoodie) {
+    P(ctx, x - 2, y0 - 1, 5, 2, r.hair);                     // short hair
+    P(ctx, x - 4, y0 - 1, 1, 7, r.top);                      // hood draped
+    P(ctx, x + 4, y0 - 1, 1, 7, r.top);
+    P(ctx, x - 3, y0 - 2, 7, 1, r.top);                      // hood over the crown
+    P(ctx, x - 2, y0 + 9, 5, 2, '#79828f');                  // kangaroo pocket
+  } else {
+    P(ctx, x - 2, y0 - 1, 5, 2, r.hair);
+  }
+  if (r.glasses) P(ctx, x - 2, y0 + 2, 5, 1, '#1c2430');
 }
 
 function drawCat(ctx, c, t) {
