@@ -139,6 +139,20 @@ await check('save persists across reload', async () => {
   if (!(money > 0)) throw new Error('simHours not persisted');
 });
 
+await check('singularity → big-bang animation → ending modal', async () => {
+  await page.evaluate(() => {
+    const s = window.AIMOGUL.s;
+    s.bestCap = 200.5; s.singularity = true; s.singularityAt = s.simHours;
+  });
+  await page.waitForSelector('#singularity-canvas', { timeout: 5000 });
+  await page.waitForTimeout(2400);
+  await page.click('#singularity-canvas');           // skip the cinematic
+  await page.waitForSelector('#modal-root .modal', { timeout: 5000 });
+  const txt = await page.textContent('#modal-root .modal');
+  if (!txt.includes('SINGULARITY')) throw new Error('ending modal missing');
+  await page.click('#modal-root [data-act=closeModal]');
+});
+
 await check('no console or page errors', async () => {
   const real = errors.filter(e => !e.includes('favicon'));
   if (real.length) throw new Error(real.slice(0, 3).join(' | '));

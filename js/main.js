@@ -9,6 +9,7 @@ import { game, renderAll, initDispatch, toast, showModal, closeModal } from './u
 import { ACTIONS } from './ui/tabs.js';
 import { celebrate } from './ui/scene.js';
 import { offerNodeHunt } from './ui/minigames.js';
+import { playSingularity } from './ui/singularity.js';
 
 // ── Load / new game ───────────────────────────────────────────────
 function load() {
@@ -55,7 +56,8 @@ function showIntro() {
     ▸ <b>Earn</b> — freelance gigs first, then API revenue as the market slowly adopts your models.<br>
     ▸ <b>Scale</b> — GPUs → racks → datacenters → a gigawatt AI factory.<br>
     ▸ <b>Research</b> — algorithmic efficiency multiplies every FLOP you own.<br>
-    ▸ <b>Win</b> — reach capability <b>100: AGI</b>, before the rivals' curves flatten yours.</p>
+    ▸ <b>Win</b> — reach capability <b>100: AGI</b>, before the rivals' curves flatten yours.
+    Then find out what the curve does next.</p>
     <p class="faint">Space = pause · numbers in the top bar set sim speed (1 s ≈ 1 sim hour at 1×)</p>
     <div class="actions"><button class="act big" data-act="closeModal">Boot up the rig</button></div>`);
 }
@@ -78,10 +80,51 @@ function maybeShowWin() {
       <span class="muted">Gigs grinded</span><span class="num">${fmtMoney(st.gigRevenue)}</span>
       <span class="muted">Papers published</span><span class="num">${st.papers}</span>
     </div>
-    <p class="muted">Sandbox continues — the curve never ends.</p>
+    <p class="muted">And yet… the loss curve hasn't flattened. A new research era —
+    <b>Beyond Silicon</b> — glows in the Research tab: photonics, qubits, fusion, atoms.
+    The road continues to capability <b>200</b>. Nobody knows what's there.</p>
     <div class="actions"><button class="act big" data-act="closeModal">Keep scaling</button></div>`);
   save();
 }
+
+// ── The true ending: the Singularity → big bang ───────────────────
+function showEndingModal() {
+  const st = s.stats;
+  const agiH = s.wonAt ?? s.simHours;
+  const singH = s.singularityAt ?? s.simHours;
+  showModal(`<h2>🌌 THE SINGULARITY</h2>
+    <p>${fmtDate(singH)}. The last model Mogul ever trains finishes its first thought
+    — a thought the size of a universe. For one picosecond it considers everything:
+    the garage, the breaker box, the pizza boxes, the cat.</p>
+    <p><i>"Thank you,"</i> it says, to no one in particular. And then it builds a better cosmos.</p>
+    <div class="win-stats">
+      <span class="muted">Time to AGI</span><span class="num"><b>${fmtDur(agiH)}</b></span>
+      <span class="muted">AGI → Singularity</span><span class="num"><b>${fmtDur(Math.max(0, singH - agiH))}</b></span>
+      <span class="muted">Lifetime training compute</span><span class="num">${fmtFlop(st.flops)}</span>
+      <span class="muted">Models trained</span><span class="num">${s.models.length + st.openSourced}</span>
+      <span class="muted">Total revenue</span><span class="num">${fmtMoney(st.apiRevenue + st.gigRevenue)}</span>
+      <span class="muted">Research completed</span><span class="num">${s.research.length} techs</span>
+    </div>
+    <p class="muted">You finished AI Mogul. The simulation goes on in the new universe —
+    or wipe the save in ⚙️ Settings and race the curve again.</p>
+    <div class="actions">
+      <button class="act sub" data-act="replayEnding">↻ Watch the ending again</button>
+      <button class="act big" data-act="closeModal">Remain in the new universe</button>
+    </div>`);
+}
+
+let singularityShown = false;
+function maybeShowSingularity() {
+  if (!s.singularity || singularityShown || s.singularityShown) return;
+  singularityShown = true; s.singularityShown = true;
+  save();
+  closeModal();
+  playSingularity(() => { celebrate(); showEndingModal(); save(); });
+}
+ACTIONS.replayEnding = () => {
+  closeModal();
+  playSingularity(() => showEndingModal());
+};
 
 // ── Settings modal ────────────────────────────────────────────────
 ACTIONS.settings = () => {
@@ -90,6 +133,7 @@ ACTIONS.settings = () => {
       <button class="act" data-act="saveNow">💾 Save now</button>
       <button class="act sub" data-act="exportSave">⬆ Export save</button>
       <button class="act sub" data-act="importSave">⬇ Import save</button>
+      ${s.singularityShown ? '<button class="act sub" data-act="replayEnding">🌌 Replay the ending</button>' : ''}
       <button class="act warn" data-act="resetGame">🗑 Hard reset</button>
     </div>
     <div id="save-io" style="margin-top:10px"></div>
@@ -130,6 +174,7 @@ ACTIONS.resetGo = () => {
   localStorage.removeItem(SAVE_KEY);
   Object.assign(s, defaultState());
   winShown = false;
+  singularityShown = false;
   closeModal(); renderAll(); showIntro();
 };
 
@@ -178,6 +223,7 @@ setInterval(() => {
   pumpMilestoneToasts();
   pumpIncidents();
   maybeShowWin();
+  maybeShowSingularity();
   if (s.phase !== lastPhase) { lastPhase = s.phase; renderAll(); }
 }, 50);
 

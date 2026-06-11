@@ -65,6 +65,22 @@ export const EVENTS = [
   { id: 'enterprise', weight: 5, minPhase: 1,
     apply: (s) => { const amt = scaledMoney(s, 3000); s.money += amt; return amt; },
     text: (s, amt) => `🤝 An enterprise signs an annual API contract upfront: +${fmtMoney(amt)}.` },
+  { id: 'qHype', weight: 5, minPhase: 4,
+    buff: { label: 'Quantum-AI hype', demand: 1.8, hours: 48 },
+    text: () => '🪐 "Quantum AI" trends worldwide after your keynote — demand +80% for 48h.' },
+  { id: 'flare', weight: 6, minPhase: 5,
+    apply: (s, sel) => {
+      const lostH = sel.fx.outageGuard ? 1 : 4;
+      for (const r of s.runs) {
+        const rate = sel.trainRate / Math.max(1, s.runs.length);
+        r.physDone = Math.max(0, r.physDone - rate * 3600 * lostH);
+      }
+      if (s.runs.length) s.lastIncident = { lostH, realAt: Date.now() };
+      return lostH;
+    },
+    text: (s, h) => h <= 1
+      ? '☀️ Solar flare! Rad-hardened checkpoints hold — the constellation loses only 1h.'
+      : '☀️ Solar flare! The constellation safes itself for 4 hours of training while the particle storm passes.' },
 ];
 
 // Real, checkable facts — surfaced occasionally in the news ticker.
@@ -81,6 +97,16 @@ export const FACTS = [
   '💡 Real fact: in synchronous training, one slow GPU ("straggler") stalls all of them — finding it is literal binary search.',
   '💡 Real fact: RLHF tunes models against a reward model trained from human preference pairs — typical failure mode: sycophancy.',
   '💡 Real fact: frontier training runs take months; a mid-run loss spike can mean restarting from a checkpoint days back.',
+  '💡 Real fact: photonic chips multiply matrices with light interference — near-zero heat per operation; optical interconnects already link AI racks.',
+  '💡 Real fact: Google\'s Willow chip (2024) showed error-corrected qubits improving as you add more — the key threshold for scalable quantum computing.',
+  '💡 Real fact: your brain runs on ~20 watts. Neuromorphic chips (Intel Loihi 2, IBM NorthPole) chase that efficiency by computing only on "spikes".',
+  '💡 Real fact: Landauer\'s principle — erasing one bit costs at least kT·ln2 ≈ 3×10⁻²¹ J. Today\'s chips run ~1000× above that floor.',
+  '💡 Real fact: memristor crossbars compute matrix products in physics itself: Ohm\'s law multiplies, Kirchhoff\'s current law adds.',
+  '💡 Real fact: fusion ignition was achieved at NIF in Dec 2022 — more energy out of the fuel than the laser put in, for the first time.',
+  '💡 Real fact: superconducting logic switches in picoseconds at zero resistance, but needs ~4 K cooling — cryostats eat most of the gain on small machines.',
+  '💡 Real fact: DNA can store ~215 petabytes per gram and lasts millennia — synthesis cost, not density, is what keeps it out of datacenters.',
+  '💡 Real fact: launch costs fell ~10× with reusable rockets; orbital datacenters with free solar power and radiative cooling are now seriously proposed.',
+  '💡 Real fact: I. J. Good (1965): an ultraintelligent machine could design better machines — "an intelligence explosion". Takeoff speed is still debated.',
 ];
 
 export const NEWS_FLAVOR = [

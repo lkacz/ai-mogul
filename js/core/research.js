@@ -116,8 +116,56 @@ export const RESEARCH = [
   { id: 'recursion', era: 3, rp: 300e3, reqCap: 80, deps: ['aiResearch', 'selfplay'], name: 'Recursive Self-Improvement',
     fx: { algo: 3.0 },
     desc: 'The model improves the code that trains the model. Handle with care.' },
+
+  // ── Era 4: Beyond Silicon (factory+, post-AGI) ─────────────────
+  // Real, plausible future technologies. All reqCap ≥ 100 so the pre-AGI
+  // balance is untouched. `real:` is shown to the player as an explainer.
+  { id: 'optical', era: 4, rp: 800e3, money: 20e9, reqCap: 100, deps: ['customSilicon'], name: 'Photonic Computing',
+    fx: { unlock: 'px1', ppMult: 5, mfu: 0.04 },
+    desc: 'Matrix multiplication as light interference. Unlocks the PX-1 Photonic Mesh.',
+    real: 'Photonic chips compute matrix multiplications by passing light through meshes of interferometers — the math happens at light speed with almost no resistive heat. As of the mid-2020s, companies like Lightmatter and Lightelligence ship photonic interconnects and accelerator prototypes; co-packaged optics are already replacing copper between AI racks, and full optical matmul engines are the natural next step.' },
+  { id: 'analog', era: 4, rp: 1.2e6, reqCap: 100, name: 'Analog In-Memory Computing',
+    fx: { mfu: 0.05, powerMult: 0.75 },
+    desc: 'Memristor crossbars where physics does the matmul: Ohm\'s law multiplies, Kirchhoff\'s law adds.',
+    real: 'In a memristor crossbar, weights are stored as conductances; applying input voltages makes the array compute a matrix-vector product in a single step, in place — no data shuffling between memory and processor. IBM, HP and many labs have demonstrated analog AI inference chips with orders-of-magnitude better energy per operation; precision and drift are the open problems.' },
+  { id: 'neuro', era: 4, rp: 1.5e6, reqCap: 100, name: 'Neuromorphic Serving',
+    fx: { infEff: 5, powerMult: 0.8 },
+    desc: 'Spiking, event-driven inference chips. Brains do this on 20 watts.',
+    real: 'Neuromorphic processors like Intel\'s Loihi 2 and IBM\'s NorthPole compute only when "spikes" arrive, instead of clocking every transistor every cycle — the human brain runs general intelligence on ~20 W this way, while a GPU cluster needs megawatts. They already excel at low-power sensing and inference; mapping large language models onto them is active research.' },
+  { id: 'cryo', era: 4, rp: 3e6, money: 30e9, reqCap: 105, name: 'Superconducting Logic',
+    fx: { ppMult: 4, powerMult: 0.6 },
+    desc: 'Josephson junctions switch in picoseconds with zero electrical resistance.',
+    real: 'Superconducting single-flux-quantum logic switches in picoseconds and moves signals with zero resistance — potentially 100× the clock at a fraction of the power, which is why it\'s also the cryogenic backbone of quantum computers. The catch: it needs ~4 K cooling, and the cryocooler overhead eats most of the win unless you build very large machines. A natural fit for, say, a dedicated AI megastructure.' },
+  { id: 'fusion', era: 4, rp: 4e6, money: 200e9, reqCap: 105, name: 'Fusion Power On-Site',
+    fx: { powerMult: 0.25 },
+    desc: 'Compact tokamaks behind the substation. Q > 10, fuel from seawater.',
+    real: 'Fusion crossed a threshold in December 2022 when the National Ignition Facility got more energy out of a fuel pellet than the laser put in. Private ventures like Commonwealth Fusion Systems are now building compact high-field tokamaks (SPARC) targeting net electricity in the early 2030s — and AI datacenters, with their bottomless demand for firm clean power, are first in line as customers.' },
+  { id: 'reversible', era: 4, rp: 5e6, reqCap: 110, deps: ['cryo'], name: 'Reversible Computing',
+    fx: { powerMult: 0.4 },
+    desc: 'Never erase a bit, never pay the Landauer tax.',
+    real: 'Landauer\'s principle (1961, experimentally confirmed in 2012) says erasing one bit must dissipate at least kT·ln2 ≈ 3×10⁻²¹ J of heat — a hard floor for ordinary computing. Reversible logic sidesteps it by never destroying information: every gate can run backwards, so in principle computation can approach zero energy. Today\'s chips run about a thousand times above the Landauer limit, so there is enormous headroom.' },
+  { id: 'embodied', era: 4, rp: 2e6, money: 50e9, reqCap: 100, deps: ['multimodalR'], name: 'Embodied AI Fleets',
+    fx: { dataQ: 1.08, demandMult: 2 },
+    desc: 'A million robots gathering grounded, real-world experience. Unlocks the Embodied Experience Stream.',
+    real: 'The web is running out of high-quality text, but the physical world generates unlimited grounded data. Robot foundation models (RT-2, π0, GR00T) already transfer web knowledge into manipulation skills, and "sim-to-real" training does millions of practice years in simulation. Fleets of robots sharing one brain turn every grasp and stumble into training data for all of them at once.' },
+  { id: 'quantumAI', era: 4, rp: 8e6, money: 150e9, reqCap: 115, name: 'Quantum Machine Learning',
+    fx: { unlock: 'qc1', algo: 2 },
+    desc: 'Error-corrected QPUs sample what no classical computer can. Unlocks the QC-1 Quantum Pod.',
+    real: 'In 2024 Google\'s Willow chip demonstrated "below-threshold" quantum error correction — logical qubits that get better as you add more physical ones, the key milestone for scaling. Useful quantum machine learning is still speculative: QPUs won\'t run today\'s transformers, but they could sample probability distributions, optimize, and simulate quantum chemistry in ways classical hardware fundamentally cannot.' },
+  { id: 'worldSim', era: 4, rp: 12e6, reqCap: 120, deps: ['embodied', 'worldmodel'], name: 'Full World Simulation',
+    fx: { algo: 2.5 },
+    desc: 'A faithful physics-and-society simulator. The model rehearses reality before touching it.',
+    real: 'World models — neural networks that predict what happens next in an environment — already power video-generation systems and robot planners (Genie, Sora-class models, MuZero\'s learned dynamics). Scaled up, a model that can simulate outcomes can run experiments in imagination: try a million designs, policies or proofs internally and only act on the best one.' },
+  { id: 'nanofab', era: 4, rp: 20e6, money: 300e9, reqCap: 130, deps: ['optical'], name: 'Atomically Precise Manufacturing',
+    fx: { ppMult: 4, mfu: 0.04 },
+    desc: 'Assemblers place atoms like bricks. Compute gets printed, not fabbed.',
+    real: 'Feynman\'s "plenty of room at the bottom" (1959) and Drexler\'s molecular assemblers remain the far frontier of manufacturing — but the bottom-up path is real today: DNA origami self-assembles nanostructures, scanning-tunneling microscopes place individual atoms, and 2D materials are grown a single atomic layer at a time. AI-designed proteins (AlphaFold\'s descendants) may be the bootstrap tool that makes molecular machinery practical.' },
+  { id: 'omega', era: 4, rp: 50e6, reqCap: 150, deps: ['worldSim', 'quantumAI', 'recursion'], name: 'Ω-Recursion',
+    fx: { algo: 4, rpMult: 3 },
+    desc: 'The model redesigns its own architecture, end to end. Each generation births the next. The curve goes vertical.',
+    real: 'I. J. Good predicted it in 1965: "an ultraintelligent machine could design even better machines; there would then unquestionably be an intelligence explosion." Whether the real curve is a slow takeoff over decades or a fast one over months is one of the most consequential open questions in AI — it depends on exactly the feedback loops this game lets you play with.' },
 ];
 
-export const ERA_NAMES = ['Foundations', 'Scale', 'Frontier', 'Superintelligence'];
+export const ERA_NAMES = ['Foundations', 'Scale', 'Frontier', 'Superintelligence', 'Beyond Silicon'];
 
 export const RESEARCH_BY_ID = Object.fromEntries(RESEARCH.map(r => [r.id, r]));

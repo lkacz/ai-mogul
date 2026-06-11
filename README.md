@@ -5,7 +5,9 @@
 San Mateo, January 2025. **Mario Damodei** quits his big-lab job with $1,500, a gaming PC with a
 used GTX 1070, and a conviction that the scaling laws aren't done. Train language models, sell
 fine-tuning gigs, ship an API, raise funding, build datacenters — and race three rival labs to
-**capability 100: AGI**.
+**capability 100: AGI**. And then discover the quest doesn't end there: a hidden post-AGI arc
+through real future technologies leads to **capability 200 — the Singularity**, and the game
+ends in a big-bang.
 
 No build step, no dependencies, no backend. Pure HTML/CSS/ES-modules — runs anywhere,
 deploys on GitHub Pages, saves to `localStorage`.
@@ -33,11 +35,32 @@ The numbers are compressed for playability, but the *mechanics* are the real thi
 | Algorithmic efficiency | Research multiplies *effective* compute (the real ~10×/decade-of-progress effect) |
 | PUE & $/kWh | Cooling overhead and power contracts dominate datacenter economics |
 | Market adoption lag | Capability ≠ instant revenue; enterprises adopt over months, sales staff help |
-| Funding round gates | Investors fund traction over time — seed → Series A/B/C → sovereign megaround |
+| Funding round gates | Investors fund traction over time — seed → Series A/B/C → sovereign megaround → IPO |
 | AI research feedback | Past capability 50, your models accelerate your own algorithmic progress |
+| Intelligence explosion | Past capability 100, self-improvement compounds exponentially (I. J. Good, 1965) — but the fixed point only passes 200 if you feed it new physics |
 
 Capability is a log-scale index of effective training compute: ~12 is a GPT-2-era model,
-~28 the ChatGPT moment, ~38 GPT-4-era, 100 = AGI.
+~28 the ChatGPT moment, ~38 GPT-4-era, 100 = AGI, 200 = the Singularity.
+
+## Beyond AGI: the Beyond Silicon era 🛰️
+
+AGI is the twist, not the ending. A fifth research era unlocks at capability 100, built from
+**real, plausible future technologies** — each one researched pops a "📚 the real thing"
+explainer of where it actually stands today:
+
+- **Photonic computing** — matmuls as light interference (unlocks the PX-1 Photonic Mesh)
+- **Analog in-memory computing** — memristor crossbars; Ohm's law multiplies, Kirchhoff adds
+- **Neuromorphic serving** — spiking chips chasing the brain's 20 W
+- **Superconducting & reversible logic** — picosecond Josephson junctions, the Landauer limit
+- **Fusion power on-site** — Q>10 tokamaks behind the substation
+- **Embodied AI fleets** — robots streaming grounded experience (a 10²⁰-token dataset)
+- **Quantum machine learning** — error-corrected QPUs (unlocks the QC-1 Quantum Pod)
+- **Full world simulation, atomically precise manufacturing, Ω-Recursion…**
+
+Scale into the **Orbital Compute Constellation** — 100 GW of solar-powered satellites — push the
+Singularity Index to 200, and watch the ending: the model compresses everything it knows into a
+single point, and the screen plays a **big-bang** — shockwaves, a cooling particle universe,
+galaxies condensing, and one small blue world with a familiar garage light.
 
 ## The lab is alive 🕹️
 
@@ -47,8 +70,9 @@ pizza boxes; hired scientists, engineers, ops and sales walk around and work at 
 racks blink with LEDs that track your real GPU count and training activity; monitors show the
 live loss curve of the current run. Click anyone — including the cat — for a quip.
 Each facility is its own scene: garage → startup office → colo cage → hyperscale hall →
-the gigawatt Factory with its glowing core that pulses faster as you approach AGI.
-Milestones rain confetti on everyone.
+the gigawatt Factory with its glowing core that pulses faster as you approach AGI →
+an orbital station window with Earth below, drifting laser-linked compute satellites, and a
+knot of light that tightens as the Singularity nears. Milestones rain confetti on everyone.
 
 ## Minigames at key moments 🎮
 
@@ -66,16 +90,17 @@ ends with a "📚 The real thing" note:
   sycophancy, hallucination, verbosity, non-haiku haikus.
 
 All skippable, all rate-limited, all rewards capped so the idle balance holds. The ticker also
-drops real, checkable facts about scaling laws, MFU, PUE and friends.
+drops real, checkable facts about scaling laws, MFU, PUE — and, late game, photonics, qubits,
+the Landauer limit, fusion ignition and orbital datacenters.
 
 ## How to play
 
 - **Lab** — watch your lab live; allocate compute between training, inference (revenue) and research; do gigs early.
 - **Training** — pick parameters & tokens, watch the predicted capability, hit start.
-- **Hardware** — buy GPUs (GTX 1070 → H100 → B200 → your own custom silicon); mind power & slots; upgrade the facility: garage → office → colo → hyperscale DC → 6 GW AI factory.
-- **Research** — 32 real techniques across 4 eras, from BPE tokenization to recursive self-improvement.
-- **Company** — hire staff, buy datasets, publish papers, raise five rounds of funding.
-- **Goals** — a 25-step quest line from "first training run" to AGI, plus achievements.
+- **Hardware** — buy GPUs (GTX 1070 → H100 → B200 → custom silicon → photonic meshes → quantum pods); mind power & slots; upgrade the facility: garage → office → colo → hyperscale DC → 6 GW AI factory → orbital constellation.
+- **Research** — 43 real techniques across 5 eras, from BPE tokenization to Ω-Recursion.
+- **Company** — hire staff, buy datasets, publish papers, raise six rounds of funding.
+- **Goals** — a 32-step quest line from "first training run" to the Singularity (the post-AGI steps stay hidden until you get there), plus achievements.
 
 1 real second ≈ 1 sim hour at 1× (up to 500×). Space pauses. Progress accrues while you're away.
 
@@ -83,8 +108,9 @@ drops real, checkable facts about scaling laws, MFU, PUE and friends.
 
 ```
 js/core/   pure simulation (no DOM): balance, engine, state, catalogs
-js/ui/     rendering + input (scene.js = procedural pixel-art lab scene)
-test/      bot.mjs     — scripted full playthrough, asserts AGI is reachable & paced
+js/ui/     rendering + input (scene.js = procedural pixel-art lab scene,
+           singularity.js = the big-bang ending cinematic)
+test/      bot.mjs     — scripted full playthrough, asserts AGI & Singularity are reachable & paced
            smoke.mjs   — imports everything under a DOM stub, builds all tabs
            browser.mjs — boots the real game in headless Chrome/Edge via playwright-core
 ```

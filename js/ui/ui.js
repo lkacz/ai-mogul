@@ -88,22 +88,30 @@ function renderSidebar() {
       ${goal.reward ? `<div class="greward">Reward: ${rewardText(goal.reward)}</div>` : ''}
     </div>`;
   } else {
-    goalHtml = `<div id="goal-card"><div class="gname">🌟 AGI achieved — sandbox mode</div>
-      <div class="gdesc">Keep scaling. The curve never ends.</div></div>`;
+    goalHtml = `<div id="goal-card"><div class="gname">🌌 Singularity reached</div>
+      <div class="gdesc">You finished AI Mogul. The new universe runs in sandbox — or hard-reset in ⚙️ and race the curve again.</div></div>`;
   }
 
   const lead = s.bestCap - sel.maxRival;
   const capRow = (r) => `<div class="stat-row"><span class="k">${esc(r.name)}</span><span class="stat-v" style="color:${r.cap > s.bestCap ? 'var(--red)' : 'var(--dim)'}">${r.cap.toFixed(1)}</span></div>`;
 
+  // pre-AGI: race to 100. Post-AGI: the Singularity Index opens, road to 200.
+  const post = s.bestCap >= 100;
+  const capMax = post ? BAL.SINGULARITY_CAP : 100;
+  const capBanner = `
+    <div class="side-section agi-banner">
+      <h4>${post ? '🌌 Singularity Index — best model' : 'AGI Index — best model'}</h4>
+      <div class="cap-big">${s.bestCap.toFixed(1)}<span class="faint" style="font-size:14px"> / ${capMax}</span></div>
+      <div class="muted">${capTier(s.bestCap)}</div>
+      <div class="bar thin" style="margin-top:6px"><i style="width:${clamp(s.bestCap / capMax, 0, 1) * 100}%; background:${post ? 'linear-gradient(90deg,#f472b6,#fbbf24,#fff)' : 'linear-gradient(90deg,#a78bfa,#f472b6)'}"></i></div>
+      <div class="bar-label">${post
+        ? `<span>⚡ self-improvement ×${fmtNum(sel.superImprove * sel.selfImprove)}</span><span>singularity at ${BAL.SINGULARITY_CAP}</span>`
+        : `<span>${lead >= 0 ? '👑 leading' : '▼ ' + lead.toFixed(1) + ' behind'}</span><span>rival best ${sel.maxRival.toFixed(1)}</span>`}</div>
+    </div>`;
+
   const html = `
     ${goalHtml}
-    <div class="side-section agi-banner">
-      <h4>AGI Index — best model</h4>
-      <div class="cap-big">${s.bestCap.toFixed(1)}<span class="faint" style="font-size:14px"> / 100</span></div>
-      <div class="muted">${capTier(s.bestCap)}</div>
-      <div class="bar thin" style="margin-top:6px"><i style="width:${clamp(s.bestCap, 0, 100)}%; background:linear-gradient(90deg,#a78bfa,#f472b6)"></i></div>
-      <div class="bar-label"><span>${lead >= 0 ? '👑 leading' : '▼ ' + lead.toFixed(1) + ' behind'}</span><span>rival best ${sel.maxRival.toFixed(1)}</span></div>
-    </div>
+    ${capBanner}
     <div class="side-section">
       <h4>Economy</h4>
       <div class="stat-row"><span class="k">Net / hour</span><span class="stat-v ${sel.netPerHour >= 0 ? 'good' : 'bad'}">${fmtMoney(sel.netPerHour)}</span></div>

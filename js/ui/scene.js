@@ -341,12 +341,91 @@ function drawFactory(ctx, t, s, sel, runProg) {
   }
 }
 
+function layoutOrbital() { return { x0: 24, x1: 420, desks: [[110, 184], [350, 188]] }; }
+function drawOrbital(ctx, t, s, sel, runProg) {
+  sceneCommon(ctx, '#04060d', '#101524', '#2b3142', '#272d3c');
+  // panoramic window onto space (frame, then contents clipped inside)
+  P(ctx, 6, 6, W - 12, 110, '#39455c');
+  ctx.save();
+  ctx.beginPath(); ctx.rect(10, 10, W - 20, 102); ctx.clip();
+  P(ctx, 10, 10, W - 20, 102, '#020308');
+  // stars
+  for (let i = 0; i < 90; i++) {
+    const x = 12 + hash(i, 1) * (W - 24), y = 11 + hash(i, 2) * 100;
+    const tw = 0.5 + 0.5 * Math.sin(t * (0.6 + hash(i, 3) * 2) + i);
+    P(ctx, x, y, 1, 1, `rgba(210,220,240,${0.2 + 0.55 * tw})`);
+  }
+  // Earth, lower left — night side with city lights, day-lit rim
+  ctx.fillStyle = '#0d2748';
+  ctx.beginPath(); ctx.arc(76, 196, 110, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#143a66';
+  ctx.beginPath(); ctx.arc(60, 206, 110, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(120,190,255,.8)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(76, 196, 110, -Math.PI * 0.78, -Math.PI * 0.22); ctx.stroke();
+  for (let i = 0; i < 26; i++) {  // city lights
+    const a = -Math.PI * (0.25 + hash(i, 7) * 0.5), rr = 96 + hash(i, 8) * 10;
+    P(ctx, 76 + Math.cos(a) * rr, 196 + Math.sin(a) * rr, 1, 1,
+      Math.sin(t * 2 + i * 1.7) > -0.4 ? '#f7d488' : '#9a7b3c');
+  }
+  // compute satellites drift by: body + solar wings + blinking laser links
+  const sats = clamp(Math.ceil(sel.gpuCount / 4e6), 4, 12);
+  const act = s.runs.length ? 0.9 : 0.3;
+  const sx = [], sy = [];
+  for (let i = 0; i < sats; i++) {
+    const x = 12 + ((hash(i, 4) * (W - 24) + t * (2.5 + (i % 3))) % (W - 28));
+    const y = 18 + hash(i, 5) * 64;
+    sx.push(x); sy.push(y);
+  }
+  ctx.strokeStyle = 'rgba(124,224,179,.28)'; ctx.lineWidth = 0.6;   // laser mesh
+  for (let i = 1; i < sats; i++) {
+    if (hash(i, 9) < act) {
+      ctx.beginPath(); ctx.moveTo(sx[i - 1] + 3, sy[i - 1] + 1); ctx.lineTo(sx[i] + 3, sy[i] + 1); ctx.stroke();
+    }
+  }
+  for (let i = 0; i < sats; i++) {
+    P(ctx, sx[i] - 6, sy[i], 5, 2, '#1d3a5e'); P(ctx, sx[i] + 7, sy[i], 5, 2, '#1d3a5e'); // wings
+    P(ctx, sx[i], sy[i] - 1, 6, 4, '#262e3d'); P(ctx, sx[i] + 1, sy[i], 4, 2, '#39455c');
+    if (Math.sin(t * (3 + i) + i * 9) > 0.2) P(ctx, sx[i] + 5, sy[i], 1, 1, act > 0.5 ? '#39e6a3' : '#e6c739');
+  }
+  // the approach to the Singularity: a knot of light that tightens past cap 100
+  const pr = clamp((s.bestCap - 100) / 100, 0, 1);
+  if (pr > 0) {
+    const px = 360, py = 42;
+    const pulse = 0.5 + Math.sin(t * (2 + pr * 8)) * 0.5;
+    const cg = ctx.createRadialGradient(px, py, 0, px, py, 8 + pr * 26);
+    cg.addColorStop(0, `rgba(255,255,255,${0.5 + 0.5 * pulse * pr})`);
+    cg.addColorStop(0.4, `rgba(216,180,254,${0.5 * pulse})`);
+    cg.addColorStop(1, 'rgba(167,139,250,0)');
+    ctx.fillStyle = cg; ctx.fillRect(px - 36, py - 36, 72, 72);
+    P(ctx, px - 1, py - 1, 2, 2, '#fff');
+  }
+  ctx.restore();
+  // window struts
+  for (let x = 100; x < W - 20; x += 96) P(ctx, x, 6, 3, 110, '#39455c');
+  // console strip under the window: blinking telemetry
+  P(ctx, 6, 118, W - 12, 6, '#161b26');
+  for (let i = 0; i < 30; i++) {
+    const on = hash(i, 6) < 0.5 ? Math.sin(t * 3 + i) > 0 : Math.sin(t * 1.7 + i * 2) > 0.3;
+    P(ctx, 14 + i * 15, 120, 3, 2, on ? (i % 3 ? '#39e6a3' : '#22d3ee') : '#27314a');
+  }
+  // a couple of local racks + the crash-cart desks
+  drawRack(ctx, 444, 148, t, 7, s.runs.length ? 0.9 : 0.2, 44);
+  drawRack(ctx, 462, 148, t, 8, s.runs.length ? 0.9 : 0.2, 44);
+  drawDesk(ctx, 110, 180, t, runProg);
+  drawDesk(ctx, 350, 184, t, runProg);
+  if (s.singularity) {  // afterglow of the new universe
+    ctx.fillStyle = `rgba(216,180,254,${0.05 + Math.sin(t * 0.8) * 0.03})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
 const SCENES = [
   { draw: drawGarage, layout: layoutGarage },
   { draw: drawOffice, layout: layoutOffice },
   { draw: drawColo, layout: layoutColo },
   { draw: drawDc, layout: layoutDc },
   { draw: drawFactory, layout: layoutFactory },
+  { draw: drawOrbital, layout: layoutOrbital },
 ];
 
 // ── confetti ──────────────────────────────────────────────────────

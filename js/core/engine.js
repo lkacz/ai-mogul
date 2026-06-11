@@ -94,7 +94,11 @@ function finalizeRun(s, sel, r) {
   if (s.autoDeploy && isBest) deployModel(s, model.id);
   if (!s.won && s.bestCap >= BAL.AGI_CAP) {
     s.won = true; s.wonAt = s.simHours;
-    pushNews(s, '🌟 AGI ACHIEVED. The world will never be the same.');
+    pushNews(s, '🌟 AGI ACHIEVED. The world will never be the same. New research glows in the Beyond Silicon era.');
+  }
+  if (!s.singularity && s.bestCap >= BAL.SINGULARITY_CAP) {
+    s.singularity = true; s.singularityAt = s.simHours;
+    pushNews(s, '🌌 THE SINGULARITY. The model\'s next thought takes longer to describe than to think.');
   }
   // AutoML: respawn the same config if unlocked & enabled
   if (s.autoRetrain && sel.fx.unlocks.has('autoRetrain')) {

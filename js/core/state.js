@@ -44,6 +44,8 @@ export function defaultState() {
     milestones: {},    // id -> simHours completed
     won: false,
     wonAt: null,
+    singularity: false,   // true ending: capability ≥ SINGULARITY_CAP
+    singularityAt: null,
 
     stats: {
       runsStarted: 0, apiRevenue: 0, gigRevenue: 0, spent: 0,
@@ -87,7 +89,9 @@ export function selectors(s) {
   // AI research feedback loop: models past cap 50 accelerate algorithmic progress
   const fb = Math.max(0, s.bestCap - BAL.SELF_IMPROVE_MIN_CAP) / BAL.SELF_IMPROVE_MIN_CAP;
   const selfImprove = 1 + fb * fb * BAL.SELF_IMPROVE_K;
-  const algoEff = fx.algo * selfImprove;
+  // Intelligence explosion: past AGI the model rewrites itself — exponential feedback
+  const superImprove = Math.pow(10, Math.max(0, s.bestCap - BAL.AGI_CAP) / BAL.SUPER_FB_DIV);
+  const algoEff = fx.algo * selfImprove * superImprove;
 
   // hardware totals
   let flops = 0, watts = 0, vramGB = 0, gpuCount = 0;
@@ -159,7 +163,7 @@ export function selectors(s) {
   const ppRate = BAL.PP_BASE * fx.ppMult;  // max useful FLOP/s per model param
 
   return {
-    fac, fx, algoEff, selfImprove, flops, watts, vramGB, gpuCount, mfu,
+    fac, fx, algoEff, selfImprove, superImprove, flops, watts, vramGB, gpuCount, mfu,
     effFlops, trainRate, infFlops, resFlops, maxParams, dataQ, dataset: ds,
     deployed, price, capacity, potential, adoptRate, revenue, served, maxRival,
     elecPerHour, salaries, costPerHour, rpPerHour, maxRuns, ppRate,

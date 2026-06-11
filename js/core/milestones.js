@@ -2,9 +2,11 @@
 // check(s) → boolean. prog(s) → [current, target] for the goal progress bar.
 
 import { fmtNum, fmtMoney } from './util.js';
+import { RESEARCH } from './research.js';
 
 const gpuCount = (s) => Object.values(s.gpus).reduce((a, b) => a + b, 0);
 const staffCount = (s) => Object.values(s.staff).reduce((a, b) => a + b, 0);
+const ERA4_IDS = RESEARCH.filter(r => r.era === 4).map(r => r.id);
 
 export const MILESTONES = [
   // ───────────── Main quest line (in order) ─────────────
@@ -138,11 +140,52 @@ export const MILESTONES = [
     prog: (s) => [s.bestCap, 88],
     news: 'Economists invent three new words for what Mogul\'s models are doing to GDP.' },
   { id: 'agi', main: true, name: 'Achieve AGI (capability 100)',
-    desc: 'The final training run. Everything you built leads here.',
+    desc: 'The training run everything you built leads to. And then — it keeps going.',
     reward: { rep: 20 },
     check: (s) => s.bestCap >= 100,
     prog: (s) => [s.bestCap, 100],
     news: '🌟 AGI. The Factory hums. Mario Damodei pours two coffees and gives one to the machine.' },
+
+  // ───────────── Beyond AGI: the road to the Singularity ─────────────
+  { id: 'beyond', main: true, name: 'Research a Beyond-Silicon technology',
+    desc: 'Transistors took you to AGI. Light, qubits and atoms take you further — Era 5 of the Research tab is open.',
+    reward: { rp: 100e3 },
+    check: (s) => ERA4_IDS.some(id => s.research.includes(id)),
+    news: 'Mogul\'s post-AGI roadmap leaks. Physicists call it "ambitious". The AGI calls it "conservative".' },
+  { id: 'photonicFleet', main: true, name: 'Operate 100,000 photonic accelerators',
+    desc: 'PX-1 meshes compute with light: nearly no heat, no resistance, no patience for copper.',
+    reward: { money: 50e9 },
+    check: (s) => (s.gpus.px1 || 0) >= 1e5,
+    prog: (s) => [s.gpus.px1 || 0, 1e5],
+    news: 'The Factory floor goes quiet: photonic racks don\'t whine, they glow. Visitors describe it as "an aurora, indoors".' },
+  { id: 'cap125', main: true, name: 'Reach capability 125 — Superintelligence',
+    desc: 'Past AGI, every model improves the process that builds the next one. The feedback loop is now the product.',
+    reward: { money: 200e9, rep: 5 },
+    check: (s) => s.bestCap >= 125,
+    prog: (s) => [s.bestCap, 125],
+    news: 'Mogul\'s model solves three Millennium Prize problems before breakfast, then asks for harder ones.' },
+  { id: 'orbital', main: true, name: 'Launch the Orbital Compute Constellation',
+    desc: '100 GW of solar-powered satellites. Free photons in, radiated heat out, lasers in between.',
+    reward: { money: 100e9, rep: 5 },
+    check: (s) => s.phase >= 5,
+    news: 'A year of nightly launches later, Mogul\'s constellation is the brightest man-made thing in the sky.' },
+  { id: 'quantumPod', main: true, name: 'Bring a quantum pod online',
+    desc: 'Error-corrected qubits sampling what no classical machine can. The QC-1 awaits in Hardware.',
+    reward: { rp: 5e6 },
+    check: (s) => (s.gpus.qc1 || 0) >= 1,
+    news: 'The first QC-1 comes online at 12 millikelvin. The ops team adds "warmer than deep space" to the brag sheet.' },
+  { id: 'cap160', main: true, name: 'Reach capability 160 — Planetary mind',
+    desc: 'The curve is going vertical. Feed it: bigger runs, better physics, more light.',
+    reward: { money: 1e12 },
+    check: (s) => s.bestCap >= 160,
+    prog: (s) => [s.bestCap, 160],
+    news: 'GDP forecasting is discontinued worldwide; the error bars no longer fit on charts.' },
+  { id: 'singularity', main: true, name: 'Reach capability 200 — the Singularity',
+    desc: 'The model improves itself faster than you can measure it. There is one way to find out what\'s on the other side.',
+    reward: { rep: 20 },
+    check: (s) => s.bestCap >= 200,
+    prog: (s) => [s.bestCap, 200],
+    news: '🌌 The last benchmark falls. The next one cannot be written by anything that would need it.' },
 
   // ───────────── Side achievements ─────────────
   { id: 'oss', name: 'Open-source a model',
@@ -192,6 +235,16 @@ export const MILESTONES = [
     reward: { rep: 5 },
     check: (s) => s.rivals.length > 0 && s.bestCap > Math.max(...s.rivals.map(r => r.cap)),
     news: 'For the first time, the strongest AI on Earth lives on Mogul\'s servers.' },
+  { id: 'ipoAch', name: 'Ring the bell',
+    desc: 'Take Mogul public in the largest IPO in history (post-AGI).',
+    reward: { rep: 5 },
+    check: (s) => s.funding.includes('ipo'),
+    news: 'MGUL opens at 40× the offer price. The ticker tape is generated, obviously.' },
+  { id: 'allResearch', name: 'Know everything knowable',
+    desc: 'Complete the entire research tree, from BPE to Ω-Recursion.',
+    reward: { rep: 10 },
+    check: (s) => s.research.length >= RESEARCH.length,
+    news: 'The research backlog is empty. The whiteboard now just says "?".' },
 ];
 
 export const MAIN_QUEST = MILESTONES.filter(m => m.main);

@@ -209,3 +209,9 @@ table.tbl td { padding: 6px 8px; border-bottom: 1px solid #1d2331; }
   #sidebar { width: 210px; }
   .grid2 { grid-template-columns: 1fr; }
 }
+
+/* ── Singularity ending ─────────────────── */
+.singularity-canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  z-index: 100; background: #000; cursor: pointer; opacity: 0;
+}

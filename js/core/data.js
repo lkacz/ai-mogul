@@ -25,6 +25,12 @@ export const GPUS = [
   { id: 'mx1', name: 'Mogul MX-1 (custom)', tflops: 15000, watts: 900, vram: 512,
     price: 55000, phase: 3, research: 'customSilicon',
     desc: 'Your own training silicon. Designed in-house, fabbed at 2nm. Best perf/watt in the world.' },
+  { id: 'px1', name: 'PX-1 Photonic Mesh', tflops: 2e6, watts: 2000, vram: 2048,
+    price: 280e3, phase: 4, research: 'optical',
+    desc: 'Matrix multiplication as interference patterns in silicon photonics. Light doesn\'t resist — almost no heat per MAC.' },
+  { id: 'qc1', name: 'QC-1 Quantum Pod', tflops: 2.5e7, watts: 6000, vram: 8192,
+    price: 4.5e6, phase: 5, research: 'quantumAI',
+    desc: 'Error-corrected qubits behind a photonic interconnect. Samples gradient distributions no classical chip can.' },
 ];
 
 export const FACILITIES = [
@@ -48,6 +54,10 @@ export const FACILITIES = [
     pue: 1.08, elecPrice: 0.035, upkeep: 400e3,
     desc: 'A gigawatt-class campus: 6 GW, on-site generation, direct-to-chip liquid cooling (PUE 1.08).',
     story: 'They call it the Factory. Six gigawatts behind its own gas turbines and a solar field you can see from orbit. Inside, one job: turn electricity into intelligence.' },
+  { id: 'orbital', name: 'Orbital Compute Constellation', cost: 750e9, slots: 50e6, powerW: 100e9, staffMax: 50000,
+    pue: 1.05, elecPrice: 0.004, upkeep: 4e6,
+    desc: '100 GW of compute satellites in sun-synchronous orbit: free photons in, radiated heat out (PUE 1.05), lasers between nodes.',
+    story: 'The launches run nightly for a year. A hundred gigawatts of solar wings unfold over the terminator line, linked by laser. Mission control keeps one window pointed at Earth — Mario insists. "So it remembers where it\'s from."' },
 ];
 
 export const DATASETS = [
@@ -62,6 +72,9 @@ export const DATASETS = [
   { id: 'synthetic', name: 'Synthetic Data Engine', cost: 250e6, tokens: 1e16, quality: 1.55,
     research: 'synthData',
     desc: 'Your own models generate, verify and grade training data. The data wall falls.' },
+  { id: 'embodied', name: 'Embodied Experience Stream', cost: 8e9, tokens: 1e20, quality: 1.75,
+    research: 'embodied',
+    desc: 'A million robot bodies and every sensor on Earth, streaming grounded experience. The model stops reading about physics and starts living in it.' },
 ];
 
 export const STAFF = [
@@ -88,6 +101,8 @@ export const FUNDING = [
     desc: 'Sovereign funds and hyperscalers fight for allocation. You pick the quiet ones.' },
   { id: 'sovereign', name: 'Sovereign Megaround', amount: 80e9, reqCap: 70, reqRep: 78, rep: 12, gapDays: 270,
     desc: 'Nation-state capital for the Factory. The term sheet has a foreword.' },
+  { id: 'ipo', name: 'The IPO', amount: 2e12, reqCap: 100, reqRep: 90, rep: 10, gapDays: 120,
+    desc: 'The largest public offering in history. The prospectus risk section just says "see: the singularity".' },
 ];
 
 export const RIVALS = [
@@ -108,4 +123,8 @@ export const MARIO_QUOTES = [
   'An H100 is just a GTX 1070 that believed in itself.',
   'Chinchilla says 20 tokens per parameter. Chinchilla is usually right.',
   'AGI timeline? Ask my burn rate.',
+  'Quantum supremacy? I\'d settle for quantum adequacy.',
+  'The speed of light is the new memory bandwidth.',
+  'We put the datacenter in orbit. The latency is awful. The vibes are immaculate.',
+  'Landauer\'s limit is the only bill I haven\'t figured out how to negotiate.',
 ];

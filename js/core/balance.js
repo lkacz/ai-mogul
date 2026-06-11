@@ -14,6 +14,7 @@ export const BAL = {
   CAP_BASE: 15.3,
   CAP_SLOPE: 6.0,
   AGI_CAP: 100,
+  SINGULARITY_CAP: 200,       // the true ending — the intelligence explosion
 
   CHINCHILLA_RATIO: 20,       // optimal tokens per parameter
   CHIN_SIGMA: 0.45,           // tolerance (in log10 of D/D*) before quality degrades
@@ -77,6 +78,12 @@ export const BAL = {
   SELF_IMPROVE_K: 9,
   SELF_IMPROVE_MIN_CAP: 50,
 
+  // Intelligence explosion: past AGI the model improves itself directly.
+  // algoEff ×= 10^((cap − 100) / SUPER_FB_DIV). Each retrain closes most of
+  // the gap to a fixed point — pushing the fixed point past 200 requires
+  // Beyond-Silicon hardware (photonic/quantum) and the orbital constellation.
+  SUPER_FB_DIV: 8,
+
   // Critical-batch-size limit: a single run can only absorb
   // N × PP_BASE FLOP/s (× research ppMult) no matter how big the cluster.
   // This is why real frontier runs take months.
@@ -111,6 +118,12 @@ export const CAP_TIERS = [
   [75,  'Autonomous researcher'],
   [88,  'Transformative AI'],
   [100, 'AGI'],
+  [112, 'Artificial superintelligence'],
+  [125, 'Nobel committee, as one mind'],
+  [140, 'Civilization-scale intellect'],
+  [160, 'Planetary mind'],
+  [180, 'Beyond human comprehension'],
+  [200, 'The Singularity'],
 ];
 
 export function capTier(cap) {

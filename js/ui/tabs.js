@@ -15,7 +15,7 @@ export const ACTIONS = {};
 export const INPUTS = {};
 Object.assign(ACTIONS, mgHandlers);
 
-const FACILITY_EMOJI = ['🏠', '🏢', '🗄️', '🏭', '🌆'];
+const FACILITY_EMOJI = ['🏠', '🏢', '🗄️', '🏭', '🌆', '🛰️'];
 
 function doAction(fn, ...args) {
   const r = fn(game.s, ...args);
@@ -330,13 +330,13 @@ const hwTab = {
         <button class="act gold" data-act="buyFacility" id="hw-upgrade">⬆ Upgrade: ${esc(next.name)} — ${fmtMoney(next.cost)}</button>
       </div>
       <div class="faint" style="margin-top:4px">${fmtNum(next.slots)} slots · ${fmtPower(next.powerW)} · PUE ${next.pue} · $${next.elecPrice}/kWh · staff ${fmtNum(next.staffMax)}</div>`
-      : '<div class="gold" style="margin-top:10px">This is the endgame facility. 6 GW of pure thought.</div>'}
+      : '<div class="gold" style="margin-top:10px">This is the final facility. A hundred gigawatts of sunlight, all of it thinking.</div>'}
     </div>`;
 
     const gpuCards = GPUS.map(g => {
       const owned = s.gpus[g.id] || 0;
       const locked = g.phase > s.phase || (g.research && !s.research.includes(g.research));
-      const lockMsg = g.phase > s.phase ? `Requires ${FACILITIES[g.phase].name}` : (g.research && !s.research.includes(g.research)) ? 'Requires research: Custom Training Silicon' : '';
+      const lockMsg = g.phase > s.phase ? `Requires ${FACILITIES[g.phase].name}` : (g.research && !s.research.includes(g.research)) ? `Requires research: ${RESEARCH_BY_ID[g.research].name}` : '';
       const price = gpuPrice(s, sel, g);
       return `<div class="res-card ${locked ? 'locked' : ''}">
         <div class="row" style="justify-content:space-between">
@@ -369,7 +369,8 @@ const hwTab = {
     setBar('hw-slotbar', sel.gpuCount / sel.fac.slots, sel.gpuCount / sel.fac.slots > 0.92);
     set('hw-elec', fmtMoney(sel.elecPerHour) + '/h');
     const up = document.getElementById('hw-upgrade');
-    if (up) up.disabled = s.money < FACILITIES[s.phase + 1].cost;
+    const next = FACILITIES[s.phase + 1];
+    if (up && next) up.disabled = s.money < next.cost;
   },
 };
 
@@ -440,6 +441,8 @@ const resTab = {
       if (fx.ppMult) parts.push(`×${fx.ppMult} batch limit`);
       if (fx.outageGuard) parts.push('outage protection');
       if (fx.unlock === 'mx1') parts.push('unlocks MX-1 chip');
+      if (fx.unlock === 'px1') parts.push('unlocks PX-1 photonic chip');
+      if (fx.unlock === 'qc1') parts.push('unlocks QC-1 quantum pod');
       if (fx.unlock === 'synthData') parts.push('unlocks synthetic data');
       if (fx.unlock === 'autoRetrain') parts.push('unlocks AutoML');
       return parts.map(p => `<span class="fx-chip">${p}</span>`).join('');
@@ -489,6 +492,15 @@ ACTIONS.research = (id) => {
   if (r.ok && id === 'rlhf' && !game.s.stats.rlhfRated) {
     game.s.stats.rlhfRated = 1;
     playRlhf();                 // one-shot: train the reward model yourself
+    return;
+  }
+  // Beyond-Silicon techs come with a real-world explainer
+  const def = RESEARCH_BY_ID[id];
+  if (r.ok && def && def.real) {
+    showModal(`<h2>🔭 ${esc(def.name)}</h2>
+      <p>${esc(def.desc)}</p>
+      <p class="muted"><b>📚 The real thing:</b> ${esc(def.real)}</p>
+      <div class="actions"><button class="act big" data-act="closeModal">Back to the future</button></div>`);
   }
 };
 
@@ -597,7 +609,10 @@ const goalsTab = {
   sig: (s) => Object.keys(s.milestones).length + ':' + s.won,
   build(s) {
     const current = MAIN_QUEST.find(m => !s.milestones[m.id]);
-    const questHtml = MAIN_QUEST.map((m, i) => {
+    // the post-AGI arc stays hidden until AGI — the curve continuing is the reveal
+    const agiIdx = MAIN_QUEST.findIndex(m => m.id === 'agi');
+    const visible = s.won ? MAIN_QUEST : MAIN_QUEST.slice(0, agiIdx + 1);
+    const questHtml = visible.map((m, i) => {
       const done = !!s.milestones[m.id];
       const isCur = m === current;
       return `<div class="run-card" style="${isCur ? 'border-color:var(--accent)' : ''}; ${done ? 'opacity:.6' : ''}">
@@ -607,7 +622,10 @@ const goalsTab = {
         </div>
         <div class="muted small">${esc(m.desc)}</div>
       </div>`;
-    }).join('');
+    }).join('') + (s.won ? '' : `<div class="run-card" style="opacity:.55">
+        <b>🔒 +${MAIN_QUEST.length - agiIdx - 1} hidden steps</b>
+        <div class="muted small">The quest does not end at capability 100. Get there and see.</div>
+      </div>`);
     const side = MILESTONES.filter(m => !m.main).map(m => {
       const done = !!s.milestones[m.id];
       return `<div class="res-card ${done ? 'done' : ''}">
@@ -617,7 +635,7 @@ const goalsTab = {
       </div>`;
     }).join('');
     return `<div class="grid2">
-      <div class="card"><h3>The road to AGI</h3>${questHtml}</div>
+      <div class="card"><h3>The road to AGI — and beyond</h3>${questHtml}</div>
       <div class="card"><h3>Achievements</h3><div class="grid3" style="grid-template-columns:1fr 1fr">${side}</div></div>
     </div>`;
   },

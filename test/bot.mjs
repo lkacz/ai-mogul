@@ -1,5 +1,6 @@
-// Scripted greedy playthrough: validates that the economy never dead-ends and
-// AGI is reachable in a reasonable number of sim-hours. Run: node test/bot.mjs
+// Scripted greedy playthrough: validates that the economy never dead-ends,
+// AGI is reachable in a reasonable number of sim-hours, and the post-AGI
+// Beyond-Silicon arc carries through to the Singularity. Run: node test/bot.mjs
 
 import { defaultState, selectors } from '../js/core/state.js';
 import * as E from '../js/core/engine.js';
@@ -131,13 +132,15 @@ for (; h < MAX_HOURS; h++) {
     }
   }
   if (s.phase !== lastPhase) { lastPhase = s.phase; }
-  if (s.won) { mark(`🌟 AGI ACHIEVED`); break; }
+  if (s.won && !s.agiMarked) { s.agiMarked = true; mark(`🌟 AGI ACHIEVED — pushing on toward the Singularity`); }
+  if (s.singularity) { mark(`🌌 SINGULARITY REACHED`); break; }
 }
 
 console.log(log.join('\n'));
 console.log('─'.repeat(70));
 const sel = selectors(s);
-console.log(`End: t=${Math.round(s.simHours)}h (${(s.simHours / 8760).toFixed(2)} sim-years)  won=${s.won}`);
+console.log(`End: t=${Math.round(s.simHours)}h (${(s.simHours / 8760).toFixed(2)} sim-years)  won=${s.won}  singularity=${s.singularity}`);
+console.log(`AGI at ${s.wonAt === null ? '—' : Math.round(s.wonAt) + 'h'}, singularity at ${s.singularityAt === null ? '—' : Math.round(s.singularityAt) + 'h'}`);
 console.log(`cap=${s.bestCap.toFixed(1)} money=${fmtMoney(s.money)} rp=${fmtNum(s.rp)} rep=${s.rep.toFixed(0)}`);
 console.log(`phase=${FACILITIES[s.phase].name} gpus=${fmtNum(sel.gpuCount)} flops=${fmtFlops(sel.flops)} algoEff=${fmtNum(sel.algoEff)}`);
 console.log(`models=${s.models.length} lifetimeFLOP=${s.stats.flops.toExponential(2)} research=${s.research.length}/${RESEARCH.length}`);
@@ -145,6 +148,9 @@ console.log(`milestones: ${Object.keys(s.milestones).length}, main quest: ${seen
 
 const failed = [];
 if (!s.won) failed.push(`AGI not reached within ${MAX_HOURS} sim-hours`);
-if (s.won && s.simHours < 5_000) failed.push(`AGI too fast (${Math.round(s.simHours)}h) — pacing broken`);
+if (s.won && s.wonAt < 5_000) failed.push(`AGI too fast (${Math.round(s.wonAt)}h) — pacing broken`);
+if (!s.singularity) failed.push(`Singularity not reached within ${MAX_HOURS} sim-hours`);
+if (s.singularity && s.singularityAt - s.wonAt < 800)
+  failed.push(`post-AGI arc too short (${Math.round(s.singularityAt - s.wonAt)}h after AGI) — Beyond-Silicon pacing broken`);
 if (failed.length) { console.log('❌ FAIL: ' + failed.join('; ')); process.exit(1); }
 console.log('✅ PASS');
