@@ -82,7 +82,7 @@ function showFounderChoice() {
   };
   showModal(`<h2>🧠 AI MOGUL</h2>
     <p><b>Choose your founder.</b><br>
-    <span class="muted">A cold garage. $1,500. One used GTX 1070. Who walks in?</span></p>
+    <span class="muted">A cold garage. $1,500. One used BTX 1070. Who walks in?</span></p>
     <div class="row" style="gap:12px; align-items:stretch">${order.map(card).join('')}</div>`);
   for (const id of order) drawFounderPortrait(document.getElementById('fc_' + id), id);
 }

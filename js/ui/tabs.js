@@ -696,7 +696,7 @@ const coTab = {
           <div class="stat-row"><span class="k">Reputation</span><span class="stat-v cyan" id="co-rep"></span></div>
           <div class="stat-row"><span class="k">Papers published</span><span class="stat-v">${s.stats.papers}</span></div>
           <button class="act" data-act="paper" id="co-paper" style="margin-top:6px"></button>
-          <div class="faint" style="margin-top:4px">+${BAL.PAPER_REP} reputation each. Investors read NeurIPS proceedings.</div>
+          <div class="faint" style="margin-top:4px">+${BAL.PAPER_REP} reputation each. Investors read the NeurDips proceedings.</div>
         </div>
         <div class="card"><h3>Funding rounds</h3><div class="grid3" style="grid-template-columns:1fr">${fundCards}</div></div>
       </div>

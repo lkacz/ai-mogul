@@ -23,7 +23,7 @@ export const RESEARCH = [
   { id: 'dataclean1', era: 0, rp: 12, name: 'Dedup & Filtering',
     fx: { dataQ: 1.1 },
     desc: 'Remove duplicates and spam from the corpus. Cleaner data, lower loss.' },
-  { id: 'kernels', era: 0, rp: 20, name: 'Hand-Tuned CUDA Kernels',
+  { id: 'kernels', era: 0, rp: 20, name: 'Hand-Tuned GPU Kernels',
     fx: { mfu: 0.06 },
     desc: 'Fused ops and tiled matmuls. The GPUs finally stop waiting on memory.' },
   { id: 'lora', era: 0, rp: 18, name: 'LoRA Fine-Tuning',

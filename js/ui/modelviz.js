@@ -13,13 +13,13 @@ import { clamp, fmtNum } from '../core/util.js';
 
 const W = 560, H = 250;
 
-// closest real-world counterpart per scale band
+// closest real-world counterpart per scale band (year anchors, no brand names)
 const CLASSES = [
-  [0, 'a tiny toy transformer (nanoGPT territory)'],
-  [3e7, 'GPT-2-small-class'],
-  [7e8, 'GPT-2-XL / GPT-3-1.3B-class'],
-  [6e9, 'GPT-3-13B-class'],
-  [8e10, 'GPT-3-175B / frontier-dense-class'],
+  [0, 'a tiny toy transformer (weekend-project territory)'],
+  [3e7, '2019-era small text model-class (~124M)'],
+  [7e8, '2019-era XL-class (~1.5B)'],
+  [6e9, 'mid-size 13B-class'],
+  [8e10, '2020-frontier 175B / dense-class'],
   [5e11, 'frontier sparse-MoE-class'],
   [1e13, 'super-frontier system'],
   [1e15, 'planetary-scale model society'],

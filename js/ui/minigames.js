@@ -200,7 +200,7 @@ export function playLr(runId) {
 // ══════════════════════════════════════════════════════════════════
 // Every category here is a real thing data teams keep or filter.
 const GOOD_DOCS = [
-  '📖 Wikipedia', '📚 Public-domain novel', '📄 arXiv paper', '🧑‍🍳 Cookbook',
+  '📖 Encyclopedia article', '📚 Public-domain novel', '📄 arHive preprint', '🧑‍🍳 Cookbook',
   '💻 Code w/ tests', '✒️ Poetry anthology', '🗞️ Quality journalism',
   '🎓 Open textbook', '🧮 Olympiad solutions', '⚖️ Court opinions',
   '📜 Patent filings', '🐦 Field guide to birds', '🍄 Mushroom encyclopedia',
@@ -362,7 +362,7 @@ export function offerNodeHunt(incident) {
 // Real ways a single node ruins everyone's night.
 const NODE_FAULTS = [
   'ECC errors on one HBM stack',
-  'a flaky NVLink retraining itself in a loop',
+  'a flaky interconnect link retraining itself in a loop',
   'a PCIe link silently degraded to x1',
   'a dying fan — the GPU thermal-throttles to a crawl',
   'a bad optical transceiver dropping packets',

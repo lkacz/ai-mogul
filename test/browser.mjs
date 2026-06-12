@@ -217,15 +217,15 @@ await check('hardware tab + buy GPU', async () => {
   await page.evaluate(() => { window.AIMOGUL.s.paused = true; });
   await page.click('[data-act=tab][data-arg=hw]');
   const before = await page.evaluate(() => JSON.parse(localStorage.getItem('aimogul_save_v1') || '{}').money ?? null);
-  await page.click('.res-card:has-text("GTX 1070") [data-act=buyGpu]');
-  const owned = await page.textContent('.res-card:has-text("GTX 1070")');
+  await page.click('.res-card:has-text("BTX 1070") [data-act=buyGpu]');
+  const owned = await page.textContent('.res-card:has-text("BTX 1070")');
   if (!owned.includes('Owned: 2')) throw new Error('GPU count did not increase: ' + owned.slice(0, 80));
 });
 
 await check('sell GPU frees the slot and refunds 45%', async () => {
   const moneyBefore = await page.evaluate(() => window.AIMOGUL.s.money);
-  await page.click('.res-card:has-text("GTX 1070") [data-act=sellGpu]');   // −1 button
-  const card = await page.textContent('.res-card:has-text("GTX 1070")');
+  await page.click('.res-card:has-text("BTX 1070") [data-act=sellGpu]');   // −1 button
+  const card = await page.textContent('.res-card:has-text("BTX 1070")');
   if (!card.includes('Owned: 1')) throw new Error('GPU count did not decrease: ' + card.slice(0, 80));
   const moneyAfter = await page.evaluate(() => window.AIMOGUL.s.money);
   if (!(moneyAfter > moneyBefore)) throw new Error('no refund received');
@@ -233,20 +233,20 @@ await check('sell GPU frees the slot and refunds 45%', async () => {
 
 await check('custom quantity buy with suffix parsing', async () => {
   await page.evaluate(() => { window.AIMOGUL.s.money = 1e5; });
-  await page.fill('.res-card:has-text("GTX 1070") .qty-in', '5');
-  await page.click('.res-card:has-text("GTX 1070") [data-act=buyGpuQty]');
-  const card = await page.textContent('.res-card:has-text("GTX 1070")');
+  await page.fill('.res-card:has-text("BTX 1070") .qty-in', '5');
+  await page.click('.res-card:has-text("BTX 1070") [data-act=buyGpuQty]');
+  const card = await page.textContent('.res-card:has-text("BTX 1070")');
   if (!card.includes('Owned: 6')) throw new Error('custom buy failed: ' + card.slice(0, 90));
 });
 
 await check('hold-to-buy auto-repeats until slots are full', async () => {
-  const btn = page.locator('.res-card:has-text("GTX 1070") [data-act=buyGpu]').first();
+  const btn = page.locator('.res-card:has-text("BTX 1070") [data-act=buyGpu]').first();
   const box = await btn.boundingBox();
   await page.mouse.move(box.x + 5, box.y + 5);
   await page.mouse.down();
   await page.waitForTimeout(1500);
   await page.mouse.up();
-  const card = await page.textContent('.res-card:has-text("GTX 1070")');
+  const card = await page.textContent('.res-card:has-text("BTX 1070")');
   if (!card.includes('Owned: 8')) throw new Error('hold did not repeat: ' + card.slice(0, 90));   // garage slot cap
   await page.evaluate(() => { window.AIMOGUL.s.paused = false; });   // sim back on
 });

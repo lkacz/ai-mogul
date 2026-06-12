@@ -3,7 +3,7 @@
 **From a garage GPU to a gigawatt AI factory — a realistic browser simulation of building an AI lab.**
 
 San Mateo, January 2025. **Mario Damodei** quits his big-lab job with $1,500, a gaming PC with a
-used GTX 1070, and a conviction that the scaling laws aren't done. Train language models, sell
+used BTX 1070, and a conviction that the scaling laws aren't done. Train language models, sell
 fine-tuning gigs, ship an API, raise funding, build datacenters — and race three rival labs to
 **capability 100: AGI**. And then discover the quest doesn't end there: a hidden post-AGI arc
 through real future technologies climbs the **Kardashev scale** — orbital constellations, a
@@ -42,8 +42,8 @@ The numbers are compressed for playability, but the *mechanics* are the real thi
 | Intelligence explosion | Past capability 100, self-improvement compounds exponentially (I. J. Good, 1965) — but the fixed point only passes 300 if you feed it a star, then a galaxy |
 | Kardashev ladder | Facilities climb the real 1964 scale: planetary (Type I-ish factory) → stellar (Dyson swarm, 1960) → galactic (Lloyd-limit cores, black-hole batteries via the Penrose process) |
 
-Capability is a log-scale index of effective training compute: ~12 is a GPT-2-era model,
-~28 the ChatGPT moment, ~38 GPT-4-era, 100 = AGI, 200 = a star-fed mind, 300 = the Singularity.
+Capability is a log-scale index of effective training compute: ~12 is a 2019-era text model,
+~28 the chatbot moment, ~38 a 2023-era frontier model, 100 = AGI, 200 = a star-fed mind, 300 = the Singularity.
 
 ## Beyond AGI: the Beyond Silicon era 🛰️
 
@@ -150,7 +150,7 @@ every choice — quietly, after the fact, never as a label on the button.
 - Gigs build a **🔥 hot streak** — chain them without lapsing for up to ×2 pay (and an achievement at ×10).
 - Money **rolls** at 60 fps; gains float up off the buttons; funding rounds rain big gold numbers.
 - Every new-best model throws confetti in the lab; crossing a **capability tier**
-  ("Coherent sentences" → "GPT-2-era" → … → "The Singularity") gets a purple tier-up banner.
+  ("Coherent sentences" → "Rambling essayist" → … → "The Singularity") gets a purple tier-up banner.
 - And entropy fights back: dead HBM, a 2 AM burglary your ops crew can foil, a flat white set on
   the test bench — and the rare rack fire that **actually burns in the pixel scene** for a day
   while insurance pays out. Sell old cards at 45% to clear slots and power for better silicon.
@@ -171,7 +171,7 @@ every choice — quietly, after the fact, never as a label on the button.
   stage cuts, an inner world model, a chain-of-thought loop, photonic/quantum substrate tints,
   and past 10¹⁵ params a routed *society of trillion-parameter expert modules* (the real
   "mixture of a million experts" research direction).
-- **Hardware** — buy GPUs (GTX 1070 → H100 → B200 → custom silicon → photonic meshes → quantum pods → swarm collectors → Omega cores); mind power & slots; upgrade the facility up the Kardashev scale: garage → office → colo → hyperscale DC → 6 GW AI factory → orbital constellation → Dyson swarm → Omega Lattice.
+- **Hardware** — buy GPUs (BTX 1070 → HY-100 → BY-200 → custom silicon → photonic meshes → quantum pods → swarm collectors → Omega cores); mind power & slots; upgrade the facility up the Kardashev scale: garage → office → colo → hyperscale DC → 6 GW AI factory → orbital constellation → Dyson swarm → Omega Lattice.
 - **Research** — 43 real techniques across 5 eras, from BPE tokenization to Ω-Recursion.
   RP funds a project; **your researchers then build it over time** (lab speed = 1 + researchers,
   multiplied by AI research assistants) — watch the progress bar, hire to go faster.
