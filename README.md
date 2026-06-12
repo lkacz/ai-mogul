@@ -143,6 +143,29 @@ four million unaugmented who just want their dark sky back, and the final alloca
 universe's energy bright and brief, or cold and nearly forever. Your 🧭 Integrity moves with
 every choice — quietly, after the fact, never as a label on the button.
 
+## The world report 🛰️
+
+Capability numbers are abstract; the future isn't. After each **new-best model**, curated
+news broadcasts air every minute or two of real play time — 48 stories that show what that
+capability *does* to the world, each over its own **animated pixel-art vignette**: bounding
+boxes snapping onto photos, a classroom where the board explains itself, a ward where the
+trend line finally points down, a tokamak feeding a city, a light-sail leaving the Sun.
+
+The coverage is honestly mixed — **good, bad and ambiguous in balance**: the tutor that
+reaches every child arrives alongside the career ladder losing its bottom rung; fusion and
+malaria eradication share an era with autonomous flash wars and cities that never forget.
+Every story carries a "📚 the real thing" line grounding it in actual research and debate —
+ImageNet to AlphaFold to DART to Breakthrough Starshot — and the channel itself grows with
+you: WORLD REPORT → SYSTEM REPORT → DEEP-FIELD REPORT.
+
+It *feels* like television: a static burst as the signal locks in, scanlines, and a scrolling
+**wire crawl** of micro-headlines under every scene ("HOTLINE: 'what did yours do?'"). Each
+broadcast names the model release whose wave it follows — your release. Stories air once per
+playthrough and pause the sim while you read; at turbo they file silently as wire briefs.
+Nothing is ever lost: **click the news ticker** to open the **Chronicle**, the replayable
+archive of every report this world has filed — by the end of a run it reads as the history
+of how your models changed civilization.
+
 ## It feels alive from minute one ✨
 
 - The goal card has a **Go →** button and the right tab pulses while you're learning the ropes.

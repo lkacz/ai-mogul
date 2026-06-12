@@ -33,6 +33,8 @@ console.log('Importing modules…');
 const { defaultState, selectors, serialize, deserialize } = await import('../js/core/state.js');
 const { DILEMMAS } = await import('../js/core/dilemmas.js');
 const { DESIGNS, scoreDesign } = await import('../js/core/design.js');
+const { IMPACTS, IMPACT_BY_ID, queueImpacts, IMPACT_QUEUE_MAX } = await import('../js/core/impacts.js');
+const { IMPACT_SCENES, drawBroadcast } = await import('../js/ui/impactviz.js');
 const { drawDesignScene, PART_DRAW } = await import('../js/ui/designparts.js');
 const sceneMod = await import('../js/ui/scene.js');
 const E = await import('../js/core/engine.js');
@@ -146,6 +148,71 @@ check('all dilemmas: both options resolve; every outcome applies cleanly', () =>
       }
     }
   }
+});
+
+check('impact news: well-formed, tone-balanced, queue paces correctly', () => {
+  const ids = new Set();
+  const tones = { good: 0, bad: 0, mixed: 0 };
+  for (const n of IMPACTS) {
+    if (ids.has(n.id)) throw new Error(`duplicate id ${n.id}`);
+    ids.add(n.id);
+    if (!(n.cap >= 4 && n.cap <= 290)) throw new Error(`${n.id}: cap out of range`);
+    if (!(n.tone in tones)) throw new Error(`${n.id}: bad tone ${n.tone}`);
+    tones[n.tone]++;
+    if (!IMPACT_SCENES[n.viz]) throw new Error(`${n.id}: no scene renderer "${n.viz}"`);
+    for (const f of ['tag', 'title', 'body', 'real']) {
+      if (typeof n[f] !== 'string' || n[f].length < (f === 'tag' ? 3 : 4)) throw new Error(`${n.id}: missing ${f}`);
+    }
+    if (!Array.isArray(n.wire) || n.wire.length < 2 || n.wire.some(w => typeof w !== 'string' || w.length < 6)) {
+      throw new Error(`${n.id}: needs 2+ wire crawl lines`);
+    }
+  }
+  // the world answers in all registers — no tone may dominate or vanish
+  for (const [tone, c] of Object.entries(tones)) {
+    if (c < IMPACTS.length * 0.2) throw new Error(`tone "${tone}" underrepresented: ${c}/${IMPACTS.length}`);
+  }
+  // queue: only unlocked stories, ascending cap, no dupes on re-queue
+  const s = defaultState();
+  s.bestCap = 25;
+  queueImpacts(s);
+  if (!s.impactQueue.length) throw new Error('nothing queued at cap 25');
+  if (s.impactQueue.some(id => IMPACT_BY_ID[id].cap > 25)) throw new Error('queued beyond bestCap');
+  const caps = s.impactQueue.map(id => IMPACT_BY_ID[id].cap);
+  if (caps.some((c, i) => i && c < caps[i - 1])) throw new Error('queue not ascending');
+  const len = s.impactQueue.length;
+  queueImpacts(s);
+  if (s.impactQueue.length !== len) throw new Error('re-queue duplicated entries');
+  // seen entries never return; a giant jump banks at most IMPACT_QUEUE_MAX,
+  // and what it retires lands in the Chronicle as unaired wire briefs
+  s.impactsSeen.push(s.impactQueue.shift());
+  s.bestCap = 300;
+  queueImpacts(s);
+  if (s.impactQueue.length > IMPACT_QUEUE_MAX) throw new Error('queue not trimmed');
+  if (s.impactQueue.some(id => s.impactsSeen.includes(id))) throw new Error('seen story re-queued');
+  if (!(s.impactLog || []).length) throw new Error('trimmed stories not logged to the Chronicle');
+  if (s.impactLog.some(e => e.live !== 0)) throw new Error('retired story logged as live');
+  // engine integration: the mid-game bot run queued some world reports
+  if (!(states.mid.impactQueue || []).length) throw new Error('mid-state queued no impacts');
+});
+
+check('impact scenes: every renderer draws on the 2d-context stub', () => {
+  const grad = { addColorStop() {} };
+  const ctx = new Proxy({}, {
+    get: (o, k) => {
+      if (k === 'createRadialGradient' || k === 'createLinearGradient') return () => grad;
+      if (k === 'measureText') return () => ({ width: 10 });
+      return typeof o[k] !== 'undefined' ? o[k] : () => {};
+    },
+    set: () => true,
+  });
+  for (const [key, draw] of Object.entries(IMPACT_SCENES)) {
+    for (const tone of ['good', 'bad', 'mixed']) {
+      for (const t of [0, 0.7, 3.3, 11.8]) draw(ctx, t, '#34d399', tone);
+    }
+    if (!key) throw new Error('unreachable');
+  }
+  // the broadcast post-process (static burst, scanlines, wire crawl) too
+  for (const t of [0, 0.05, 0.3, 2.4]) drawBroadcast(ctx, t, 'WIRES: test +++', '#34d399');
 });
 
 check('facility designs: all tiers score, fx bounded, neutral when unset', () => {

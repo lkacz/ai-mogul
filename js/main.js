@@ -11,8 +11,10 @@ import { ACTIONS } from './ui/tabs.js';
 import { celebrate, drawFounderPortrait } from './ui/scene.js';
 import { offerNodeHunt, playRlhf } from './ui/minigames.js';
 import { playSingularity, playOpening } from './ui/singularity.js';
+import { showImpact } from './ui/impactviz.js';
 import { RESEARCH_BY_ID } from './core/research.js';
 import { DILEMMAS, DILEMMA_BY_ID } from './core/dilemmas.js';
+import { IMPACT_BY_ID, retireImpact } from './core/impacts.js';
 
 // ── Load / new game ───────────────────────────────────────────────
 // Meta persists across universes: which founder stars in the NEXT story.
@@ -324,6 +326,65 @@ ACTIONS.dilemma = (arg) => {
   renderAll();
 };
 
+// ── World report: how the future feels from the ground ────────────
+// Each new-best model queues curated impact stories (core/impacts.js);
+// they air every minute or two of REAL time — sim speed never floods
+// them, turbo retires the backlog silently (see drainSignalsSilently).
+game.nextImpactReal = Date.now() + 75e3 + Math.random() * 45e3;
+let impactPrevPaused = false;
+function pumpImpacts() {
+  if (document.hidden) return;
+  if (!document.getElementById('modal-root').classList.contains('hidden')) return;
+  if (s.speed >= 10000) return;            // unsupervised — the news airs to nobody
+  if (!s.impactQueue || !s.impactQueue.length) return;
+  if (Date.now() < game.nextImpactReal) return;
+  const id = s.impactQueue.shift();
+  (s.impactsSeen = s.impactsSeen || []).push(id);
+  const n = IMPACT_BY_ID[id];
+  if (!n) return;
+  (s.impactLog = s.impactLog || []).push({ id, h: s.simHours, live: 1, rel: s.lastReleaseName || null });
+  game.nextImpactReal = Date.now() + 75e3 + Math.random() * 45e3;   // 1.25–2 min
+  impactPrevPaused = s.paused;
+  s.paused = true;                         // the broadcast holds the world still
+  E.pushNews(s, `🛰 World report: ${n.title}.`);
+  showImpact(n, fmtDate(s.simHours), { rel: s.lastReleaseName });
+}
+ACTIONS.impactDone = () => {
+  closeModal();
+  s.paused = impactPrevPaused;
+  renderAll();
+};
+
+// The Chronicle: every report this world has filed, replayable. Opened from
+// the news ticker; turbo-retired stories appear as wire briefs (◼), still
+// watchable — neglect loses the moment, never the record.
+// (reachable while a modal is open only via the replay's back button — the
+// ticker itself sits under the modal overlay)
+ACTIONS.chronicle = () => showChronicle();
+function showChronicle() {
+  const log = s.impactLog || [];
+  const rows = [...log].reverse().map((e) => {
+    const n = IMPACT_BY_ID[e.id];
+    if (!n) return '';
+    return `<button class="chron-row" data-act="impactReplay" data-arg="${e.id}">
+      <span class="chron-date">${esc(fmtDate(e.h))}</span>
+      <span class="imp-tag ${n.tone}">${esc(n.tag)}</span>
+      <span class="chron-title">${esc(n.title)}</span>
+      <span class="chron-go">${e.live ? '▸ watch' : '◼ wire brief'}</span>
+    </button>`;
+  }).join('');
+  showModal(`<h2>🛰 The Chronicle</h2>
+    <p class="muted">Every world report filed since the garage${log.length ? '' : ' — nothing yet. The wave starts with your first frontier model'}.</p>
+    ${rows ? `<div class="chron-list">${rows}</div>` : ''}
+    <div class="actions"><button class="act" data-act="closeModal">Close</button></div>`);
+}
+ACTIONS.impactReplay = (id) => {
+  const n = IMPACT_BY_ID[id];
+  const e = (s.impactLog || []).find(x => x.id === id);
+  if (!n || !e) return;
+  showImpact(n, fmtDate(e.h), { rel: e.rel, replay: true });
+};
+
 // consequences land on the player's clock, wherever the sim has wandered
 function pumpFalloutReal() {
   const list = s.fallout;
@@ -389,6 +450,9 @@ function drainSignalsSilently() {
   s.lastIncident = null;                 // the outage loss stands, unannounced
   if (s.resDoneQueue) s.resDoneQueue.length = 0;
   s.pendingDilemma = null;               // unanswered offers evaporate
+  while (s.impactQueue && s.impactQueue.length > 3) {   // old news files as wire briefs
+    retireImpact(s, s.impactQueue.shift());
+  }
   lastBestCap = s.bestCap;               // no retroactive celebration bursts
   lastTier = capTier(s.bestCap);
 }
@@ -419,6 +483,7 @@ setInterval(() => {
     pumpDrama();
     pumpResearchDone();
     pumpDilemma();
+    pumpImpacts();
     pumpIncidents();
     pumpAutoGigs();
   }

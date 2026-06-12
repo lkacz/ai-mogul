@@ -25,6 +25,10 @@ export function defaultState(founderId = 'mario') {
     dilemmasSeen: [],                // resolved dilemma ids (each fires once)
     lastDilemmaH: 0,
     fallout: [],                     // delayed consequences {atH, txt, rep?, buff?}
+    impactQueue: [],                 // world-report story ids awaiting broadcast
+    impactsSeen: [],                 // broadcast (or retired) story ids — fire once
+    impactLog: [],                   // the Chronicle: {id, h, live, rel} as aired/retired
+    lastReleaseName: null,           // newest best model — broadcasts credit its wave
 
     phase: 0,                                   // index into FACILITIES
     gpus: { gtx1070: 1 },                       // id -> count

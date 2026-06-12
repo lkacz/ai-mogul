@@ -57,9 +57,12 @@ await check('fresh boot: cosmic opening → founder choice → intro modal', asy
 
 await check('dismiss intro', async () => {
   await page.click('#modal-root [data-act=closeModal]');
-  // keep timed dilemma offers from popping modals mid-suite (the dedicated
-  // dilemma check injects its own pendingDilemma)
-  await page.evaluate(() => { window.AIMOGUL.nextDilemmaReal = Infinity; });
+  // keep timed dilemma offers and world-report broadcasts from popping
+  // modals mid-suite (dedicated checks inject their own)
+  await page.evaluate(() => {
+    window.AIMOGUL.nextDilemmaReal = Infinity;
+    window.AIMOGUL.nextImpactReal = Infinity;
+  });
 });
 
 await check('sidebar shows AGI index + goal with Go button', async () => {
@@ -302,6 +305,55 @@ await check('moral dilemma: neutral choice, delayed consequence scheduled', asyn
   if (!(after.integ > 70)) throw new Error('integrity not moved (hidden): ' + after.integ);
   if (after.fallout < 1) throw new Error('no delayed consequence scheduled');
   await page.evaluate(() => { window.AIMOGUL.nextDilemmaReal = Infinity; });   // re-mute
+});
+
+await check('world report: broadcast modal airs a queued impact story', async () => {
+  await page.evaluate(() => {
+    const g = window.AIMOGUL;
+    g.s.paused = false;                  // a known pause state to restore to
+    g.s.impactQueue = ['seesCats'];
+    g.s.impactsSeen = [];
+    g.nextImpactReal = 0;
+  });
+  await page.waitForSelector('.modal.impact', { timeout: 5000 });
+  const t = await page.textContent('.modal.impact');
+  if (!t.includes('Machines learn to see')) throw new Error('headline missing');
+  if (!t.includes('The real thing')) throw new Error('grounding line missing');
+  const paused = await page.evaluate(() => window.AIMOGUL.s.paused);
+  if (!paused) throw new Error('broadcast did not pause the sim');
+  const canvasOk = await page.evaluate(() => {
+    const cv = document.getElementById('imp-canvas');
+    return cv && cv.width === 640 && cv.height === 264;   // scene + wire crawl
+  });
+  if (!canvasOk) throw new Error('broadcast canvas missing');
+  await page.click('[data-act=impactDone]');
+  const after = await page.evaluate(() => ({
+    paused: window.AIMOGUL.s.paused,
+    seen: window.AIMOGUL.s.impactsSeen,
+    queue: window.AIMOGUL.s.impactQueue.length,
+    log: window.AIMOGUL.s.impactLog,
+    ticker: window.AIMOGUL.s.news[window.AIMOGUL.s.news.length - 1].txt,
+  }));
+  if (after.paused) throw new Error('sim still paused after broadcast');
+  if (!after.seen.includes('seesCats') || after.queue !== 0) throw new Error('story not retired');
+  if (!after.log.some(e => e.id === 'seesCats' && e.live)) throw new Error('story not logged to the Chronicle');
+  if (!after.ticker.includes('World report')) throw new Error('ticker line missing');
+  await page.evaluate(() => { window.AIMOGUL.nextImpactReal = Infinity; });   // re-mute
+});
+
+await check('chronicle: ticker opens the archive, aired story replays', async () => {
+  await page.click('#ticker');
+  await page.waitForSelector('.chron-row');
+  const t = await page.textContent('#modal-root');
+  if (!t.includes('The Chronicle')) throw new Error('chronicle modal missing');
+  if (!t.includes('Machines learn to see')) throw new Error('aired story not listed');
+  await page.click('.chron-row');                          // replay it
+  await page.waitForSelector('.modal.impact');
+  const rt = await page.textContent('.modal.impact');
+  if (!rt.includes('archive replay')) throw new Error('replay framing missing');
+  await page.click('.modal.impact [data-act=chronicle]');  // back to the archive
+  await page.waitForSelector('.chron-row');
+  await page.click('#modal-root [data-act=closeModal]');
 });
 
 await check('singularity → final cinematic, save erased', async () => {

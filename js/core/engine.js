@@ -4,6 +4,7 @@
 import { BAL, capabilityFor, trainCompute, optimalTokens } from './balance.js';
 import { GPUS, FACILITIES, DATASETS, FUNDING, RIVAL_ASYMPTOTE, founderize } from './data.js';
 import { DILEMMA_BY_ID } from './dilemmas.js';
+import { queueImpacts } from './impacts.js';
 import { DESIGNS, GRID_W, GRID_H, scoreDesign, placedCount } from './design.js';
 import { RESEARCH_BY_ID } from './research.js';
 import { MILESTONES, MILESTONE_BY_ID } from './milestones.js';
@@ -114,6 +115,8 @@ function finalizeRun(s, sel, r) {
   if (isBest) {
     s.rep = Math.min(100, s.rep + Math.max(0, (cap - s.bestCap)) * BAL.REP_PER_CAP);
     s.bestCap = cap;
+    s.lastReleaseName = model.name;   // the broadcasts credit this wave to it
+    queueImpacts(s);   // the world reacts to each new generation (UI-paced, no effects)
   }
   pushNews(s, `✅ ${r.name} finished training — capability ${cap.toFixed(1)}${isBest ? ' (new best!)' : ''}.`);
   if (s.autoDeploy && isBest) deployModel(s, model.id);
