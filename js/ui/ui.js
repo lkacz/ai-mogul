@@ -119,7 +119,7 @@ function renderHeader() {
     sc.innerHTML =
       `<button class="speed-btn ${s.paused ? 'on' : ''}" data-act="pause">⏸</button>` +
       game.speeds.map(v =>
-        `<button class="speed-btn ${!s.paused && s.speed === v ? 'on' : ''} ${v >= 10000 ? 'turbo' : ''}" data-act="speed" data-arg="${v}" ${v >= 10000 ? 'title="Turbo: the lab runs itself — incidents and offers resolve silently (usually not in your favor); only AGI and the Singularity interrupt."' : ''}>${lbl(v)}</button>`
+        `<button class="speed-btn ${!s.paused && s.speed === v ? 'on' : ''} ${v >= 10000 ? 'turbo' : ''}" data-act="speed" data-arg="${v}" ${v >= 10000 ? 'title="Turbo: the lab runs alone. Problems and offers get settled without asking you (often badly). Only AGI and the Singularity will stop the clock."' : ''}>${lbl(v)}</button>`
       ).join('');
   }
 }
@@ -184,7 +184,7 @@ function renderSidebar() {
       <div class="stat-row"><span class="k">Market adoption</span><span class="stat-v">${sel.potential > 0 ? fmtPct(clamp(s.adoption / sel.potential, 0, 1)) : '—'}</span></div>
       <div class="stat-row"><span class="k">Costs / hour</span><span class="stat-v">${fmtMoney(sel.costPerHour)}</span></div>
       <div class="stat-row"><span class="k">Reputation</span><span class="stat-v cyan">${s.rep.toFixed(0)} / 100</span></div>
-      <div class="stat-row" title="Your choices, remembered: integrity sways enterprise trust (demand), researcher morale (RP), who joins — and who blows the whistle. 70 is neutral.">
+      <div class="stat-row" title="The game remembers your choices. Integrity changes customer trust (demand), researcher morale (RP), and who wants to work for you. 70 is the neutral point.">
         <span class="k">Integrity</span>
         <span class="stat-v" style="color:${(s.integrity ?? 70) >= 70 ? 'var(--accent)' : (s.integrity ?? 70) >= 40 ? 'var(--dim)' : 'var(--red)'}">🧭 ${(s.integrity ?? 70).toFixed(0)} / 100</span>
       </div>
@@ -383,7 +383,7 @@ ACTIONS.speed = (arg) => {
   const wasTurbo = game.s.speed >= 10000;
   game.s.speed = v; game.s.paused = false;
   if (v >= 10000 && !wasTurbo) {
-    toast('⚡ <b>Turbo engaged.</b> Notifications muted — incidents, offers and milestones resolve silently (the world doesn\'t wait for you). Only AGI and the Singularity will interrupt.');
+    toast('⚡ <b>Turbo on.</b> Notifications are off — problems, offers and milestones get settled without you (the world does not wait). Only AGI and the Singularity will stop the clock.');
   }
   renderAll();
 };

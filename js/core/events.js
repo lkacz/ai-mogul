@@ -72,7 +72,7 @@ export const EVENTS = [
     text: () => '📦 Packaging capacity sells out — accelerator prices +40% for 72h.' },
   { id: 'gpuDeal', weight: 7, minPhase: 0,
     buff: { label: 'GPU deal', gpuPrice: 0.75, hours: 24 },
-    text: () => '🏷️ A crypto-mining farm liquidates — GPUs 25% off for 24h!' },
+    text: () => '🏷️ A crypto-mining farm shuts down and sells everything — GPUs 25% off for 24h!' },
   { id: 'grant', weight: 6, minPhase: 0,
     apply: (s) => { const amt = scaledMoney(s, 1500); s.money += amt; return amt; },
     text: (s, amt) => `🎓 A compute grant comes through: +${fmtMoney(amt)}.` },
@@ -110,7 +110,7 @@ export const EVENTS = [
       const k = ids[Math.floor(Math.random() * ids.length)];
       s.staff[k]--; return k;
     },
-    text: (s, k) => k ? `🎣 A rival lab poaches one of your ${k === 'ops' ? 'ops engineers' : k + 's'} with a comp package you'd rather not see.` : '🎣 A rival recruiter sniffs around but leaves empty-handed.' },
+    text: (s, k) => k ? `🎣 A rival lab steals one of your ${k === 'ops' ? 'ops engineers' : k + 's'} with a salary offer you'd rather not see.` : '🎣 A rival recruiter sniffs around but leaves empty-handed.' },
   { id: 'rivalRelease', weight: 8, minPhase: 0,
     apply: (s) => {
       if (!s.rivals.length) return null;
@@ -175,7 +175,7 @@ export const EVENTS = [
   { id: 'whistle', weight: 5, minPhase: 1, dramatic: true,
     cond: (s) => (s.integrity ?? 70) < 40,
     apply: (s) => { s.rep = Math.max(0, s.rep - 6); return true; },
-    text: () => '📢 A whistleblower walks internal docs to the press: "What Mogul does when nobody is looking." −6 rep.' },
+    text: () => '📢 A whistleblower hands internal documents to the press: "What Mogul does when nobody is looking." −6 rep.' },
   { id: 'exodus', weight: 4, minPhase: 1, dramatic: true,
     cond: (s) => (s.integrity ?? 70) < 30 && Object.values(s.staff).some(n => n > 2),
     apply: (s) => {

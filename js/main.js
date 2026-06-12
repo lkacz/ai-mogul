@@ -55,7 +55,7 @@ function grantOffline() {
   const before = { money: s.money, rp: s.rp, models: s.models.length, cap: s.bestCap };
   for (let i = 0; i < hours; i++) E.step(s, 1);
   showModal(`<h2>⏰ While you were away…</h2>
-    <p>The lab kept running for <b>${fmtDur(hours)}</b> of sim time.</p>
+    <p>The lab kept working for <b>${fmtDur(hours)}</b> of game time.</p>
     <div class="win-stats">
       <span class="muted">Cash</span><span class="num">${fmtMoney(before.money)} → <b class="gold">${fmtMoney(s.money)}</b></span>
       <span class="muted">Research points</span><span class="num">${fmtNum(before.rp)} → <b>${fmtNum(s.rp)}</b></span>
@@ -100,13 +100,13 @@ ACTIONS.pickFounder = (id) => {
 function showIntro() {
   showModal(`<h2>🧠 AI MOGUL</h2>
     <p><b>San Mateo, January 2025.</b> ${founder().intro}</p>
-    <p class="muted">▸ <b>Train models</b> — capability grows with the log of effective compute (C = 6·N·D).<br>
-    ▸ <b>Earn</b> — freelance gigs first, then API revenue as the market slowly adopts your models.<br>
-    ▸ <b>Scale</b> — GPUs → racks → datacenters → a gigawatt AI factory.<br>
-    ▸ <b>Research</b> — algorithmic efficiency multiplies every FLOP you own.<br>
-    ▸ <b>Win</b> — reach capability <b>100: AGI</b>, before the rivals' curves flatten yours.
-    Then find out what the curve does next.</p>
-    <p class="faint">Space = pause · numbers in the top bar set sim speed (1 s ≈ 1 sim hour at 1×)</p>
+    <p class="muted">▸ <b>Train models</b> — more compute makes smarter models (C = 6·N·D).<br>
+    ▸ <b>Earn money</b> — small jobs first, then API income as the market slowly starts using your models.<br>
+    ▸ <b>Grow</b> — GPUs → racks → datacenters → a gigawatt AI factory.<br>
+    ▸ <b>Research</b> — better algorithms make every chip you own count for more.<br>
+    ▸ <b>Win</b> — reach capability <b>100: AGI</b>, before your rivals get there.
+    Then see what happens next.</p>
+    <p class="faint">Space = pause · numbers in the top bar set game speed (1 s ≈ 1 game hour at 1×)</p>
     <div class="actions"><button class="act big" data-act="closeModal">Boot up the rig</button></div>`);
 }
 
@@ -135,10 +135,10 @@ function maybeShowWin() {
       <span class="muted">Gigs grinded</span><span class="num">${fmtMoney(st.gigRevenue)}</span>
       <span class="muted">Papers published</span><span class="num">${st.papers}</span>
     </div>
-    <p class="muted">And yet… the loss curve hasn't flattened. A new research era —
-    <b>Beyond Silicon</b> — glows in the Research tab: photonics, qubits, fusion, atoms —
-    and past those, Kardashev's ladder: a star, then a galaxy. The road continues to
-    capability <b>300</b>. Nobody knows what's there.</p>
+    <p class="muted">And yet… the model is still getting smarter. A new research era —
+    <b>Beyond Silicon</b> — glows in the Research tab: light-based chips, qubits, fusion —
+    and beyond those, bigger steps: the power of a star, then a galaxy. The road continues to
+    capability <b>300</b>. Nobody knows what is there.</p>
     <div class="actions"><button class="act big" data-act="closeModal">Keep scaling</button></div>`);
   save();
 }
@@ -176,7 +176,7 @@ ACTIONS.settings = () => {
       <button class="act warn" data-act="resetGame">🗑 Hard reset</button>
     </div>
     <div id="save-io" style="margin-top:10px"></div>
-    <p class="faint" style="margin-top:12px">AI Mogul autosaves every 15 s. Numbers are compressed for playability,
+    <p class="faint" style="margin-top:12px">AI Mogul saves your game every 15 s. The numbers are squeezed to keep play fun,
     but the mechanics are real: Chinchilla scaling, MFU, PUE, batch-size limits, adoption curves.</p>
     <div class="actions"><button class="act" data-act="closeModal">Close</button></div>`);
 };

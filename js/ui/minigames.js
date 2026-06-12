@@ -66,7 +66,7 @@ export function offerLrGame(runId) {
   showModal(`<h2>🎚️ Babysit the launch?</h2>
     <p>The job is queued. Tune the <b>learning rate</b> live for the first steps —
     a clean warmup and decay gives this run up to <b class="gold">+12% effective compute</b>.</p>
-    ${lessonBox('Real training uses LR <i>schedules</i>: linear warmup, long cruise, then decay. Too high and the loss diverges to NaN; too low and you waste the cluster.')}
+    ${lessonBox('Real training uses LR <i>schedules</i>: a gentle warmup, a long cruise, then a slow decay. Too high and the loss explodes to NaN; too low and you waste the cluster.')}
     <div class="actions">
       <button class="act sub" data-act="mgSkipLr">Let it ride (skip)</button>
       ${crew ? `<button class="act" data-act="mgDelegateLr" data-arg="${runId}">🤝 Hand it to ${crew.who} (+${(12 * crew.score).toFixed(0)}%)</button>` : ''}
@@ -187,7 +187,7 @@ export function playLr(runId) {
       showModal(`<h2>${diverged ? '💥 Diverged!' : pct >= 80 ? '🏆 Beautiful schedule!' : pct >= 45 ? '👍 Solid run' : '😬 It… converged. Technically.'}</h2>
         <p>Schedule quality: <b class="gold">${pct}%</b> → this run gets <b>+${(12 * score).toFixed(1)}% effective compute</b>.</p>
         ${diverged ? '<p class="muted">The loss hit NaN — you rode over the ceiling. Warmup exists for a reason!</p>' : ''}
-        ${lessonBox('The stable-LR ceiling really does move: low at init (hence <i>warmup</i>), high mid-training, lower again near convergence (hence <i>cosine decay</i>).')}
+        ${lessonBox('The safe-LR ceiling really does move: low at the start (that is why <i>warmup</i> exists), high in the middle, lower near the end (that is why <i>cosine decay</i> exists).')}
         <div class="actions"><button class="act big" data-act="mgClose">Back to the lab</button></div>`);
       toast(`🎚️ LR tuned: +${(12 * score).toFixed(1)}% effective compute on this run.`);
     }, diverged ? 900 : 100);
@@ -233,7 +233,7 @@ export function offerDedup(dsId, dsName) {
   showModal(`<h2>🧹 Clean the new corpus?</h2>
     <p><b>${esc(dsName)}</b> just arrived — raw. Filter the junk yourself for a permanent
     <b class="gold">up to +4% data quality</b> on this dataset.</p>
-    ${lessonBox('Deduplication and filtering measurably improve LLMs — duplicated text wastes compute and causes memorization. Garbage in, garbage out is an empirical law.')}
+    ${lessonBox('Deduplication and filtering measurably improve language models — repeated text wastes compute and makes models memorize instead of learn. Garbage in, garbage out is a measured fact.')}
     <div class="actions">
       <button class="act sub" data-act="mgSkipDedup">Ship it raw (skip)</button>
       ${crew ? `<button class="act" data-act="mgDelegateDedup" data-arg="${dsId}">🤝 Hand it to ${crew.who} (+${(4 * crew.score).toFixed(1)}%)</button>` : ''}
@@ -334,7 +334,7 @@ export function playDedup(dsId) {
     showModal(`<h2>${pct >= 80 ? '🏆 Pristine corpus!' : pct >= 45 ? '🧹 Respectably clean' : '😬 The spam got through'}</h2>
       <p>Cleaning quality: <b class="gold">${pct}%</b> → this dataset permanently gains
       <b>+${(4 * score).toFixed(1)}% quality</b>.</p>
-      ${lessonBox('Modern pipelines do exactly this at scale: MinHash dedup, classifier-based quality filters, PII scrubbing. Data work is unglamorous and decisive.')}
+      ${lessonBox('Real pipelines do exactly this at scale: MinHash dedup, quality filters, PII scrubbing. Data work is not glamorous, but it decides how good the model gets.')}
       <div class="actions"><button class="act big" data-act="mgClose">Back to the lab</button></div>`);
     toast(`🧹 Dataset cleaned: +${(4 * score).toFixed(1)}% quality.`);
   }
@@ -352,7 +352,7 @@ export function offerNodeHunt(incident) {
     <p>The all-reduce is hanging: <b>one of 16 nodes</b> is bad and the run lost
     <b class="bad">${incident.lostH}h of progress</b>. Find the node with
     <b>5 diagnostics</b> and you claw back <b class="gold">90% of it</b> (plus RP for the postmortem).</p>
-    ${lessonBox('One straggler GPU stalls a whole synchronous training job. Real SREs bisect node ranges exactly like this — binary search finds 1 of 16 in 4 tests.')}
+    ${lessonBox('One slow GPU (a "straggler") freezes the whole training job. Real engineers hunt it exactly like this — binary search finds 1 bad node out of 16 in just 4 tests.')}
     ${paged >= 2 ? '<p class="muted small">😮‍💨 Tired of carrying the pager? Hire an <b>ops rotation (3+ Infra/DC Ops)</b> on the Company tab — they\'ll bisect future incidents themselves and save most of the progress.</p>' : ''}
     <div class="actions">
       <button class="act sub" data-act="mgSkipNode">Eat the loss (skip)</button>
@@ -444,7 +444,7 @@ export function playNodeHunt(lostH) {
       showModal(`<h2>🏆 Found it: n${String(faulty).padStart(2, '0')}</h2>
         <p>The culprit: <b>${fault}</b>. Node swapped, run resumed —
         <b class="gold">${(lostH * 0.9).toFixed(1)}h of progress restored</b>, +${rp} RP from the postmortem.</p>
-        ${lessonBox('Binary search: each test halves the suspects. 16 nodes → 4 tests. SREs call it bisection; it works on git history too.')}
+        ${lessonBox('Binary search: each test cuts the suspects in half. 16 nodes → 4 tests. Engineers call it bisection; it works on code history too.')}
         <div class="actions"><button class="act big" data-act="mgClose">Back to bed</button></div>`);
     } else {
       showModal(`<h2>😬 Wrong node</h2>
@@ -556,7 +556,7 @@ export function playRlhf() {
     pushNews(s, `🍭 Reward model trained — ${correct}/5 preference accuracy.`);
     showModal(`<h2>${correct >= 4 ? '🏆' : '🍭'} Reward model: ${correct}/5</h2>
       <p>+${rep.toFixed(1)} reputation, +${rp} RP${correct >= 4 ? ', and a <b class="gold">+15% demand buff for 48h</b> — aligned models sell' : ''}.</p>
-      ${lessonBox('RLHF distills thousands of these judgments into a reward model, then optimizes the LLM against it. Its failure modes are exactly what you just saw: sycophancy, verbosity, confident nonsense.')}
+      ${lessonBox('RLHF turns thousands of choices like yours into a reward model, then trains the LLM against it. Its weak points are what you just saw: flattery ("sycophancy"), padding, confident nonsense.')}
       <div class="actions"><button class="act big" data-act="mgClose">Ship it</button></div>`);
   }
   renderQ();
@@ -580,7 +580,7 @@ const CURVES = [
     name: 'a phase transition', fact: 'some capabilities switch on over a narrow range of scale — or the metric just makes it look that way',
     make: () => { const m = 0.35 + Math.random() * 0.3, k = 9 + Math.random() * 5; return (u) => 0.2 + 0.58 / (1 + Math.exp(-k * (u - m))); } },
   { id: 'ucurve', xl: 'model size', yl: 'test error',
-    name: 'a U-curve', fact: 'double descent: test error falls, rises at the interpolation threshold, then falls again',
+    name: 'a U-curve', fact: 'double descent: test error falls, rises again right where the model starts memorizing, then falls once more',
     make: () => { const c = 0.42 + Math.random() * 0.16; return (u) => 0.3 + 1.9 * (u - c) * (u - c); } },
   { id: 'sine', xl: 'training steps', yl: 'loss',
     name: 'a periodic signal', fact: 'cyclic learning-rate schedules and data-loader epochs leave fingerprints like this in real loss curves',
@@ -609,7 +609,7 @@ export function offerCurveGame() {
     <p><b>${esc(name)}</b> starts the way every project starts: a wall of noisy measurements
     that may or may not contain a trend. Find it yourself for up to a
     <b class="gold">+12% head start</b> on the project.</p>
-    ${lessonBox('This is most of research: plot the runs, squint, refit. The scaling laws were found exactly this way — many measurements, one line that refused to bend.')}
+    ${lessonBox('Most of research looks like this: plot the runs, stare, fit again. The scaling laws were found exactly this way — many measurements, one line that refused to bend.')}
     <div class="actions">
       <button class="act sub" data-act="mgSkipCurve">Eyeball it later (skip)</button>
       ${crew ? `<button class="act" data-act="mgDelegateCurve">🤝 Hand it to ${crew.who} (+${(12 * crew.score).toFixed(0)}%)</button>` : ''}

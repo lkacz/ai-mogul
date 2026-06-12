@@ -18,7 +18,7 @@ export const GPUS = [
     desc: 'The chip that trained a whole generation of chatbots. Fast interconnect, HBM2e.' },
   { id: 'ambMi', name: 'AMB Instinct BI-300', tflops: 280, watts: 500, vram: 128,
     price: 8200, phase: 1,
-    desc: 'The red team\'s datacenter card: a lake of VRAM for the price of a hatchback. The drivers improve weekly. Sincerely.' },
+    desc: 'The red team\'s datacenter card: a lake of VRAM for the price of a small car. The drivers improve weekly. Sincerely.' },
   { id: 'h100', name: 'HY-100 SXL', tflops: 990, watts: 700, vram: 80,
     price: 28000, phase: 1,
     desc: 'Grasshopper architecture. FP8 transformer engine. The currency of the AI boom.' },
@@ -59,7 +59,7 @@ export const FACILITIES = [
     story: 'The garage breaker finally trips for the last time. Mario signs a lease, mounts a rack, and hires the first believers. The whiteboard says: "SCALE IS ALL YOU NEED."' },
   { id: 'colo', name: 'Colo Datacenter Suite', cost: 600e3, slots: 1200, powerW: 1.2e6, staffMax: 80,
     pue: 1.35, elecPrice: 0.10, upkeep: 350,
-    desc: 'A leased cage in a colocation facility. 1.2 MW critical load, real cooling (PUE 1.35), remote hands.',
+    desc: 'A rented cage in a shared datacenter. 1.2 MW of power, real cooling (PUE 1.35), on-site staff.',
     story: 'Racks on racks. Mario stops naming the servers — there are too many now. Investors start calling *him*.' },
   { id: 'dc', name: 'Hyperscale Datacenter', cost: 30e6, slots: 60e3, powerW: 60e6, staffMax: 1200,
     pue: 1.2, elecPrice: 0.06, upkeep: 12e3,
@@ -72,7 +72,7 @@ export const FACILITIES = [
   { id: 'orbital', name: 'Orbital Compute Constellation', cost: 750e9, slots: 50e6, powerW: 100e9, staffMax: 50000,
     pue: 1.05, elecPrice: 0.004, upkeep: 4e6,
     desc: '100 GW of compute satellites in sun-synchronous orbit: free photons in, radiated heat out (PUE 1.05), lasers between nodes.',
-    story: 'The launches run nightly for a year. A hundred gigawatts of solar wings unfold over the terminator line, linked by laser. Mission control keeps one window pointed at Earth — Mario insists. "So it remembers where it\'s from."' },
+    story: 'The launches run nightly for a year. A hundred gigawatts of solar wings unfold along the edge of night, linked by laser. Mission control keeps one window pointed at Earth — Mario insists. "So it remembers where it\'s from."' },
   // ppMult: the facility IS the interconnect at this scale — it raises the
   // batch-size wall. marketMult: a Kardashev-II economy doesn't sell API
   // calls; the addressable market is energy and matter compilation.
@@ -132,15 +132,15 @@ export const FUNDING = [
   { id: 'seriesA', name: 'Series A', amount: 20e6, reqCap: 25, reqRep: 20, rep: 10, gapDays: 60,
     desc: 'A real venture round. The partners want to see scaling curves.' },
   { id: 'seriesB', name: 'Series B', amount: 300e6, reqCap: 40, reqRep: 40, rep: 10, gapDays: 120,
-    desc: 'Growth capital for serious compute. Your data room is mostly loss curves.' },
+    desc: 'Growth money for serious compute. The investor folder is mostly loss curves.' },
   // late gaps stay short enough that the chain completes before the endgame —
   // the early gaps (A/B) are the real economic brake; these are story beats
   { id: 'seriesC', name: 'Series C', amount: 5e9, reqCap: 55, reqRep: 60, rep: 10, gapDays: 120,
-    desc: 'Sovereign funds and hyperscalers fight for allocation. You pick the quiet ones.' },
+    desc: 'Government funds and tech giants fight to get in. You pick the quiet ones.' },
   { id: 'sovereign', name: 'Sovereign Megaround', amount: 80e9, reqCap: 70, reqRep: 78, rep: 12, gapDays: 150,
     desc: 'Nation-state capital for the Factory. The term sheet has a foreword.' },
   { id: 'ipo', name: 'The IPO', amount: 2e12, reqCap: 100, reqRep: 90, rep: 10, gapDays: 120,
-    desc: 'The largest public offering in history. The prospectus risk section just says "see: the singularity".' },
+    desc: 'The largest stock listing in history. The risk section of the filing just says "see: the singularity".' },
 ];
 
 export const RIVALS = [
