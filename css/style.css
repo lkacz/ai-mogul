@@ -317,6 +317,13 @@ table.tbl td { padding: 6px 8px; border-bottom: 1px solid #1d2331; }
 .imp-filed { margin-left: 8px; font-size: 11px; color: var(--faint); font-style: italic; }
 .imp-real { color: var(--faint); font-size: 12px; border-top: 1px dashed var(--border); padding-top: 8px; }
 
+/* dilemma establishing shot — quiet, framed, above the question */
+.dl-canvas {
+  width: 100%; display: block; margin-bottom: 12px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: #05070c;
+}
+
 /* the Chronicle: aired reports, replayable */
 .chron-list { display: flex; flex-direction: column; gap: 4px; max-height: 52vh; overflow-y: auto; margin: 8px 0; }
 .chron-row {

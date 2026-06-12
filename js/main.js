@@ -11,7 +11,7 @@ import { ACTIONS } from './ui/tabs.js';
 import { celebrate, drawFounderPortrait } from './ui/scene.js';
 import { offerNodeHunt, playRlhf } from './ui/minigames.js';
 import { playSingularity, playOpening } from './ui/singularity.js';
-import { showImpact } from './ui/impactviz.js';
+import { showImpact, mountDilemmaScene, dilemmaScene } from './ui/impactviz.js';
 import { RESEARCH_BY_ID } from './core/research.js';
 import { DILEMMAS, DILEMMA_BY_ID } from './core/dilemmas.js';
 import { IMPACT_BY_ID, retireImpact } from './core/impacts.js';
@@ -312,10 +312,13 @@ function pumpDilemma() {
   const btn = (i) => `<button class="act" data-act="dilemma" data-arg="${i}"
     style="flex:1; white-space:normal; padding:10px 12px; line-height:1.35">${esc(d.options[i].label)}</button>`;
   // no "real debate" sidebar — the citations stay in the data as writing
-  // anchors, but the player just gets the situation, in-world, nothing meta
-  showModal(`<h2>⚖️ ${esc(d.title)}</h2>
+  // anchors, but the player just gets the situation, in-world, nothing meta.
+  // The scene above the text sets the stage, never the answer.
+  showModal(`<canvas id="dl-canvas" class="dl-canvas" width="640" height="240"></canvas>
+    <h2>⚖️ ${esc(d.title)}</h2>
     <p>${text}</p>
     <div class="row" style="gap:10px; margin-top:10px; align-items:stretch">${btn(order[0])}${btn(order[1])}</div>`);
+  mountDilemmaScene(document.getElementById('dl-canvas'), dilemmaScene(d));
 }
 ACTIONS.dilemma = (arg) => {
   const r = E.resolveDilemma(s, +arg);

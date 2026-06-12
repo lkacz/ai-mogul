@@ -27,8 +27,19 @@ await page.evaluate(() => {
   s.pendingDilemma = { id: 'maven', realAt: Date.now() };
 });
 await page.waitForSelector('#modal-root .modal');
-await page.waitForTimeout(400);
+await page.waitForTimeout(900);
 await page.screenshot({ path: join(ROOT, 'test', 'shot_dilemma.png') });
 console.log('shot dilemma');
+
+// a second register: the personal-scale request (companion scene)
+await page.evaluate(() => {
+  document.getElementById('modal-root').classList.add('hidden');
+  window.AIMOGUL.s.pendingDilemma = { id: 'griefBot', realAt: Date.now() };
+});
+await page.waitForFunction(() =>
+  document.getElementById('modal-root').textContent.includes('widow'));
+await page.waitForTimeout(900);
+await page.screenshot({ path: join(ROOT, 'test', 'shot_dilemma_grief.png') });
+console.log('shot dilemma grief');
 await browser.close();
 server.close();

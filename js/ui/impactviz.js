@@ -721,6 +721,109 @@ export const IMPACT_SCENES = {
     ctx.fillText('sol 8,412 · soil pH approaching habitable', 14, H - 10);
   },
 
+  // the founder's desk at 2 a.m. — where the personal calls get made
+  desk(ctx, t, a) {
+    sky(ctx, '#0a0c12', '#10131c');
+    P(ctx, 420, 30, 150, 110, '#0c1322');                  // the window, raining
+    ctx.fillStyle = '#d6dce8'; ctx.beginPath(); ctx.arc(530, 58, 11, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#0c1322'; ctx.beginPath(); ctx.arc(525, 54, 10, 0, TAU); ctx.fill();
+    for (let r = 0; r < 22; r++) {
+      const rx = 424 + R(r * 7) * 142, ry = (R(r * 3) * 110 + t * (60 + R(r) * 50)) % 106;
+      P(ctx, rx, 32 + ry, 1, 5 + R(r) * 4, 'rgba(140,160,200,0.35)');
+    }
+    P(ctx, 414, 28, 4, 114, '#1c2230'); P(ctx, 568, 28, 4, 114, '#1c2230');
+    P(ctx, 414, 138, 158, 4, '#1c2230'); P(ctx, 490, 28, 3, 114, '#1c2230');
+    P(ctx, 60, 168, 320, 8, '#2a2418');                    // the desk
+    P(ctx, 70, 176, 8, 50, '#1e1a10'); P(ctx, 360, 176, 8, 50, '#1e1a10');
+    const g = ctx.createRadialGradient(120, 120, 4, 120, 120, 90);   // lamp cone
+    g.addColorStop(0, 'rgba(251,191,36,0.30)'); g.addColorStop(1, 'rgba(251,191,36,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(120, 120, 90, 0, TAU); ctx.fill();
+    P(ctx, 96, 120, 5, 48, '#39415a'); P(ctx, 84, 110, 30, 12, '#4a5470');
+    P(ctx, 180, 108, 96, 62, '#232b3d');                   // the terminal
+    P(ctx, 184, 112, 88, 54, '#0a0f16');
+    for (let l = 0; l < 5; l++) {                          // a hard email, half-written
+      const wmax = 24 + R(l * 5) * 54;
+      const wNow = Math.min(wmax, Math.max(0, ((t * 0.5 % 2.4) - l * 0.36) * 110));
+      P(ctx, 189, 118 + l * 9, wNow, 3, l ? '#39415a' : a);
+    }
+    if ((t * 1.4) % 1 < 0.55) P(ctx, 190 + Math.min(78, ((t * 0.5 % 2.4) - 4 * 0.36) * 110), 154, 5, 7, a);
+    P(ctx, 296, 150, 14, 18, '#4a3a26');                   // coffee, long cold
+    P(ctx, 310, 154, 5, 8, '#4a3a26');
+    P(ctx, 300 + Math.sin(t * 2) * 2, 138 - (t * 14 % 12), 2, 5, 'rgba(214,220,232,0.25)');
+    const cb = Math.sin(t * 1.1) * 1.5;                    // the cat, unbothered
+    P(ctx, 326, 156 + cb * 0.3, 30, 12, '#39415a');
+    P(ctx, 350, 148 + cb * 0.3, 13, 11, '#39415a');
+    P(ctx, 351, 144 + cb * 0.3, 4, 5, '#39415a'); P(ctx, 358, 144 + cb * 0.3, 4, 5, '#39415a');
+    P(ctx, 320, 160, 8, 4, '#39415a');
+    person(ctx, 224, 178, '#3b4a6b', 2.6, 12);             // you, deciding
+    ctx.font = '9px monospace'; ctx.fillStyle = '#5d6478';
+    ctx.fillText('2:13 am · the cursor blinks either way', 60, H - 10);
+  },
+
+  // a long table, a glowing offer, the city watching through the glass
+  boardroom(ctx, t, a) {
+    sky(ctx, '#0b0d14', '#12161f');
+    skyline(ctx, 150, 77, '#10141f', '#26304a', t, 0.3);   // the city, through glass
+    P(ctx, 0, 24, W, 2, '#1c2230');
+    for (let m = 0; m < 5; m++) P(ctx, 64 + m * 128, 24, 3, 126, '#1c2230');   // mullions
+    P(ctx, 0, 148, W, 6, '#161b27');
+    ctx.fillStyle = '#241d12';                             // the table
+    ctx.beginPath(); ctx.moveTo(110, 226); ctx.lineTo(530, 226); ctx.lineTo(470, 162); ctx.lineTo(170, 162); ctx.fill();
+    ctx.fillStyle = '#2e2517';
+    ctx.beginPath(); ctx.moveTo(110, 226); ctx.lineTo(530, 226); ctx.lineTo(528, 232); ctx.lineTo(112, 232); ctx.fill();
+    for (let p2 = 0; p2 < 3; p2++) {                       // them
+      person(ctx, 190 + p2 * 100, 128, '#11151f', 2.4, p2 * 9);
+      person(ctx, 240 + p2 * 100, 130, '#0e1119', 2.2, p2 * 9 + 4);
+    }
+    const pulse = 0.5 + 0.5 * Math.sin(t * 1.8);           // the offer, glowing
+    const gg = ctx.createRadialGradient(320, 190, 2, 320, 190, 46);
+    gg.addColorStop(0, `rgba(251,191,36,${0.20 + pulse * 0.12})`); gg.addColorStop(1, 'rgba(251,191,36,0)');
+    ctx.fillStyle = gg; ctx.beginPath(); ctx.arc(320, 190, 46, 0, TAU); ctx.fill();
+    P(ctx, 300, 182, 40, 26, '#d6dce8');
+    for (let l = 0; l < 4; l++) P(ctx, 304, 186 + l * 5, 32 - R(l) * 14, 2, '#8b93a7');
+    P(ctx, 304, 202, 18, 2, a);                            // the signature line
+    const tap = (t * 2.2) % 1 < 0.5 ? 0 : 2;               // a pen, tapping
+    P(ctx, 392, 186 + tap, 3, 12, '#9aa6bb');
+    ctx.font = '9px monospace'; ctx.fillStyle = '#5d6478';
+    ctx.fillText('page 1 of 41 · the number is real', 110, H - 10);
+  },
+
+  // the server aisle where the model actually lives
+  rack(ctx, t, a) {
+    sky(ctx, '#07090e', '#0b0e15');
+    for (let side = 0; side < 2; side++) {                 // two rows, in perspective
+      for (let i = 0; i < 5; i++) {
+        const depth = i / 5;
+        const rw = 86 - depth * 38, rh = 150 - depth * 64;
+        const rx = side === 0 ? 30 + i * 78 + depth * 20 : W - 30 - rw - i * 78 - depth * 20;
+        const ry = 36 + depth * 30;
+        P(ctx, rx, ry, rw, rh, '#11151f');
+        P(ctx, rx, ry, rw, 3, '#1c2230'); P(ctx, rx, ry, 3, rh, '#1c2230');
+        for (let ly = 0; ly < 9; ly++) {
+          for (let lx = 0; lx < 4; lx++) {
+            const seed = side * 999 + i * 97 + ly * 13 + lx;
+            const on = R(seed + Math.floor(t * (1.5 + R(seed) * 4))) > 0.4;
+            if (on) {
+              const c = R(seed * 3) < 0.78 ? '#1e4f3e' : R(seed * 7) < 0.5 ? '#22d3ee' : '#fbbf24';
+              P(ctx, rx + 8 + lx * ((rw - 16) / 4), ry + 10 + ly * ((rh - 20) / 9), 3, 3, c);
+            }
+          }
+        }
+      }
+    }
+    P(ctx, 0, 196, W, 44, '#0a0d12');                      // the cold aisle
+    P(ctx, W / 2 - 70, 198, 140, 2, 'rgba(34,211,238,0.25)');
+    P(ctx, W / 2 - 40, 214, 80, 2, 'rgba(34,211,238,0.15)');
+    const wx = W / 2 + Math.sin(t * 0.5) * 90;             // the one who has to decide
+    const hg = ctx.createRadialGradient(wx + 5, 168, 2, wx + 5, 168, 40);
+    hg.addColorStop(0, `rgba(52,211,153,0.18)`); hg.addColorStop(1, 'rgba(52,211,153,0)');
+    ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(wx + 5, 168, 40, 0, TAU); ctx.fill();
+    person(ctx, wx, 168, '#1c2230', 2.4, 31);
+    P(ctx, wx + 2, 170, 8, 3, a);                          // the badge that opens the door
+    ctx.font = '9px monospace'; ctx.fillStyle = '#5d6478';
+    ctx.fillText('checkpoint 41,206 saved · awaiting instruction', 14, H - 10);
+  },
+
   // the watch that never blinks, and the rock that misses
   shield(ctx, t, a) {
     sky(ctx, '#04060c', '#0a0e1a');
@@ -816,8 +919,54 @@ export function drawBroadcast(ctx, t, wireText, a) {
   ctx.fillStyle = a; ctx.fillText('⚡', x - 18, H + 16);
 }
 
-// ── the broadcast modal + its animation loop ───────────────────────
-let cv = null, raf = 0, sceneKey = null, tone = 'good', t0 = 0, wireText = '';
+// ── dilemma headers: the same scenes, without the television ────────
+// Hard choices get a quiet establishing shot, not a news show: a neutral
+// purple accent (no tone — tone would whisper an answer) and a soft veil
+// that settles the scene behind the question. Exported for the smoke stub.
+export function drawVeil(ctx) {
+  const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, W * 0.6);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(5,7,12,0.45)');
+  ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+  const fg = ctx.createLinearGradient(0, H - 50, 0, H);
+  fg.addColorStop(0, 'rgba(22,27,39,0)'); fg.addColorStop(1, 'rgba(22,27,39,0.9)');
+  ctx.fillStyle = fg; ctx.fillRect(0, H - 50, W, 50);
+}
+
+// Which scene sets each dilemma's stage (core data stays untouched —
+// presentation is a UI concern). Smoke enforces full coverage; the
+// per-phase fallback only catches dilemmas added without a mapping.
+export const DILEMMA_VIZ = {
+  ghostwriter: 'desk', shadowLibrary: 'desk', confession: 'desk',
+  benchmarkLeak: 'rack', openWeights: 'rack', rushLaunch: 'rack',
+  recipeTheft: 'boardroom', sovereignSeed: 'boardroom', dataBroker: 'boardroom',
+  griefBot: 'companion', user4406: 'companion', ageGate: 'companion', teenFilter: 'companion',
+  detector: 'tutor', proctor: 'tutor',
+  annotators: 'jobs', layoffModel: 'jobs', picketLine: 'jobs', jobShock: 'jobs',
+  corpusRot: 'feed', slopFarm: 'feed', engagementMax: 'feed', persuasion: 'feed',
+  voiceClone: 'cyber', maven: 'cyber', backdoor: 'cyber', nc3Advisor: 'cyber',
+  eavesdrop: 'city', precrime: 'city', panopticon: 'city', heatwave: 'city',
+  cityCharter: 'city', simMinds: 'city',
+  votefactory: 'forum', truthEngine: 'forum', docket: 'forum', constitution: 'forum',
+  unforgetting: 'forum',
+  liarsDividend: 'studio', forkSelf: 'studio',
+  babel: 'babel', lastSpeakers: 'babel', latticeMerge: 'babel',
+  medTriage: 'hospital', denialEngine: 'hospital', innerVoice: 'hospital',
+  cureOrProfit: 'meds', bioUnlock: 'meds', embryoMenu: 'meds',
+  buryPaper: 'autolab',
+  coalPower: 'eco', aquifer: 'eco', uplift: 'eco', forecast: 'eco',
+  climateGeo: 'shield', earthShade: 'shield',
+  rivalRun: 'fusion', entropyBudget: 'fusion',
+  slowdown: 'space',
+  darkForest: 'starship', centauri: 'starship', seam: 'starship',
+  mercuryRights: 'seed', secondGenesis: 'seed', ancestorSim: 'seed', thousandGardens: 'seed',
+};
+const PHASE_FALLBACK = ['desk', 'desk', 'boardroom', 'forum', 'city', 'space', 'seed', 'starship'];
+export function dilemmaScene(d) {
+  return DILEMMA_VIZ[d.id] || PHASE_FALLBACK[Math.min(PHASE_FALLBACK.length - 1, d.minPhase || 0)];
+}
+
+// ── the shared animation loop (broadcast or dilemma header) ─────────
+let cv = null, raf = 0, sceneKey = null, tone = 'good', t0 = 0, wireText = '', accent = ACCENT.good, tv = true;
 
 function frame() {
   raf = 0;
@@ -827,10 +976,20 @@ function frame() {
   const t = (performance.now() - t0) / 1000;
   ctx.clearRect(0, 0, W, CANVAS_H);
   const draw = IMPACT_SCENES[sceneKey];
-  const a = ACCENT[tone] || ACCENT.good;
-  if (draw) draw(ctx, t, a, tone);
-  drawBroadcast(ctx, t, wireText, a);
+  if (draw) draw(ctx, t, accent, tone);
+  if (tv) drawBroadcast(ctx, t, wireText, accent);
+  else drawVeil(ctx);
   raf = requestAnimationFrame(frame);
+}
+
+export function mountDilemmaScene(el, key) {
+  cv = el;
+  sceneKey = key;
+  tone = 'dilemma';                // no scene reads this — deliberately neutral
+  accent = '#a78bfa';
+  tv = false;
+  t0 = performance.now();
+  if (cv && cv.getContext && !raf) raf = requestAnimationFrame(frame);
 }
 
 // program name grows with the story's scale — the channel keeps up
@@ -867,6 +1026,8 @@ export function showImpact(n, dateline, opts = {}) {
   cv = document.getElementById('imp-canvas');
   sceneKey = n.viz;
   tone = n.tone;
+  accent = ACCENT[n.tone] || ACCENT.good;
+  tv = true;
   wireText = (n.wire || []).join('   +++   ') + '   +++   ';
   t0 = performance.now();
   if (cv && cv.getContext && !raf) raf = requestAnimationFrame(frame);

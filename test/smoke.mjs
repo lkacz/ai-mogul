@@ -34,7 +34,7 @@ const { defaultState, selectors, serialize, deserialize } = await import('../js/
 const { DILEMMAS } = await import('../js/core/dilemmas.js');
 const { DESIGNS, scoreDesign } = await import('../js/core/design.js');
 const { IMPACTS, IMPACT_BY_ID, queueImpacts, IMPACT_QUEUE_MAX } = await import('../js/core/impacts.js');
-const { IMPACT_SCENES, drawBroadcast } = await import('../js/ui/impactviz.js');
+const { IMPACT_SCENES, drawBroadcast, drawVeil, DILEMMA_VIZ, dilemmaScene } = await import('../js/ui/impactviz.js');
 const { drawDesignScene, PART_DRAW } = await import('../js/ui/designparts.js');
 const sceneMod = await import('../js/ui/scene.js');
 const E = await import('../js/core/engine.js');
@@ -213,6 +213,23 @@ check('impact scenes: every renderer draws on the 2d-context stub', () => {
   }
   // the broadcast post-process (static burst, scanlines, wire crawl) too
   for (const t of [0, 0.05, 0.3, 2.4]) drawBroadcast(ctx, t, 'WIRES: test +++', '#34d399');
+  drawVeil(ctx);
+});
+
+check('dilemma scenes: every dilemma has an explicit, valid establishing shot', () => {
+  for (const [id, key] of Object.entries(DILEMMA_VIZ)) {
+    if (!IMPACT_SCENES[key]) throw new Error(`mapping ${id} → unknown scene "${key}"`);
+  }
+  for (const d of DILEMMAS) {
+    if (!DILEMMA_VIZ[d.id]) throw new Error(`${d.id}: no explicit scene mapping (add it to DILEMMA_VIZ)`);
+    if (!IMPACT_SCENES[dilemmaScene(d)]) throw new Error(`${d.id}: resolves to unknown scene`);
+  }
+  // the fallback path stays valid for dilemmas added without a mapping
+  for (let ph = 0; ph <= 9; ph++) {
+    if (!IMPACT_SCENES[dilemmaScene({ id: '__new__', minPhase: ph })]) {
+      throw new Error(`phase ${ph} fallback resolves to unknown scene`);
+    }
+  }
 });
 
 check('facility designs: all tiers score, fx bounded, neutral when unset', () => {

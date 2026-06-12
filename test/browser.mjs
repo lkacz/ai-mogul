@@ -295,6 +295,11 @@ await check('moral dilemma: neutral choice, delayed consequence scheduled', asyn
   if (!txt.includes('shadow library')) throw new Error('dilemma modal missing');
   if (/real debate/i.test(txt)) throw new Error('meta "real debate" sidebar leaked into the dialog');
   if (/integrity\s*[-+−]?\d/i.test(txt)) throw new Error('integrity is signposted in the dialog');
+  const dlCanvas = await page.evaluate(() => {
+    const cvs = document.getElementById('dl-canvas');
+    return cvs && cvs.width === 640 && cvs.height === 240;
+  });
+  if (!dlCanvas) throw new Error('dilemma establishing-shot canvas missing');
   const btnCls = await page.$$eval('[data-act=dilemma]', els => els.map(e => e.className));
   if (btnCls.length !== 2 || btnCls[0] !== btnCls[1]) throw new Error('options styled unequally: ' + btnCls);
   await page.click('[data-act=dilemma][data-arg="1"]');   // license data properly

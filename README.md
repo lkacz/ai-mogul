@@ -121,9 +121,12 @@ the Landauer limit, fusion ignition and orbital datacenters.
 
 ## The temptations ⚖️
 
-Every 3–5 minutes of *real* play time (never at turbo), a hard decision arrives — 34 of them
-across the whole arc, every one anchored to a **real controversy** with a "📚 the real debate"
-note. And they are presented the way hard choices actually feel: **two identical buttons, in
+Every 3–5 minutes of *real* play time (never at turbo), a hard decision arrives — 66 of them
+across the whole arc, every one anchored to a real controversy, and every one opening on an
+**animated establishing shot**: the widow's request plays over an apartment block at night,
+the weapons contract over a live world map, the ship-it-tonight call over a blinking server
+aisle, the 2 a.m. temptations over a lamp-lit garage desk where the cursor blinks either way.
+The scene sets the stage, never the answer. And they are presented the way hard choices actually feel: **two identical buttons, in
 random order, with no hint of which answer is "right"** — because the text argues both sides,
 and both sides have one. The general is correct that slower targeting kills your own soldiers;
 the widow asking for a grief bot has read the warnings and is asking anyway.
