@@ -35,6 +35,7 @@ const { DILEMMAS } = await import('../js/core/dilemmas.js');
 const { DESIGNS, scoreDesign } = await import('../js/core/design.js');
 const { IMPACTS, IMPACT_BY_ID, queueImpacts, IMPACT_QUEUE_MAX } = await import('../js/core/impacts.js');
 const { IMPACT_SCENES, drawBroadcast, drawVeil, DILEMMA_VIZ, dilemmaScene } = await import('../js/ui/impactviz.js');
+const { generatePaper } = await import('../js/ui/papergen.js');
 const { drawDesignScene, PART_DRAW } = await import('../js/ui/designparts.js');
 const sceneMod = await import('../js/ui/scene.js');
 const E = await import('../js/core/engine.js');
@@ -214,6 +215,28 @@ check('impact scenes: every renderer draws on the 2d-context stub', () => {
   // the broadcast post-process (static burst, scanlines, wire crawl) too
   for (const t of [0, 0.05, 0.3, 2.4]) drawBroadcast(ctx, t, 'WIRES: test +++', '#34d399');
   drawVeil(ctx);
+});
+
+check('paper generator: well-formed, era-aware, varied, career-length', () => {
+  for (const [label, st] of Object.entries(states)) {
+    const titles = new Set();
+    for (let i = 0; i < 6; i++) {
+      const p = generatePaper(st);
+      const full = [p.venue, p.title, p.authors, ...p.chunks.map(c => c.t)].join(' ');
+      if (/undefined|\[object|\{\w+\}/.test(full)) throw new Error(`${label}: unfilled slot in "${full.slice(0, 120)}"`);
+      if (!p.title || p.title.length < 8) throw new Error(`${label}: bad title "${p.title}"`);
+      if (!p.venue || !p.authors.includes('Mogul')) throw new Error(`${label}: bad venue/authors`);
+      if (p.chunks.length < 22 || p.chunks.length > 110) throw new Error(`${label}: ${p.chunks.length} chunks out of range`);
+      if (!p.chunks.some(c => c.head)) throw new Error(`${label}: no section heads`);
+      titles.add(p.title);
+    }
+    if (titles.size < 4) throw new Error(`${label}: titles too repetitive (${titles.size}/6 unique)`);
+  }
+  // a long career writes long papers, capped at ~100 keystrokes
+  const vet = JSON.parse(JSON.stringify(states.mid));
+  vet.stats.papers = 30;
+  const long = generatePaper(vet);
+  if (long.chunks.length < 85) throw new Error(`veteran paper too short: ${long.chunks.length}`);
 });
 
 check('dilemma scenes: every dilemma has an explicit, valid establishing shot', () => {

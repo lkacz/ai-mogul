@@ -50,6 +50,9 @@ export function defaultState(founderId = 'mario') {
     modelSeq: 0,
     bestCap: 0,
     autoDeploy: true,
+    paperAuto: 0,      // standing arrangement: the team drafts every paper
+
+
 
     rivals: RIVALS.map(r => ({ id: r.id, name: r.name, cap: r.start, rate: r.rate })),
 

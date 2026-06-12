@@ -12,10 +12,11 @@ import { initScene } from './scene.js';
 import { initModelViz, setModelViz } from './modelviz.js';
 import { mgHandlers, offerLrGame, offerDedup } from './minigames.js';
 import { dzHandlers } from './designer.js';
+import { pwHandlers, offerPaperWrite } from './papergen.js';
 
 export const ACTIONS = {};
 export const INPUTS = {};
-Object.assign(ACTIONS, mgHandlers, dzHandlers);
+Object.assign(ACTIONS, mgHandlers, dzHandlers, pwHandlers);
 
 const FACILITY_EMOJI = ['🏠', '🏢', '🗄️', '🏭', '🌆', '🛰️', '☀️', '🌌'];
 
@@ -631,7 +632,7 @@ const coTab = {
   // affordability, funding readiness and the traction countdown refresh in
   // place (update below) — no time-based term, so the tab never rebuilds
   // under the player's pointer
-  sig: (s, sel) => [s.phase, JSON.stringify(s.staff), s.dataTier, s.funding.length, s.stats.papers, s.research.length].join('|'),
+  sig: (s, sel) => [s.phase, JSON.stringify(s.staff), s.dataTier, s.funding.length, s.stats.papers, s.research.length, s.paperAuto ? 1 : 0].join('|'),
   build(s, sel) {
     const staffRows = STAFF.map(st => `
       <tr>
@@ -696,6 +697,9 @@ const coTab = {
           <div class="stat-row"><span class="k">Reputation</span><span class="stat-v cyan" id="co-rep"></span></div>
           <div class="stat-row"><span class="k">Papers published</span><span class="stat-v">${s.stats.papers}</span></div>
           <button class="act" data-act="paper" id="co-paper" style="margin-top:6px"></button>
+          ${s.paperAuto && (s.staff.researcher >= 2 || s.bestCap >= 100)
+    ? `<div class="small cyan" style="margin-top:4px">${s.bestCap >= 100 ? '🤖 the models draft them' : '🧑‍🔬 the research team drafts them'} — one click submits · <a data-act="paperManual" style="cursor:pointer; text-decoration:underline">write them yourself</a></div>`
+    : ''}
           <div class="faint" style="margin-top:4px">+${BAL.PAPER_REP} reputation each. Investors read the NeurDips proceedings.</div>
         </div>
         <div class="card"><h3>Funding rounds</h3><div class="grid3" style="grid-template-columns:1fr">${fundCards}</div></div>
@@ -720,9 +724,9 @@ const coTab = {
         : s.staff.engineer >= 2 ? 'can clean corpora for you ✓ (4+: hands-free)'
           : 'at 2+ they take dataset cleaning off your desk'}`);
     set('stafffx_researcher', `now: research speed ×${fmtNum(E.resSpeed(s, sel))} · +${fmtNum(s.staff.researcher * BAL.RP_PER_RESEARCHER * sel.fx.rpMult)} RP/h · ${
-      s.staff.researcher >= 4 ? 'every launch tuned hands-free ✓'
-        : s.staff.researcher >= 2 ? 'can tune launches for you ✓ (4+: hands-free)'
-          : 'at 2+ they take LR tuning off your desk'}`);
+      s.staff.researcher >= 4 ? 'every launch tuned hands-free ✓ · papers drafted on request ✓'
+        : s.staff.researcher >= 2 ? 'can tune launches & draft your papers ✓ (4+: hands-free)'
+          : 'at 2+ they take LR tuning and paper drafting off your desk'}`);
     set('stafffx_ops', `now: −${fmtPct(Math.min(BAL.OPS_ELEC_CAP, s.staff.ops * BAL.OPS_ELEC_EACH))} electricity · ${s.staff.ops > 0 ? 'hot spares ✓' : 'no hot spares'}${s.staff.ops >= 3 ? ' · on-call rotation ✓ (no more 3 AM pagers)' : ' · YOU carry the pager (3+ take it)'}${s.staff.ops >= 5 ? ' · burglar-proof ✓' : ''}`);
     set('stafffx_sales', `now: ×${(1 + BAL.ADOPT_SALES_K * Math.log10(1 + s.staff.sales)).toFixed(2)} market adoption speed · ${
       s.staff.sales >= 1 ? 'consulting pipeline running ✓ (gigs close themselves)'
@@ -773,7 +777,8 @@ ACTIONS.fund = (id, el) => {
   const r = doAction(E.takeFunding, id);
   if (r.ok) spawnFloat('+' + fmtMoney(game.s.money - before), el, 'gold big');
 };
-ACTIONS.paper = () => doAction(E.publishPaper);
+// publishing means writing: the paper sprint (papergen.js) wraps the action
+ACTIONS.paper = () => offerPaperWrite();
 
 // ════════════════════════ GOALS ════════════════════════
 const goalsTab = {

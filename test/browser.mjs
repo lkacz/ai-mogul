@@ -361,6 +361,42 @@ await check('chronicle: ticker opens the archive, aired story replays', async ()
   await page.click('#modal-root [data-act=closeModal]');
 });
 
+await check('paper sprint: keystrokes write the draft; the team takes it over', async () => {
+  await page.evaluate(() => {
+    const s = window.AIMOGUL.s;
+    s.rp = 1e9; s.staff.researcher = 2; s.paperAuto = 0;
+  });
+  await page.click('[data-act=tab][data-arg=co]');
+  await page.waitForSelector('#co-paper:not([disabled])');
+  const before = await page.evaluate(() => window.AIMOGUL.s.stats.papers);
+  await page.click('#co-paper');
+  await page.waitForSelector('.pw-doc');
+  await page.keyboard.type('the gradient must flow '.repeat(8));   // ~184 keystrokes
+  const partial = await page.evaluate(() => document.getElementById('pw-body').textContent.length);
+  if (!(partial > 40)) throw new Error('typing revealed no prose');
+  await page.click('[data-act=pwSubmit]');
+  const mid = await page.evaluate(() => ({ papers: window.AIMOGUL.s.stats.papers, paused: window.AIMOGUL.s.paused }));
+  if (mid.papers !== before + 1) throw new Error('typed paper did not publish');
+  if (mid.paused) throw new Error('world still paused after submit');
+  // delegate, with the standing arrangement checked
+  await page.click('#co-paper');
+  await page.waitForSelector('#pw-always');
+  await page.check('#pw-always');
+  await page.click('[data-act=pwDelegate]');
+  const d = await page.evaluate(() => ({ papers: window.AIMOGUL.s.stats.papers, auto: window.AIMOGUL.s.paperAuto }));
+  if (d.papers !== before + 2 || !d.auto) throw new Error('delegation failed');
+  // from now on, one click publishes — no modal, no typing
+  await page.click('#co-paper');
+  await page.waitForTimeout(200);
+  const auto = await page.evaluate(() => ({
+    papers: window.AIMOGUL.s.stats.papers,
+    modal: !document.getElementById('modal-root').classList.contains('hidden'),
+  }));
+  if (auto.papers !== before + 3) throw new Error('standing arrangement did not publish');
+  if (auto.modal) throw new Error('auto-publish opened a modal');
+  await page.evaluate(() => { window.AIMOGUL.s.paperAuto = 0; });   // leave the suite clean
+});
+
 await check('singularity → final cinematic, save erased', async () => {
   await page.evaluate(() => {
     const s = window.AIMOGUL.s;

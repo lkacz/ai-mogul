@@ -112,6 +112,12 @@ ends with a "📚 The real thing" note:
   it by bisection with 5 diagnostics and win back 90% of the lost progress. The pager is
   rate-limited so it stays an event, not a chore — and once you hire an **ops rotation (3+)**,
   they carry it: incidents get auto-bisected and most progress saved, just like real on-call.
+- **📄 Paper Sprint** (publishing a paper) — actually *write* it: any keys work, and each
+  keystroke types the next phrase of a generated preprint — title, abstract, methods, results —
+  whose science matches your era (BPE tricks in the garage, weak-to-strong generalization past
+  AGI, Landauer-floor computing at the lattice), submitted to NeurDips or the Annals of the
+  Lattice. Papers grow with your career, up to ~100 keystrokes — or check **"always assign"**
+  and your research team (or the models) drafts every future one at a single click.
 - **🍭 RLHF Rater** (researching RLHF) — judge answer pairs and meet the real failure modes:
   sycophancy, hallucination, verbosity, non-haiku haikus.
 

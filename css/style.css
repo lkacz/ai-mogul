@@ -324,6 +324,22 @@ table.tbl td { padding: 6px 8px; border-bottom: 1px solid #1d2331; }
   background: #05070c;
 }
 
+/* the paper sprint: a literal preprint, typing itself */
+.pw-doc {
+  background: #ece8db; color: #1c1a14;
+  border-radius: 6px; padding: 18px 22px;
+  font-family: Georgia, 'Times New Roman', serif;
+  box-shadow: inset 0 0 40px rgba(120,100,60,0.12), 0 2px 10px rgba(0,0,0,0.4);
+}
+.pw-venue { text-align: center; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #6b6453; margin-bottom: 8px; }
+.pw-title { text-align: center; font-size: 17px; font-weight: 700; line-height: 1.25; margin-bottom: 6px; }
+.pw-authors { text-align: center; font-size: 11px; font-style: italic; color: #4a4538; margin-bottom: 12px; border-bottom: 1px solid #c9c2ae; padding-bottom: 10px; }
+.pw-body { font-size: 12.5px; line-height: 1.5; max-height: 230px; overflow-y: auto; min-height: 110px; }
+.pw-body .pw-head { display: block; font-weight: 700; margin: 9px 0 3px; font-variant: small-caps; }
+.pw-caret { display: inline-block; width: 7px; height: 13px; background: #1c1a14; vertical-align: -2px; animation: pwblink 1s steps(1) infinite; }
+@keyframes pwblink { 50% { opacity: 0; } }
+.pw-body::-webkit-scrollbar-thumb { background: #c9c2ae; }
+
 /* the Chronicle: aired reports, replayable */
 .chron-list { display: flex; flex-direction: column; gap: 4px; max-height: 52vh; overflow-y: auto; margin: 8px 0; }
 .chron-row {
