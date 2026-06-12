@@ -363,9 +363,10 @@ ACTIONS.cancelRun = (id) => doAction(E.cancelRun, id);
 // ════════════════════════ HARDWARE ════════════════════════
 const hwTab = {
   id: 'hw', label: '🖥️ Hardware',
-  sig: (s, sel) => [s.phase, JSON.stringify(s.gpus), s.research.length, Math.round(sel.gpuPriceBuff * 100), s.facDesignFx?.[s.phase]?.score].join('|'),
+  sig: (s, sel) => [s.phase, JSON.stringify(s.gpus), s.research.length, Math.round(sel.gpuPriceBuff * 100), s.facDesignFx?.[s.phase]?.score, s.construction ? 1 : 0].join('|'),
   build(s, sel) {
     const next = FACILITIES[s.phase + 1];
+    const con = s.construction;
     const facHtml = `<div class="card">
       <h3>Facility — ${esc(sel.fac.name)} ${FACILITY_EMOJI[s.phase]}</h3>
       <div class="muted">${esc(sel.fac.desc)}</div>
@@ -383,8 +384,13 @@ const hwTab = {
       <div class="stat-row"><span class="k">Electricity</span><span class="stat-v">$${sel.fac.elecPrice.toFixed(3)}/kWh</span></div>
       <div class="stat-row"><span class="k">Electricity bill</span><span class="stat-v" id="hw-elec"></span></div>
       <div class="stat-row"><span class="k">Upkeep</span><span class="stat-v">${fmtMoney(sel.fac.upkeep)}/h</span></div>
-      ${next ? `<div style="margin-top:12px" class="row">
-        <button class="act gold" data-act="buyFacility" id="hw-upgrade">⬆ Upgrade: ${esc(next.name)} — ${fmtMoney(next.cost)}</button>
+      ${con ? `<div style="margin-top:12px">
+        <div class="bar-label"><span>🏗️ Building: <b>${esc(FACILITIES[con.phase]?.name || '')}</b></span><span class="num" id="hw-build-eta"></span></div>
+        ${bar('hw-buildbar')}
+        <div class="faint" style="margin-top:4px">Concrete, power lines, cooling towers — big compute takes time to build. The lab keeps working meanwhile.</div>
+      </div>`
+    : next ? `<div style="margin-top:12px" class="row">
+        <button class="act gold" data-act="buyFacility" id="hw-upgrade">⬆ Upgrade: ${esc(next.name)} — ${fmtMoney(next.cost)}${next.buildDays ? ` · ${next.buildDays}d build` : ''}</button>
       </div>
       ${next.research && !s.research.includes(next.research) ? `<div class="faint" style="margin-top:4px">🔒 requires research: ${esc(RESEARCH_BY_ID[next.research]?.name || next.research)}</div>` : ''}
       <div class="faint" style="margin-top:4px">${fmtNum(next.slots)} slots · ${fmtPower(next.powerW)} · PUE ${next.pue} · $${next.elecPrice}/kWh · staff ${fmtNum(next.staffMax)}</div>`
@@ -449,6 +455,11 @@ const hwTab = {
     const next = FACILITIES[s.phase + 1];
     if (up && next) up.disabled = s.money < next.cost ||
       (next.research && !s.research.includes(next.research));
+    if (s.construction) {
+      const c = s.construction;
+      set('hw-build-eta', `${Math.max(0, Math.ceil((c.needH - c.doneH) / 24))}d left`);
+      setBar('hw-buildbar', c.doneH / c.needH);
+    }
   },
 };
 

@@ -33,6 +33,7 @@ console.log('Importing modules…');
 const { defaultState, selectors, serialize, deserialize } = await import('../js/core/state.js');
 const { DILEMMAS } = await import('../js/core/dilemmas.js');
 const { DESIGNS, scoreDesign } = await import('../js/core/design.js');
+const awaitedData = await import('../js/core/data.js');
 const { IMPACTS, IMPACT_BY_ID, queueImpacts, IMPACT_QUEUE_MAX } = await import('../js/core/impacts.js');
 const { IMPACT_SCENES, drawBroadcast, drawVeil, DILEMMA_VIZ, dilemmaScene } = await import('../js/ui/impactviz.js');
 const { generatePaper } = await import('../js/ui/papergen.js');
@@ -342,6 +343,20 @@ check('quip decks: no repeats until a pool is exhausted, no boundary repeat', ()
     }
     if (seen.size !== arr.length) throw new Error('cycle did not exhaust the pool');
   }
+});
+
+check('facility construction: paid now, opens later, one at a time', () => {
+  const { FACILITIES } = awaitedData;
+  const s = defaultState();
+  s.money = 1e9;
+  const r = E.buyFacility(s, 1);
+  if (!r.ok) throw new Error('office purchase failed: ' + r.msg);
+  if (s.phase !== 0 || !s.construction) throw new Error('facility opened instantly — no construction phase');
+  if (E.buyFacility(s, 2).ok) throw new Error('parallel construction was allowed');
+  const needH = (FACILITIES[1].buildDays || 0) * 24;
+  for (let h = 0; h <= needH + 1; h++) E.step(s, 1);
+  if (s.phase !== 1) throw new Error('construction never completed');
+  if (s.construction) throw new Error('construction state not cleared');
 });
 
 check('fractional steps are stable', () => {

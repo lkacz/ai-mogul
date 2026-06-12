@@ -31,6 +31,7 @@ export function defaultState(founderId = 'mario') {
     lastReleaseName: null,           // newest best model — broadcasts credit its wave
 
     phase: 0,                                   // index into FACILITIES
+    construction: null,                         // { phase, doneH, needH } — facility being built
     gpus: { gtx1070: 1 },                       // id -> count
     alloc: { train: 0.7, inf: 0.2, res: 0.1 },  // compute allocation
     staff: { engineer: 0, researcher: 0, ops: 0, sales: 0 },

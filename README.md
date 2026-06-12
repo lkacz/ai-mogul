@@ -209,7 +209,9 @@ of how your models changed civilization.
   stage cuts, an inner world model, a chain-of-thought loop, photonic/quantum substrate tints,
   and past 10¹⁵ params a routed *society of trillion-parameter expert modules* (the real
   "mixture of a million experts" research direction).
-- **Hardware** — buy GPUs (BTX 1070 → HY-100 → BY-200 → custom silicon → photonic meshes → quantum pods → swarm collectors → Omega cores); mind power & slots; upgrade the facility up the Kardashev scale: garage → office → colo → hyperscale DC → 6 GW AI factory → orbital constellation → Dyson swarm → Omega Lattice.
+- **Hardware** — buy GPUs (BTX 1070 → HY-100 → BY-200 → custom silicon → photonic meshes → quantum pods → swarm collectors → Omega cores); mind power & slots; upgrade the facility up the Kardashev scale: garage → office → colo → hyperscale DC → 6 GW AI factory → orbital constellation → Dyson swarm → Omega Lattice. Money buys the site;
+  **construction takes time** (7 days for the office, 120 for the Factory) — datacenter lead
+  times are the real bottleneck of the AI buildout, here too.
 - **Research** — 43 real techniques across 5 eras, from BPE tokenization to Ω-Recursion.
   RP funds a project; **your researchers then build it over time** (lab speed = 1 + researchers,
   multiplied by AI research assistants) — watch the progress bar, hire to go faster.

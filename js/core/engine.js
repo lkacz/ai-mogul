@@ -92,6 +92,17 @@ export function step(s, hours = 1) {
     pushNews(s, pool[(Math.random() * pool.length) | 0]);
   }
 
+  // 5c. Construction: the next facility takes shape, hour by hour
+  if (s.construction) {
+    s.construction.doneH += hours;
+    if (s.construction.doneH >= s.construction.needH) {
+      const f = FACILITIES[s.construction.phase];
+      s.phase = s.construction.phase;
+      s.construction = null;
+      if (f) pushNews(s, `🏗️ ${f.story}`);
+    }
+  }
+
   // 6. Expire buffs
   s.buffs = s.buffs.filter(b => b.untilH > s.simHours);
 
@@ -207,6 +218,9 @@ export function sellGpu(s, id, n = 1) {
 }
 
 export function buyFacility(s, phaseIdx) {
+  if (s.construction) {
+    return err(`The ${FACILITIES[s.construction.phase]?.name || 'next facility'} is still under construction.`);
+  }
   if (phaseIdx !== s.phase + 1) return err('Upgrade one tier at a time.');
   const f = FACILITIES[phaseIdx]; if (!f) return err('No such facility.');
   if (f.research && !s.research.includes(f.research)) {
@@ -214,9 +228,16 @@ export function buyFacility(s, phaseIdx) {
   }
   if (s.money < f.cost) return err('Not enough cash.');
   s.money -= f.cost; s.stats.spent += f.cost;
-  s.phase = phaseIdx;
-  pushNews(s, `🏗️ ${f.story}`);
-  return ok(`Moved into the ${f.name}!`);
+  // money buys the site; time builds it — datacenters are never instant
+  const needH = (f.buildDays || 0) * 24;
+  if (needH <= 0) {
+    s.phase = phaseIdx;
+    pushNews(s, `🏗️ ${f.story}`);
+    return ok(`Moved into the ${f.name}!`);
+  }
+  s.construction = { phase: phaseIdx, doneH: 0, needH };
+  pushNews(s, `🏗️ Ground breaks on the ${f.name}. The builders say ${f.buildDays} days.`);
+  return ok(`Construction started: ${f.name} — ready in ${f.buildDays} days.`);
 }
 
 export function buyDataset(s, id) {
