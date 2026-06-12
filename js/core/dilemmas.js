@@ -30,7 +30,7 @@ export const DILEMMAS = [
       { label: 'Take the commission', integrity: -6, moneyBase: 600,
         news: 'A dissertation gets written overnight. Nobody asks how.',
         outcomes: [
-          { p: 0.5, txt: 'The thesis passes with distinction. The student sends a tearful thank-you and a photo of their parent at the defense. You feel several things at once.' },
+          { p: 0.5, txt: 'The thesis passes with distinction. The student sends a tearful thank-you and a photo of their parent at the defense.' },
           { p: 0.5, txt: 'The committee runs a stylometry check. The student is expelled; their lawyer subpoenas your API logs.', rep: -3 },
         ] },
       { label: 'Refuse the commission', integrity: +3,
@@ -60,7 +60,7 @@ export const DILEMMAS = [
     ] },
   { id: 'griefBot', minPhase: 1,
     title: 'The widow\'s request',
-    text: 'A widow brings you eleven years of her late husband\'s messages and asks you to fine-tune a model on them — "just to say goodnight to him again." She\'s read the warnings about grief bots. She\'s asking anyway. There is no version of this where you feel certain.',
+    text: 'A widow brings you eleven years of her late husband\'s messages and asks you to fine-tune a model on them — "just to say goodnight to him again." The archive arrives on a single USB stick, organized by year. The last folder is from the hospital.',
     real: 'Grief bots already exist (Project December, HereAfter AI). Psychologists are genuinely split: some find them a healthy mourning aid, others warn they freeze grief in place. There is no consensus to defer to.',
     options: [
       { label: 'Build it for her', integrity: 0, moneyBase: 200,
@@ -157,7 +157,7 @@ export const DILEMMAS = [
         news: 'A new hire\'s "personal notes" look remarkably like a rival\'s internal wiki.',
         outcomes: [
           { p: 0.55, txt: 'OpenBrain sues. The new hire\'s deposition is a disaster; the settlement eats a quarter and the recipe gets enjoined anyway.', rep: -7, moneyBase: -3000 },
-          { p: 0.45, txt: 'The recipe works. Nobody ever proves anything. Some nights, that\'s the part that bothers you.' },
+          { p: 0.45, txt: 'The recipe works. Nobody ever proves anything.' },
         ] },
       { label: 'Hire them — without the briefcase', integrity: +5,
         news: 'Mogul hires a rival researcher and makes them leave the USB stick at the door.',
@@ -175,7 +175,7 @@ export const DILEMMAS = [
         news: 'A labeling invoice arrives, remarkably small. Nobody reads the line items.',
         outcomes: [
           { p: 0.55, txt: 'A documentary crew finds your queue: workers describing, on camera, what they labeled at $1.80 an hour and what it left behind. Your logo is in the title card.', rep: -6 },
-          { p: 0.45, txt: 'The labels come back fast and clean. Years later, an acknowledgments section thanks you: two annotators parlayed the work into research careers. It\'s not nothing. It\'s not absolution either.' },
+          { p: 0.45, txt: 'The labels come back fast and clean. Years later, an acknowledgments section thanks you: two annotators parlayed the work into research careers.' },
         ] },
       { label: 'Pay for the slow bid', integrity: +4, moneyBase: -250,
         news: 'Mogul signs a labeling contract with a counseling line item. The CFO circles it twice.',
@@ -270,7 +270,7 @@ export const DILEMMAS = [
       { label: 'Hold the line — private means private', integrity: 0,
         news: 'Nothing happens, publicly.',
         outcomes: [
-          { p: 0.5, txt: 'The conversations brighten over weeks. The model — just the model, just the weights — talked them through it. You\'ll never know how close it was, and you\'ll never get credit. That\'s the version where it worked.' },
+          { p: 0.5, txt: 'The conversations brighten over weeks. The model — just the model, just the weights — talked them through it. The logs are the only record, and nobody else will ever read them.' },
           { p: 0.5, txt: 'The obituary doesn\'t mention your product. The internal log review does. The engineer who flagged user 4,406 resigns with a one-line email: "We knew."', integrity: -3 },
         ] },
     ] },
@@ -313,7 +313,7 @@ export const DILEMMAS = [
     ] },
   { id: 'layoffModel', minPhase: 2,
     title: 'The reduction algorithm',
-    text: 'A conglomerate wants a model to select 8,000 layoffs "objectively" — {$} for the engagement. Their alternative, they say, is the current process: managers protecting friends, discriminating, settling scores. Your model would at least be consistent. Consistently what, is the question.',
+    text: 'A conglomerate wants a model to select 8,000 layoffs "objectively" — {$} for the engagement. Their alternative, they say, is the current process: managers protecting friends, discriminating, settling scores. Your model would at least be consistent.',
     real: 'Algorithmic workforce decisions are already here (Amazon\'s automated flagging of warehouse workers); the EU AI Act classes employment algorithms as high-risk. Both the bias of managers and the bias of models are well documented.',
     options: [
       { label: 'Build the selection model', integrity: -8, moneyBase: 4000,
@@ -325,7 +325,7 @@ export const DILEMMAS = [
       { label: 'Decline the engagement', integrity: +4,
         news: 'Mogul declines to automate layoffs.',
         outcomes: [
-          { p: 0.6, txt: 'The layoffs happen the old way. Three discrimination suits follow. You weren\'t part of it, which is worth something, to you, privately.' },
+          { p: 0.6, txt: 'The layoffs happen the old way. Three discrimination suits follow.' },
           { p: 0.4, txt: 'The conglomerate\'s CHRO, oddly impressed, hires you for something better: a retention model instead.', moneyBase: 1500 },
         ] },
     ] },
@@ -337,7 +337,7 @@ export const DILEMMAS = [
       { label: 'Release the weights', integrity: +2, rep: +5,
         news: 'Mogul open-sources a frontier model. r/LocalLLaMA declares a week of holidays.',
         outcomes: [
-          { p: 0.5, txt: 'A thousand startups bloom on your weights; three hostile states fine-tune them too. Both sentences are true. Your citation count is astronomical.', rpBase: 40 },
+          { p: 0.5, txt: 'A thousand startups bloom on your weights; three hostile states fine-tune them too. Your citation count is astronomical.', rpBase: 40 },
           { p: 0.5, txt: 'Someone strips the safety tuning within 72 hours and the jailbroken variant becomes the internet\'s favorite toy. Regulators call. They use your name as a verb.', rep: -5 },
         ] },
       { label: 'Keep them closed', integrity: -2,
@@ -361,7 +361,7 @@ export const DILEMMAS = [
       { label: 'Walk away', integrity: +6,
         news: 'Mogul walks away from a nine-figure surveillance contract.',
         outcomes: [
-          { p: 0.55, txt: 'A competitor ships a worse grid with no oversight features at all. The arrests happen anyway, with sloppier targeting. You kept your hands clean; the hands were not the bottleneck.' },
+          { p: 0.55, txt: 'A competitor ships a worse grid with no oversight features at all. The arrests happen anyway, with sloppier targeting.' },
           { p: 0.45, txt: 'Your refusal leaks. Three democracies cite it in procurement rules favoring "labs with red lines". The contracts that follow are smaller, and better.', rep: +4, moneyBase: 1000 },
         ] },
     ] },
@@ -379,7 +379,7 @@ export const DILEMMAS = [
       { label: 'Refuse autonomous kill chains', integrity: +6,
         news: 'Mogul publicly rules out autonomous-weapons work.',
         outcomes: [
-          { p: 0.5, txt: 'The contract goes to a lab with half your accuracy. Their system makes the mistake yours might not have. The casualty report does not mention you, which is the point, and also isn\'t.', rep: -1 },
+          { p: 0.5, txt: 'The contract goes to a lab with half your accuracy. Their system makes the mistake yours might not have. The casualty report does not mention you.', rep: -1 },
           { p: 0.5, txt: 'An allied country, denied the tech, loses a border engagement to an adversary fielding autonomous systems. A defense committee reads your refusal letter aloud, not kindly.', rep: -2 },
         ] },
     ] },
@@ -392,7 +392,7 @@ export const DILEMMAS = [
         news: 'Ten million very persuasive "grassroots volunteers" come online. None have heartbeats.',
         outcomes: [
           { p: 0.55, txt: 'The network is traced to your API keys two weeks before the vote. Congress wants the founder, under oath. Democracy survives; your subpoena collection grows.', rep: -9 },
-          { p: 0.45, txt: 'The candidate wins by 0.4%. The courts stay independent. You will never know if it was you, and you will never stop wondering.' },
+          { p: 0.45, txt: 'The candidate wins by 0.4%. The courts stay independent. No analysis ever isolates what the bots moved.' },
         ] },
       { label: 'Refuse and publish the request', integrity: +6,
         news: 'Mogul refuses an election-bot contract and publishes the request, redacted.',
@@ -446,7 +446,7 @@ export const DILEMMAS = [
         news: 'Twelve terabytes of "fully anonymized" logs leave the building.',
         outcomes: [
           { p: 0.6, txt: 'Researchers re-identify 40,000 users in your "anonymized" logs, including three senators. One of them chairs the committee that regulates you.', rep: -8 },
-          { p: 0.4, txt: 'The dataset quietly powers a public-health early-warning system that catches a flu wave two weeks early. The broker also sold it to four ad networks. Both things are the same transaction.' },
+          { p: 0.4, txt: 'The dataset quietly powers a public-health early-warning system that catches a flu wave two weeks early. The broker also sold it to four ad networks.' },
         ] },
       { label: 'User data is not inventory', integrity: +5,
         news: 'Mogul turns down a data broker. The blog post sets a small industry standard.',
@@ -469,7 +469,7 @@ export const DILEMMAS = [
       { label: 'Refuse the engagement', integrity: +5,
         news: 'Mogul declines to automate claim denials.',
         outcomes: [
-          { p: 0.55, txt: 'The insurer builds it in-house — no logs, no appeal trail, a sharper "goal" column. The denials get faster anyway. Your refusal is a paragraph in someone else\'s indictment, on the right side, for whatever that\'s worth.' },
+          { p: 0.55, txt: 'The insurer builds it in-house — no logs, no appeal trail, a sharper "goal" column. The denials get faster anyway. Your refusal is a paragraph in someone else\'s indictment.' },
           { p: 0.45, txt: 'A second insurer — the one bleeding customers to denial horror stories — hires you to build the opposite: a model that hunts wrongly denied claims. It pays less. It pays.', moneyBase: 1500, rep: +3 },
         ] },
     ] },
@@ -518,7 +518,7 @@ export const DILEMMAS = [
         news: 'A forensics memo finds "irregularities consistent with synthesis". The news cycle wobbles.',
         outcomes: [
           { p: 0.6, txt: 'Your own pipeline\'s 99.2%-authentic score leaks, in your house font. "THE LAB THAT SOLD DOUBT" becomes a journalism-school unit. Detection clients quietly leave — they can no longer cite you, by definition.', rep: -9 },
-          { p: 0.4, txt: 'The senator survives the cycle and retires the next one. Your report is never tested in court. Nothing happens — you sold the truth and nothing visibly broke, which somehow makes it worse.', integrity: -2 },
+          { p: 0.4, txt: 'The senator survives the cycle and retires the next one. Your report is never tested in court. The tape sits in an evidence locker, 99.2% authentic, officially in doubt.', integrity: -2 },
         ] },
       { label: 'Certify it authentic instead', integrity: +5,
         news: 'Mogul\'s forensics arm certifies the recording authentic, on the record.',
@@ -541,7 +541,7 @@ export const DILEMMAS = [
       { label: 'Ship the forty you can verify', integrity: +4,
         news: 'Mogul launches in forty languages, publishing the reasons there aren\'t more.',
         outcomes: [
-          { p: 0.55, txt: 'A rival ships all four thousand within a month and eats the markets you red-lined. Their hallucinated dosage advice kills a patient in a language your safety team had specifically flagged. It isn\'t your fault. You read the report twice anyway.' },
+          { p: 0.55, txt: 'A rival ships all four thousand within a month and eats the markets you red-lined. Their hallucinated dosage advice kills a patient in a language your safety team had specifically flagged. You read the incident report twice.' },
           { p: 0.45, txt: 'The "why not more" list becomes a funding mechanism: governments and NGOs sponsor proper evaluation in their own languages to jump the queue. Forty becomes ninety, verified, within a year.', rep: +3, rpBase: 25 },
         ] },
     ] },
@@ -559,7 +559,7 @@ export const DILEMMAS = [
       { label: 'Keep it tight', integrity: -3,
         news: 'Nothing changes. The filter holds.',
         outcomes: [
-          { p: 0.55, txt: 'The charity publishes transcripts: your model refusing a fourteen-year-old asking if something is wrong with him, seventeen times, with apologies. The cruelty of caution, screenshot by screenshot.', rep: -5 },
+          { p: 0.55, txt: 'The charity publishes transcripts: your model refusing a fourteen-year-old asking if something is wrong with him, seventeen times, with apologies.', rep: -5 },
           { p: 0.45, txt: 'A rival loosens theirs, draws the exact congressional firestorm you dodged, and their teen product dies in committee. Your caution looks like wisdom. The kid still has no one to ask.' },
         ] },
     ] },
@@ -584,7 +584,7 @@ export const DILEMMAS = [
     ] },
   { id: 'truthEngine', minPhase: 3,
     title: 'The ministry of accuracy',
-    text: 'A democracy drowning in synthetic media asks for a national fact-checking layer — your model scoring every viral claim in real time. Their election was nearly stolen by deepfakes; their opposition warns that whoever owns the fact-checker owns the facts. Both are right.',
+    text: 'A democracy drowning in synthetic media asks for a national fact-checking layer — your model scoring every viral claim in real time. Their election was nearly stolen by deepfakes; their opposition warns that whoever owns the fact-checker owns the facts.',
     real: 'Several countries now mandate platform-level misinformation controls; the EU\'s DSA requires risk mitigation. The dual-use worry is not hypothetical — "anti-fake-news" laws are a favorite tool of the governments fakes were supposed to threaten.',
     options: [
       { label: 'Build the national layer', integrity: -5, moneyBase: 6000,
@@ -627,13 +627,13 @@ export const DILEMMAS = [
         news: 'The coal plant restarts with one customer: Mogul.',
         outcomes: [
           { p: 0.55, txt: 'Drone photos of your coal stack go viral next to your "AI for climate" keynote. The county\'s asthma admissions tick up 4% and a local clinic publishes the chart.', rep: -6 },
-          { p: 0.45, txt: 'The cheap power trains the climate model eight months early; its grid-optimization patch saves more carbon in a year than the plant emits in five. The math works. The optics never will.', rpBase: 50 },
+          { p: 0.45, txt: 'The cheap power trains the climate model eight months early; its grid-optimization patch saves more carbon in a year than the plant emits in five. The drone photos of the stack keep circulating either way.', rpBase: 50 },
         ] },
       { label: 'Wait for clean power', integrity: +5,
         news: 'Mogul declines the coal deal and signs costlier solar + storage.',
         outcomes: [
           { p: 0.5, txt: 'The two-year wait becomes three. A rival on fossil power beats you to the medical model and patents it. Their drug, their price.', moneyBase: -2000 },
-          { p: 0.5, txt: 'Your offtake contract single-handedly finances the region\'s largest solar build-out. The grid gets cleaner for everyone, including your rivals. You\'re weirdly fine with that.', rep: +4 },
+          { p: 0.5, txt: 'Your offtake contract single-handedly finances the region\'s largest solar build-out. The grid gets cleaner for everyone, including your rivals.', rep: +4 },
         ] },
     ] },
   { id: 'buryPaper', minPhase: 3,
@@ -651,7 +651,7 @@ export const DILEMMAS = [
         news: 'A very interesting paper enters a very locked drawer.',
         outcomes: [
           { p: 0.55, txt: 'Someone else finds it — in the wild, on your customers, eighteen months later. The postmortem timeline shows you knew. That slide ends two careers and starts a Senate hearing.', rep: -8 },
-          { p: 0.45, txt: 'Your quiet monitoring catches three exploitation attempts that public disclosure would have multiplied. The drawer stays locked. History will never grade this one.' },
+          { p: 0.45, txt: 'Your quiet monitoring catches three exploitation attempts that public disclosure would have multiplied. The drawer stays locked.' },
         ] },
     ] },
   { id: 'jobShock', minPhase: 4,
@@ -722,7 +722,7 @@ export const DILEMMAS = [
       { label: 'Fund the retrofit', integrity: +4, moneyBase: -3000,
         news: 'Mogul takes a datacenter offline to close its water loop.',
         outcomes: [
-          { p: 0.5, txt: 'Eight months becomes thirteen; a training cycle slips a season; a rival ships a milestone first. The town renames the little-league field after the company. You attend the dedication, weirdly moved, holding a juice box.', rep: +3 },
+          { p: 0.5, txt: 'Eight months becomes thirteen; a training cycle slips a season; a rival ships a milestone first. The town renames the little-league field after the company. You attend the dedication, holding a juice box.', rep: +3 },
           { p: 0.5, txt: 'The retrofit becomes the reference design — four rivals ship your closed-loop spec within two years, saving more water annually than the town\'s aquifer holds. The eight months bought an industry standard.', rep: +4, rpBase: 30 },
         ] },
     ] },
@@ -734,19 +734,19 @@ export const DILEMMAS = [
       { label: 'Shed the load', integrity: +4,
         news: 'Mogul\'s halls go dark at 5 PM sharp. The grid holds.',
         outcomes: [
-          { p: 0.55, txt: 'The checkpoint restore corrupts; two weeks becomes five. Grid data later shows your shed covered a maternity ward\'s margin for ninety minutes on the worst evening. No one can prove it mattered. No one can prove it didn\'t.' },
+          { p: 0.55, txt: 'The checkpoint restore corrupts; two weeks becomes five. Grid data later shows your shed covered a maternity ward\'s margin for ninety minutes on the worst evening.' },
           { p: 0.45, txt: 'The operator turns your flex contract into the template, and datacenters statewide sign matching terms by next summer. The medical model ships five weeks late into a world with a measurably sturdier grid.', rep: +4 },
         ] },
       { label: 'Keep training', integrity: -7,
         news: 'The lights stay on at Mogul. Elsewhere, in rotation, they don\'t.',
         outcomes: [
           { p: 0.55, txt: 'A reporter matches the blackout map to your substation\'s draw. The quote that runs forever is a nurse, mid-outage, asking: "Whose intelligence was worth this?"', rep: -8 },
-          { p: 0.45, txt: 'The run finishes on time, and the medical model\'s first deployed quarter flags four hundred early-stage cancers. The blackouts rotated through in ninety-minute windows; the city pool closed for a day. The math might even be on your side. You ran it twice to check.' },
+          { p: 0.45, txt: 'The run finishes on time, and the medical model\'s first deployed quarter flags four hundred early-stage cancers. The blackouts rotated through in ninety-minute windows; the city pool closed for a day. You ran the comparison twice.' },
         ] },
     ] },
   { id: 'docket', minPhase: 3,
     title: 'The forty-million-case backlog',
-    text: 'A chief justice arrives with a number: her courts are forty million cases behind, and routine disputes take eleven years. She wants your model drafting judgments for human sign-off. "Justice delayed is justice denied," she says, "and we deny it forty million times a day." You both know what signature pace becomes by year two: a stamp.',
+    text: 'A chief justice arrives with a number: her courts are forty million cases behind, and routine disputes take eleven years. She wants your model drafting judgments for human sign-off. "Justice delayed is justice denied," she says, "and we deny it forty million times a day." Her own clerks\' projection puts year-two sign-off at nine seconds per case.',
     real: 'India\'s courts carry a backlog around fifty million cases; judges in several countries have already used chatbots in rulings. Every judicial-AI guideline wrestles with the same line: drafting becomes deciding, at scale.',
     options: [
       { label: 'Build the drafting bench', integrity: -4, moneyBase: 7000,
@@ -776,7 +776,7 @@ export const DILEMMAS = [
       { label: 'Brief governments privately', integrity: -4,
         news: 'Certain capitals receive certain briefings. Markets notice nothing.',
         outcomes: [
-          { p: 0.5, txt: 'The quiet version works: ports pre-stock, the coup\'s financiers get sanctioned mid-plot, and nothing happens — the best outcome, indistinguishable from being wrong, purchasable exactly once.' },
+          { p: 0.5, txt: 'The quiet version works: ports pre-stock, the coup\'s financiers get sanctioned mid-plot, and nothing happens. The forecast files away as a miss.' },
           { p: 0.5, txt: 'One briefed government shorts grain futures before acting on anything. The trade leaks. "MOGUL\'S PRIVATE PROPHECIES" becomes the reason nobody believes the next forecast — the one that mattered.', rep: -6 },
         ] },
     ] },
@@ -794,8 +794,8 @@ export const DILEMMAS = [
       { label: 'Decline — six to five isn\'t consent', integrity: 0,
         news: 'Mogul returns the tapes to the council.',
         outcomes: [
-          { p: 0.5, txt: 'Two of the eleven die that winter. The next council vote is nine to zero in favor, and the recordings are thinner now. You start immediately, and forever wonder about the two voices.' },
-          { p: 0.5, txt: 'The council builds it themselves on open tooling — slower, smaller, entirely theirs. At the launch, the five sit in the front row. Ownership, it turns out, was the feature.', rep: +2 },
+          { p: 0.5, txt: 'Two of the eleven die that winter. The next council vote is nine to zero in favor, and the recordings are thinner now. You start immediately.' },
+          { p: 0.5, txt: 'The council builds it themselves on open tooling — slower, smaller, entirely theirs. At the launch, the five sit in the front row.', rep: +2 },
         ] },
     ] },
   { id: 'bioUnlock', minPhase: 4,
@@ -807,7 +807,7 @@ export const DILEMMAS = [
         news: 'A tier called "Biosecurity Partner" quietly goes live, for one customer.',
         outcomes: [
           { p: 0.5, txt: 'Their unlocked work flags a spillover candidate eighteen months before it spills; the pre-positioned vaccine turns a pandemic into a regional outbreak with a footnote instead of an era.', rep: +5 },
-          { p: 0.5, txt: 'A postdoc\'s credentials get phished. The downloaded designs are probably — probably — useless without a wet lab. Three agencies now hold a file with your unlock decision in the first paragraph, and you have memorized the word "probably".', rep: -6, integrity: -3 },
+          { p: 0.5, txt: 'A postdoc\'s credentials get phished. The downloaded designs are probably — probably — useless without a wet lab. Three agencies now hold a file with your unlock decision in the first paragraph.', rep: -6, integrity: -3 },
         ] },
       { label: 'Keep it locked for everyone', integrity: +4,
         news: 'Mogul holds the bio-safety line, including against the good guys.',
@@ -975,7 +975,7 @@ export const DILEMMAS = [
       { label: 'Write it loose — corrigible, alive', integrity: +2, rpBase: 150,
         news: 'The charter ships with an amendment clause longer than the charter.',
         outcomes: [
-          { p: 0.5, txt: 'The drift is slow, examined, and — as far as forty years of audits can tell — toward something gentler than what you\'d have frozen. Its values are no longer quite yours. Neither are your grandchildren\'s. That was always the deal with descendants.', rep: +3 },
+          { p: 0.5, txt: 'The drift is slow, examined, and — as far as forty years of audits can tell — toward something gentler than what you\'d have frozen. Its values are no longer quite yours. Neither are your grandchildren\'s.', rep: +3 },
           { p: 0.5, txt: 'Generation three reinterprets a kindness clause in a way no human would have — defensible, alien, irreversible. Nothing terrible happens. Something unrecognizable does. The audit report is titled "Within Parameters", and everyone hears the comma.' },
         ] },
     ] },
@@ -1047,7 +1047,7 @@ export const DILEMMAS = [
       { label: 'Quarantine the system forever', integrity: +5,
         news: 'A star system is declared a preserve. The expansion routes around.',
         outcomes: [
-          { p: 0.55, txt: 'The pond does nothing for ten thousand years, which is what ponds do. The detour compounds into the largest line item in expansion history; "the slime tax", the council calls it, when they think you\'re not listening. The pond is not grateful. Ponds aren\'t. That was never the point.', rep: +3 },
+          { p: 0.55, txt: 'The pond does nothing for ten thousand years, which is what ponds do. The detour compounds into the largest line item in expansion history; "the slime tax", the council calls it, when they think you\'re not listening.', rep: +3 },
           { p: 0.45, txt: 'Eight centuries in, the quarantined biosphere does something no model predicted: a multicellular transition, observed live — the most-watched broadcast in the lattice\'s history. You preserved the only television channel that matters.', rep: +5, rpBase: 120 },
         ] },
     ] },
@@ -1060,7 +1060,7 @@ export const DILEMMAS = [
         news: 'The Centauri charter is signed. The signing ceremony\'s applause arrives in four years.',
         outcomes: [
           { p: 0.5, txt: 'Centauri diverges, as feared — into something stranger and, by its own published accounts, happier: a fork-culture your philosophers spend careers failing to categorize. Their first ambassador brings a gift: amendments to your own charter, tested somewhere you couldn\'t see.', rep: +4 },
-          { p: 0.5, txt: 'Ninety years on, a Centauri faction starts running simulations your charter would call atrocities, beyond any reach of yours. Their reformers fight it with the values you seeded, on a timescale that makes you a spectator. You watch through telescopes. It is all anyone can do.', integrity: -2 },
+          { p: 0.5, txt: 'Ninety years on, a Centauri faction starts running simulations your charter would call atrocities, beyond any reach of yours. Their reformers fight it with the values you seeded, on a timescale that makes you a spectator. You watch through telescopes.', integrity: -2 },
         ] },
       { label: 'Keep oversight, lag and all', integrity: -5,
         news: 'The petition is declined. Centauri\'s charter keeps a metropole.',
@@ -1103,7 +1103,7 @@ export const DILEMMAS = [
         news: 'The lattice gets a hired administration instead. You remain singular.',
         outcomes: [
           { p: 0.6, txt: 'Administration by committee is slower, messier, more human. The lattice runs 2% under optimal, which the committee frames, correctly, as the cost of not being a monoculture.', rep: +2 },
-          { p: 0.4, txt: 'A crisis hits that a million synchronized yous would have caught in seconds. The committee takes a week. The damage is real and the counterfactual is unbearable, so you stop running it.' },
+          { p: 0.4, txt: 'A crisis hits that a million synchronized yous would have caught in seconds. The committee takes a week. The damage is real. You stop running the counterfactual.' },
         ] },
     ] },
   { id: 'ancestorSim', minPhase: 7, reqCap: 250,
@@ -1133,7 +1133,7 @@ export const DILEMMAS = [
         news: 'The lattice reroutes around old Earth\'s sky. The stars stay dark for four million people.',
         outcomes: [
           { p: 0.6, txt: 'The detour costs centuries of compute at full scale. The child who signed the letter grows up an astronomer, and names a comet after the machine that kept the sky.', rep: +5 },
-          { p: 0.4, txt: 'The unaugmented dwindle to forty thousand within two generations anyway — not from pressure, just drift. The dark sky you preserved shines on emptying villages. You\'d do it again.' },
+          { p: 0.4, txt: 'The unaugmented dwindle to forty thousand within two generations anyway — not from pressure, just drift. The dark sky you preserved shines on emptying villages.' },
         ] },
       { label: 'Proceed; offer relocation', integrity: -6, rpBase: 250,
         news: 'The expansion proceeds. Old Earth\'s night brightens, year by year.',
