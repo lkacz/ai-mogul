@@ -4,6 +4,7 @@
 import { game, showModal, closeModal, toast, esc, renderAll } from './ui.js';
 import { drawQuip } from './scene.js';
 import { pushNews, restoreOutage } from '../core/engine.js';
+import { RESEARCH_BY_ID } from '../core/research.js';
 import { clamp } from '../core/util.js';
 
 let prevPaused = false;
@@ -28,8 +29,8 @@ const alive = (cv) => cv && cv.isConnected;
 function crewFor(kind) {
   const s = game.s;
   if ((s.bestCap || 0) >= 100) return { score: 0.85, who: 'the models', auto: true };
-  const n = kind === 'lr' ? s.staff.researcher : s.staff.engineer;
-  const team = kind === 'lr' ? 'the research team' : 'the data crew';
+  const n = kind === 'dedup' ? s.staff.engineer : s.staff.researcher;
+  const team = kind === 'dedup' ? 'the data crew' : 'the research team';
   if (n >= 4) return { score: Math.min(0.75, 0.5 + 0.05 * n), who: team, auto: true };
   if (n >= 2) return { score: 0.6, who: team, auto: false };
   return null;
@@ -561,6 +562,199 @@ export function playRlhf() {
   renderQ();
 }
 
+// ══════════════════════════════════════════════════════════════════
+// 5. CURVE FITTER — offered when a research project kicks off.
+//    A scatter of noisy measurements hides a real trend; click the points
+//    that belong to it and the curve joins up under your cursor. Score
+//    gives the project a head start. Patterns and labels are the real
+//    shapes of ML science: power laws, phase transitions, double descent.
+// ══════════════════════════════════════════════════════════════════
+const CURVES = [
+  { id: 'line', xl: 'data curated', yl: 'output quality',
+    name: 'a linear trend', fact: 'the rarest and most trusted shape in the field — when you see one, you publish',
+    make: () => { const a = 0.18 + Math.random() * 0.15, b = 0.78 - Math.random() * 0.12; return (u) => a + (b - a) * u; } },
+  { id: 'powerlaw', xl: 'log compute', yl: 'log loss',
+    name: 'a power law', fact: 'scaling laws look exactly like this: a stubborn straight line in log–log space',
+    make: () => { const d = 0.5 + Math.random() * 0.2; return (u) => 0.85 - d * Math.pow(u, 0.32 + Math.random() * 0.18); } },
+  { id: 'sigmoid', xl: 'model scale', yl: 'task accuracy',
+    name: 'a phase transition', fact: 'some capabilities switch on over a narrow range of scale — or the metric just makes it look that way',
+    make: () => { const m = 0.35 + Math.random() * 0.3, k = 9 + Math.random() * 5; return (u) => 0.2 + 0.58 / (1 + Math.exp(-k * (u - m))); } },
+  { id: 'ucurve', xl: 'model size', yl: 'test error',
+    name: 'a U-curve', fact: 'double descent: test error falls, rises at the interpolation threshold, then falls again',
+    make: () => { const c = 0.42 + Math.random() * 0.16; return (u) => 0.3 + 1.9 * (u - c) * (u - c); } },
+  { id: 'sine', xl: 'training steps', yl: 'loss',
+    name: 'a periodic signal', fact: 'cyclic learning-rate schedules and data-loader epochs leave fingerprints like this in real loss curves',
+    make: () => { const f = 1.2 + Math.random() * 0.9, p = Math.random() * 6; return (u) => 0.5 + 0.26 * Math.sin(u * 6.283 * f + p); } },
+];
+
+function applyCurveScore(score, who) {
+  const s = game.s;
+  if (!s.resProj) return;
+  const head = 0.12 * score;
+  s.resProj.done = Math.min(s.resProj.need * 0.99, s.resProj.done + s.resProj.need * head);
+  toast(`📈 ${capFirst(who)} found the trend — the project starts ${(head * 100).toFixed(0)}% ahead.`);
+}
+
+export function offerCurveGame() {
+  const s = game.s;
+  if (!s.resProj) return;
+  const crew = crewFor('curve');
+  if (crew && crew.auto) {
+    applyCurveScore(crew.score, crew.who);    // the team reads the scatter themselves
+    return;
+  }
+  const name = RESEARCH_BY_ID[s.resProj.id]?.name || 'the new project';
+  pauseWorld();
+  showModal(`<h2>📈 A pattern in the noise?</h2>
+    <p><b>${esc(name)}</b> starts the way every project starts: a wall of noisy measurements
+    that may or may not contain a trend. Find it yourself for up to a
+    <b class="gold">+12% head start</b> on the project.</p>
+    ${lessonBox('This is most of research: plot the runs, squint, refit. The scaling laws were found exactly this way — many measurements, one line that refused to bend.')}
+    <div class="actions">
+      <button class="act sub" data-act="mgSkipCurve">Eyeball it later (skip)</button>
+      ${crew ? `<button class="act" data-act="mgDelegateCurve">🤝 Hand it to ${crew.who} (+${(12 * crew.score).toFixed(0)}%)</button>` : ''}
+      <button class="act big" data-act="mgPlayCurve">🎮 Find the trend</button>
+    </div>
+    ${crew ? '' : '<p class="faint" style="margin-top:8px">Two researchers on payroll would read the scatter for you.</p>'}`);
+}
+
+export function playCurve() {
+  const s = game.s;
+  const era = clamp(RESEARCH_BY_ID[s.resProj?.id]?.era ?? 0, 0, 5);
+  const T = 24;
+  const K = 6 + era;                                   // pattern points to join
+  const NOISE = 10 + era * 4;                          // distractors
+  const curve = CURVES[(Math.random() * Math.min(CURVES.length, 2 + era)) | 0];
+  const f = curve.make();
+
+  showModal(`<h2>📈 Curve Fitter</h2>
+    <p class="muted small"><b>Click the ${K} measurements that follow the hidden trend</b> — they join up
+    as you find them. Avoid the noise: every wrong point costs you. The axes are a hint.</p>
+    <canvas id="mg-cv" width="560" height="280" style="width:100%; border-radius:8px; background:#0a0d14; cursor:crosshair"></canvas>
+    <div class="row" style="justify-content:space-between; margin-top:6px">
+      <span class="num" id="mg-cv-stat"></span><span class="num gold" id="mg-cv-time"></span>
+    </div>`);
+  const cv = document.getElementById('mg-cv');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, Hc = cv.height;
+  const X = (u) => 46 + u * (W - 72);
+  const Y = (yn) => 22 + (1 - yn) * (Hc - 66);
+
+  // the signal: K points on the curve, slightly jittered, in x-order
+  const pts = [];
+  for (let i = 0; i < K; i++) {
+    const u = (i + 0.15 + Math.random() * 0.7) / K;
+    pts.push({ u, yn: clamp(f(u) + (Math.random() - 0.5) * 0.045, 0.04, 0.96), pattern: true, state: 0 });
+  }
+  // the noise: anywhere except ON the curve (ambiguity is unfair) or on
+  // top of another point
+  for (let tries = 0; pts.length < K + NOISE && tries < 600; tries++) {
+    const u = 0.02 + Math.random() * 0.96, yn = 0.05 + Math.random() * 0.9;
+    if (Math.abs(yn - f(u)) < 0.10) continue;
+    if (pts.some(p => Math.abs(X(p.u) - X(u)) < 17 && Math.abs(Y(p.yn) - Y(yn)) < 17)) continue;
+    pts.push({ u, yn, pattern: false, state: 0 });
+  }
+  let t = 0, last = performance.now() / 1000;
+  let found = 0, mistakes = 0, doneAt = 0, hover = null;
+  const fx = [];
+
+  const hit = (e) => {
+    const r = cv.getBoundingClientRect();
+    const mx = (e.clientX - r.left) / r.width * W, my = (e.clientY - r.top) / r.height * Hc;
+    let best = null, bd = 15;
+    for (const p of pts) {
+      const d = Math.hypot(X(p.u) - mx, Y(p.yn) - my);
+      if (d < bd) { bd = d; best = p; }
+    }
+    return best;
+  };
+  cv.addEventListener('pointermove', (e) => { hover = hit(e); });
+  cv.addEventListener('pointerdown', (e) => {
+    if (doneAt || t >= T) return;
+    const p = hit(e);
+    if (!p || p.state) return;
+    if (p.pattern) {
+      p.state = 1; found++;
+      fx.push({ x: X(p.u), y: Y(p.yn), txt: '+1', c: '#34d399', life: 0.7 });
+      if (found >= K) doneAt = t + 0.8;     // hold a beat: the trend confesses
+    } else {
+      p.state = 2; mistakes++;
+      fx.push({ x: X(p.u), y: Y(p.yn), txt: 'noise!', c: '#f87171', life: 0.9 });
+    }
+  });
+
+  function frame() {
+    if (!alive(cv)) return;
+    const now = performance.now() / 1000;
+    const dt = Math.min(0.05, now - last); last = now;
+    t += dt;
+    ctx.clearRect(0, 0, W, Hc);
+    ctx.fillStyle = '#0a0d14'; ctx.fillRect(0, 0, W, Hc);
+    ctx.strokeStyle = '#1a2233'; ctx.lineWidth = 1;            // grid
+    for (let gx = 0; gx <= 8; gx++) { ctx.beginPath(); ctx.moveTo(X(gx / 8), Y(0)); ctx.lineTo(X(gx / 8), Y(1)); ctx.stroke(); }
+    for (let gy = 0; gy <= 5; gy++) { ctx.beginPath(); ctx.moveTo(X(0), Y(gy / 5)); ctx.lineTo(X(1), Y(gy / 5)); ctx.stroke(); }
+    ctx.strokeStyle = '#39415a'; ctx.lineWidth = 1.5;          // axes
+    ctx.beginPath(); ctx.moveTo(X(0), Y(1)); ctx.lineTo(X(0), Y(0)); ctx.lineTo(X(1), Y(0)); ctx.stroke();
+    ctx.fillStyle = '#5d6478'; ctx.font = '11px monospace';
+    ctx.fillText(curve.xl + ' →', W - 46 - ctx.measureText(curve.xl).width, Y(0) + 16);
+    ctx.save(); ctx.translate(14, 110); ctx.rotate(-Math.PI / 2); ctx.fillText('↑ ' + curve.yl, 0, 0); ctx.restore();
+
+    // the joined trend so far (found points, in x-order)
+    const foundPts = pts.filter(p => p.state === 1).sort((a, b) => a.u - b.u);
+    if (foundPts.length > 1) {
+      ctx.strokeStyle = 'rgba(52,211,153,0.7)'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      foundPts.forEach((p, i) => ctx[i ? 'lineTo' : 'moveTo'](X(p.u), Y(p.yn)));
+      ctx.stroke();
+    }
+    if (doneAt) {                                              // the reveal
+      ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let u = 0; u <= 1.001; u += 0.02) ctx[u ? 'lineTo' : 'moveTo'](X(u), Y(clamp(f(u), 0.02, 0.98)));
+      ctx.stroke();
+    }
+    for (const p of pts) {                                     // the data
+      const px = X(p.u), py = Y(p.yn);
+      if (p.state === 1) {
+        ctx.fillStyle = '#34d399'; ctx.beginPath(); ctx.arc(px, py, 5, 0, 6.283); ctx.fill();
+      } else if (p.state === 2) {
+        ctx.strokeStyle = '#f87171'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(px - 4, py - 4); ctx.lineTo(px + 4, py + 4);
+        ctx.moveTo(px + 4, py - 4); ctx.lineTo(px - 4, py + 4); ctx.stroke();
+      } else {
+        ctx.strokeStyle = p === hover ? '#d6dce8' : '#6e7a90'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, 6.283); ctx.stroke();
+      }
+    }
+    ctx.font = '12px "Segoe UI", sans-serif';
+    for (let i = fx.length - 1; i >= 0; i--) {
+      const e2 = fx[i]; e2.life -= dt; e2.y -= 20 * dt;
+      if (e2.life <= 0) { fx.splice(i, 1); continue; }
+      ctx.fillStyle = e2.c; ctx.fillText(e2.txt, e2.x + 8, e2.y);
+    }
+    const st = document.getElementById('mg-cv-stat');
+    if (st) st.textContent = `joined ${found}/${K} · noise clicked ${mistakes}`;
+    const tm = document.getElementById('mg-cv-time');
+    if (tm) tm.textContent = doneAt ? 'fit!' : t < T ? `${(T - t).toFixed(0)}s` : 'time';
+    if ((doneAt && t >= doneAt) || (!doneAt && t >= T)) { finish(); return; }
+    requestAnimationFrame(frame);
+  }
+
+  function finish() {
+    const score = clamp(found / K - mistakes * 0.07, 0, 1);
+    applyCurveScore(score, 'you');
+    s.stats.curveBest = Math.max(s.stats.curveBest || 0, score);
+    s.stats.minigames = (s.stats.minigames || 0) + 1;
+    const pct = Math.round(score * 100);
+    showModal(`<h2>${pct >= 80 ? '🏆 The trend confessed' : pct >= 45 ? '📈 A workable fit' : '😵 The scatter won'}</h2>
+      <p>The data was hiding <b>${curve.name}</b>. Fit quality <b class="gold">${pct}%</b> →
+      the project starts <b>${(12 * score).toFixed(0)}% ahead</b>.</p>
+      ${lessonBox(capFirst(curve.fact) + '.')}
+      <div class="actions"><button class="act big" data-act="mgClose">Back to the whiteboards</button></div>`);
+  }
+  requestAnimationFrame(frame);
+}
+
 // ── shared dispatch (registered onto the main ACTIONS map by tabs.js).
 // Dynamic per-game handlers live in `dyn`; the wrappers stay stable so the
 // snapshot taken by Object.assign(ACTIONS, mgHandlers) keeps working.
@@ -579,6 +773,13 @@ export const mgHandlers = {
     closeModal(); resumeWorld();
     const c = crewFor('dedup');
     if (c) applyDedupScore(arg, c.score, c.who);
+  },
+  mgSkipCurve: () => { closeModal(); resumeWorld(); },
+  mgPlayCurve: () => playCurve(),
+  mgDelegateCurve: () => {
+    closeModal(); resumeWorld();
+    const c = crewFor('curve');
+    if (c) applyCurveScore(c.score, c.who);
   },
   mgSkipNode: () => { closeModal(); resumeWorld(); },
   mgPlayNode: (arg) => playNodeHunt(parseFloat(arg)),

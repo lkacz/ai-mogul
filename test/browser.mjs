@@ -397,6 +397,49 @@ await check('paper sprint: keystrokes write the draft; the team takes it over', 
   await page.evaluate(() => { window.AIMOGUL.s.paperAuto = 0; });   // leave the suite clean
 });
 
+await check('curve fitter: research kickoff offers the scatter; the team reads it', async () => {
+  await page.evaluate(() => {
+    const s = window.AIMOGUL.s;
+    s.rp = 1e9; s.staff.researcher = 0; s.resProj = null;
+    s.research = s.research.filter(id => id !== 'bpe');
+  });
+  await page.click('[data-act=tab][data-arg=res]');
+  await page.waitForSelector('#resbtn_bpe:not([disabled])');
+  await page.click('#resbtn_bpe');
+  await page.waitForSelector('[data-act=mgPlayCurve]');
+  const offer = await page.textContent('#modal-root');
+  if (!offer.includes('pattern in the noise')) throw new Error('offer modal missing');
+  const noDelegate = await page.evaluate(() => !document.querySelector('[data-act=mgDelegateCurve]'));
+  if (!noDelegate) throw new Error('delegate offered with zero researchers');
+  await page.click('[data-act=mgPlayCurve]');                       // personal play mounts
+  await page.waitForSelector('#mg-cv');
+  const hud = await page.textContent('#mg-cv-stat');
+  if (!/joined 0\//.test(hud)) throw new Error('game HUD missing: ' + hud);
+  await page.evaluate(() => {                                       // bail out of the live game
+    document.getElementById('modal-root').classList.add('hidden');
+    window.AIMOGUL.s.paused = false;
+  });
+  // with a crew, delegation buys the head start
+  await page.evaluate(() => {
+    const s = window.AIMOGUL.s;
+    s.staff.researcher = 2; s.resProj = null;
+    s.research = s.research.filter(id => id !== 'mixedprec');
+    if (!s.research.includes('bpe')) s.research.push('bpe');
+  });
+  await page.waitForSelector('#resbtn_mixedprec:not([disabled])');
+  await page.click('#resbtn_mixedprec');
+  await page.waitForSelector('[data-act=mgDelegateCurve]');
+  await page.click('[data-act=mgDelegateCurve]');
+  const after = await page.evaluate(() => ({
+    done: window.AIMOGUL.s.resProj ? window.AIMOGUL.s.resProj.done : -1,
+    need: window.AIMOGUL.s.resProj ? window.AIMOGUL.s.resProj.need : 0,
+    paused: window.AIMOGUL.s.paused,
+  }));
+  if (!(after.done > 0 && after.done < after.need)) throw new Error('delegation gave no head start: ' + after.done);
+  if (after.paused) throw new Error('world still paused after delegation');
+  await page.evaluate(() => { window.AIMOGUL.s.resProj = null; });  // leave the suite clean
+});
+
 await check('singularity → final cinematic, save erased', async () => {
   await page.evaluate(() => {
     const s = window.AIMOGUL.s;

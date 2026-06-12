@@ -112,6 +112,12 @@ ends with a "📚 The real thing" note:
   it by bisection with 5 diagnostics and win back 90% of the lost progress. The pager is
   rate-limited so it stays an event, not a chore — and once you hire an **ops rotation (3+)**,
   they carry it: incidents get auto-bisected and most progress saved, just like real on-call.
+- **📈 Curve Fitter** (starting a research project) — every project begins as a wall of noisy
+  measurements: click the points that follow the hidden trend and they join up under your
+  cursor. The shapes are the real shapes of ML science — power laws, phase transitions,
+  double descent, periodic loss wobble — with the axes as your hint, and more noise per era.
+  A clean fit gives the project up to a +12% head start; two researchers will read the
+  scatter for you, four make it hands-free.
 - **📄 Paper Sprint** (publishing a paper) — actually *write* it: any keys work, and each
   keystroke types the next phrase of a generated preprint — title, abstract, methods, results —
   whose science matches your era (BPE tricks in the garage, weak-to-strong generalization past

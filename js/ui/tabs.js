@@ -10,7 +10,7 @@ import { fmtMoney, fmtNum, fmtFlops, fmtFlop, fmtPower, fmtDur, fmtPct, fmtDate,
 import { game, toast, showModal, closeModal, set, setBar, bar, esc, renderAll, switchTab, spawnFloat } from './ui.js';
 import { initScene } from './scene.js';
 import { initModelViz, setModelViz } from './modelviz.js';
-import { mgHandlers, offerLrGame, offerDedup } from './minigames.js';
+import { mgHandlers, offerLrGame, offerDedup, offerCurveGame } from './minigames.js';
 import { dzHandlers } from './designer.js';
 import { pwHandlers, offerPaperWrite } from './papergen.js';
 
@@ -622,8 +622,12 @@ const resTab = {
     }
   },
 };
-// rlhf minigame + era-5 explainers fire when the project COMPLETES (main.js pump)
-ACTIONS.research = (id) => doAction(E.buyResearch, id);
+// rlhf minigame + era-5 explainers fire when the project COMPLETES (main.js pump);
+// the Curve Fitter fires when it STARTS — finding the trend is the kickoff
+ACTIONS.research = (id) => {
+  const r = doAction(E.buyResearch, id);
+  if (r.ok) offerCurveGame();
+};
 ACTIONS.hireResearcher = () => doAction(E.hire, 'researcher', 1);
 
 // ════════════════════════ COMPANY ════════════════════════
@@ -724,9 +728,9 @@ const coTab = {
         : s.staff.engineer >= 2 ? 'can clean corpora for you ✓ (4+: hands-free)'
           : 'at 2+ they take dataset cleaning off your desk'}`);
     set('stafffx_researcher', `now: research speed ×${fmtNum(E.resSpeed(s, sel))} · +${fmtNum(s.staff.researcher * BAL.RP_PER_RESEARCHER * sel.fx.rpMult)} RP/h · ${
-      s.staff.researcher >= 4 ? 'every launch tuned hands-free ✓ · papers drafted on request ✓'
-        : s.staff.researcher >= 2 ? 'can tune launches & draft your papers ✓ (4+: hands-free)'
-          : 'at 2+ they take LR tuning and paper drafting off your desk'}`);
+      s.staff.researcher >= 4 ? 'launches & research kickoffs hands-free ✓ · papers on request ✓'
+        : s.staff.researcher >= 2 ? 'can tune launches, read the scatter & draft papers ✓ (4+: hands-free)'
+          : 'at 2+ they take launches, research kickoffs and papers off your desk'}`);
     set('stafffx_ops', `now: −${fmtPct(Math.min(BAL.OPS_ELEC_CAP, s.staff.ops * BAL.OPS_ELEC_EACH))} electricity · ${s.staff.ops > 0 ? 'hot spares ✓' : 'no hot spares'}${s.staff.ops >= 3 ? ' · on-call rotation ✓ (no more 3 AM pagers)' : ' · YOU carry the pager (3+ take it)'}${s.staff.ops >= 5 ? ' · burglar-proof ✓' : ''}`);
     set('stafffx_sales', `now: ×${(1 + BAL.ADOPT_SALES_K * Math.log10(1 + s.staff.sales)).toFixed(2)} market adoption speed · ${
       s.staff.sales >= 1 ? 'consulting pipeline running ✓ (gigs close themselves)'
