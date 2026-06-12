@@ -217,26 +217,43 @@ check('impact scenes: every renderer draws on the 2d-context stub', () => {
   drawVeil(ctx);
 });
 
-check('paper generator: well-formed, era-aware, varied, career-length', () => {
-  for (const [label, st] of Object.entries(states)) {
+check('paper generator: coherent, varied, era-aware, philosophical with age', () => {
+  // every era band: 8 papers, near-zero repetition, no unfilled slots
+  for (const cap of [5, 20, 45, 80, 115, 150, 200, 260]) {
+    const st = defaultState();
+    st.bestCap = cap; st.stats.papers = 2;
     const titles = new Set();
-    for (let i = 0; i < 6; i++) {
+    let phil = 0;
+    for (let i = 0; i < 8; i++) {
       const p = generatePaper(st);
       const full = [p.venue, p.title, p.authors, ...p.chunks.map(c => c.t)].join(' ');
-      if (/undefined|\[object|\{\w+\}/.test(full)) throw new Error(`${label}: unfilled slot in "${full.slice(0, 120)}"`);
-      if (!p.title || p.title.length < 8) throw new Error(`${label}: bad title "${p.title}"`);
-      if (!p.venue || !p.authors.includes('Mogul')) throw new Error(`${label}: bad venue/authors`);
-      if (p.chunks.length < 22 || p.chunks.length > 110) throw new Error(`${label}: ${p.chunks.length} chunks out of range`);
-      if (!p.chunks.some(c => c.head)) throw new Error(`${label}: no section heads`);
+      if (/undefined|\[object|\{\w+\}/.test(full)) throw new Error(`cap ${cap}: unfilled slot in "${full.slice(0, 120)}"`);
+      if (!p.title || p.title.length < 8) throw new Error(`cap ${cap}: bad title "${p.title}"`);
+      if (!p.venue || !p.authors.includes('Mogul')) throw new Error(`cap ${cap}: bad venue/authors`);
+      if (p.chunks.length < 22 || p.chunks.length > 110) throw new Error(`cap ${cap}: ${p.chunks.length} chunks out of range`);
+      if (!p.chunks.some(c => c.head)) throw new Error(`cap ${cap}: no section heads`);
       titles.add(p.title);
+      if (p.phil) phil++;
     }
-    if (titles.size < 4) throw new Error(`${label}: titles too repetitive (${titles.size}/6 unique)`);
+    if (titles.size < 7) throw new Error(`cap ${cap}: titles too repetitive (${titles.size}/8 unique)`);
+    // the philosophical gradient: none in the garage, dominant at the end
+    if (cap <= 20 && phil > 0) throw new Error(`cap ${cap}: philosophy arrived too early`);
+    if (cap >= 240 && phil < 3) throw new Error(`cap ${cap}: late era not philosophical enough (${phil}/8)`);
   }
   // a long career writes long papers, capped at ~100 keystrokes
-  const vet = JSON.parse(JSON.stringify(states.mid));
-  vet.stats.papers = 30;
+  const vet = defaultState();
+  vet.bestCap = 50; vet.stats.papers = 30;
   const long = generatePaper(vet);
   if (long.chunks.length < 85) throw new Error(`veteran paper too short: ${long.chunks.length}`);
+  // philosophical papers carry the argument genre, not the benchmark genre
+  const deep = defaultState();
+  deep.bestCap = 270;
+  let sawArgument = false;
+  for (let i = 0; i < 8; i++) {
+    const p = generatePaper(deep);
+    if (p.phil && p.chunks.some(c => c.head && /Argument/.test(c.t))) sawArgument = true;
+  }
+  if (!sawArgument) throw new Error('no argument-genre paper generated in the deep era');
 });
 
 check('dilemma scenes: every dilemma has an explicit, valid establishing shot', () => {
