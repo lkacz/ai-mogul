@@ -198,6 +198,15 @@ of how your models changed civilization.
   benchmark test set — catch the contamination!), 14 RLHF failure modes sampled 5 at a time,
   9 root causes in Node Hunt, and a freshly randomized stability ceiling for every LR ride.
 
+## Three founders 🧑‍🔬🧢🤍
+
+Every new story starts with a choice of who walks into the cold garage: **Mario Damodei**
+(the scaling-laws believer), **Al Saltman** (absolute, unshakeable vibes), or **Mura Mirati**
+(ex-CTO of the most famous lab on Earth — and, for one unforgettable weekend, its CEO; her
+tagline is "Calm is a feature"). Each founder has their own pixel sprite, intro, and 40 quotes
+in their own voice; all the game's story text re-voices itself to whoever you picked. Each
+ending queues a different founder to lead the next New Game+.
+
 ## How to play
 
 - **Lab** — watch your lab live; allocate compute between training, inference (revenue) and research; do gigs early.

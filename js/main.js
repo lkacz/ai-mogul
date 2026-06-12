@@ -71,7 +71,8 @@ function grantOffline() {
 // wordless nudge toward a fresh story, never a lock.
 function showFounderChoice() {
   game.founderPending = true;   // the garage behind stays empty until they walk in
-  const order = metaFounder() === 'al' ? ['al', 'mario'] : ['mario', 'al'];
+  const lead = metaFounder();
+  const order = [lead, ...Object.keys(FOUNDERS).filter(id => id !== lead)];
   const card = (id) => {
     const f = FOUNDERS[id];
     return `<button class="founder-card" data-act="pickFounder" data-arg="${id}">
@@ -85,7 +86,7 @@ function showFounderChoice() {
   showModal(`<h2>🧠 AI MOGUL</h2>
     <p><b>Choose your founder.</b><br>
     <span class="muted">A cold garage. $1,500. One used BTX 1070. Who walks in?</span></p>
-    <div class="row" style="gap:12px; align-items:stretch">${order.map(card).join('')}</div>`);
+    <div class="row" style="gap:12px; align-items:stretch">${order.map(card).join('')}</div>`, 'wide');
   for (const id of order) drawFounderPortrait(document.getElementById('fc_' + id), id);
 }
 ACTIONS.pickFounder = (id) => {
@@ -157,9 +158,11 @@ function maybeShowSingularity() {
   try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* ignore */ }
   try {
     const meta = JSON.parse(localStorage.getItem(META_KEY) || '{}');
+    // each ending queues a founder who hasn't just starred: mario → al → mura → mario
+    const NEXT = { mario: 'al', al: 'mura', mura: 'mario' };
     localStorage.setItem(META_KEY, JSON.stringify({
       runs: (meta.runs || 0) + 1,
-      founder: s.founder === 'al' ? 'mario' : 'al',
+      founder: NEXT[s.founder] || 'mario',
     }));
   } catch (e) { /* ignore */ }
   closeModal();

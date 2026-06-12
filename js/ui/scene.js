@@ -427,6 +427,13 @@ function drawPerson(ctx, c, t) {
     P(ctx, x + 0, y0 - 4, 1, 2, CHROME_D);                          // antenna
     P(ctx, x + 0, y0 - 5, 1, 1, Math.sin(t * 5 + c.seed) > 0 ? '#a78bfa' : '#4c3a6b');
     if (r.curls) { P(ctx, x - 2, y0 - 3, 2, 1, r.hair); P(ctx, x + 1, y0 - 3, 2, 1, r.hair); }
+    if (r.longHair) { P(ctx, x - 4, y0, 1, 6, r.hair); P(ctx, x + 4, y0, 1, 6, r.hair); } // strands below the shell
+  } else if (r.longHair) {
+    P(ctx, x - 3, y0 - 2, 7, 3, r.hair);          // crown
+    P(ctx, x - 4, y0 - 1, 1, 10, r.hair);         // long waves past the shoulders
+    P(ctx, x + 4, y0 - 1, 1, 10, r.hair);
+    P(ctx, x - 3, y0 + 1, 1, 4, r.hair);
+    P(ctx, x + 3, y0 + 1, 1, 4, r.hair);
   } else if (r.curls) {
     P(ctx, x - 3, y0 - 2, 7, 3, r.hair);
     P(ctx, x - 3, y0 + 1, 1, 2, r.hair);
@@ -475,7 +482,13 @@ export function drawFounderPortrait(cv, founderId) {
   P(ctx, x - 4, y0 + 7, 1, 5, r.top);                        // arms
   P(ctx, x + 4, y0 + 7, 1, 5, r.top);
   P(ctx, x - 2, y0, 5, 6, r.skin);                           // head
-  if (r.curls) {
+  if (r.longHair) {
+    P(ctx, x - 3, y0 - 2, 7, 3, r.hair);                     // crown
+    P(ctx, x - 4, y0 - 1, 1, 10, r.hair);                    // long waves past the shoulders
+    P(ctx, x + 4, y0 - 1, 1, 10, r.hair);
+    P(ctx, x - 3, y0 + 1, 1, 4, r.hair);
+    P(ctx, x + 3, y0 + 1, 1, 4, r.hair);
+  } else if (r.curls) {
     P(ctx, x - 3, y0 - 2, 7, 3, r.hair);
     P(ctx, x - 3, y0 + 1, 1, 2, r.hair);
     P(ctx, x + 3, y0 + 1, 1, 2, r.hair);

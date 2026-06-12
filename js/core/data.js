@@ -255,12 +255,69 @@ export const FOUNDERS = {
     ],
     sprite: { top: '#8d959e', pants: '#33415a', hair: '#7a5b3a', skin: '#e6b486', glasses: false, hoodie: true },
   },
+  mura: {
+    id: 'mura', name: 'Mura Mirati', first: 'Mura', emoji: '🤍', she: true,
+    title: 'Founder, Mogul AI (was running everything anyway)',
+    tagline: 'Calm is a feature.',
+    intro: '<b>Mura Mirati</b> just left the most famous AI lab on Earth — she was its CTO, and for one unforgettable weekend, its CEO. Assets: <b>$1,500</b>, a gaming PC with a used BTX 1070, and a calm that makes loss curves behave. The garage is cold. She has already measured exactly how cold.',
+    quotes: [
+      'Calm is a feature. I shipped it first.',
+      'I was CEO for one weekend. It aged me one decade. Worth it for the notes.',
+      'The model is matrix multiplication with good manners.',
+      'Everyone asks about timelines. Nobody asks about test coverage.',
+      'I don\'t raise my voice. I raise the batch size.',
+      'The tools change. Taste stays. Bring taste.',
+      'Before AI I built cars and AR headsets. Same job: physics, patience, shipping.',
+      'My standup update is one word. Usually "converging".',
+      'A good eval beats a thousand opinions.',
+      'Hype is a tax. I prefer compounding quietly.',
+      'People say I\'m hard to read. The loss curve isn\'t. Read that.',
+      'We ship when it\'s safe and ready. In that order.',
+      'I test the product myself at 2 AM. Bugs are more honest then.',
+      'Fast is fine. Correct is faster.',
+      'Intelligence is cheap now. Judgment is still handmade.',
+      'I left the most famous lab on Earth. The garage has better focus.',
+      'Two kinds of founders: loud, and shipped.',
+      'The future arrives in checkpoints.',
+      'My favorite feature is the off switch. Every good tool has one.',
+      'What keeps me up at night? The fan curve on rack two.',
+      'You don\'t need a moonshot. You need a Tuesday that compounds.',
+      'Composure scales better than charisma.',
+      'The safest demo is the one you already ran two hundred times.',
+      'Make it work, make it right, make it boring. Boring is the goal.',
+      'When the room panics, somebody has to take notes. That\'s leadership.',
+      'Models hallucinate less when the data does.',
+      'A product is a promise with an API.',
+      'My management style? Low-temperature sampling.',
+      'I once fixed a demo live on stage. Nobody noticed. That\'s the job.',
+      'The org chart is a graph. Keep it acyclic.',
+      'Third founder, same garage. The rent on dreams hasn\'t changed.',
+      'Ask the model hard questions. Ask yourself harder ones.',
+      'The quietest person in the room trained the loudest model.',
+      'I speak four languages. The loss curve is my fifth.',
+      'My interviews are one question: show me something you finished.',
+      'Panic is just attention with bad scheduling.',
+      'I read the logs like letters. Some days they\'re love letters.',
+      'Strong opinions, quietly held, version-controlled.',
+      'The board drama? I kept the servers running. Somebody had to.',
+      'Elegance is what\'s left after you remove everything that breaks.',
+    ],
+    sprite: { top: '#e3ded2', pants: '#2a2f3a', hair: '#1f1610', skin: '#e2b491', glasses: false, longHair: true },
+  },
 };
 
 // Re-voice Mario-flavored text for the current founder (single choke point).
+// For a female founder, pronouns flip too — but only in text that actually
+// names Mario, so pronouns about other people are never touched.
 export function founderize(txt, founderId) {
   if (!founderId || founderId === 'mario') return txt;
   const f = FOUNDERS[founderId];
   if (!f) return txt;
-  return String(txt).replaceAll('Mario Damodei', f.name).replaceAll('Mario', f.first);
+  let t = String(txt);
+  if (f.she && t.includes('Mario')) {
+    t = t.replace(/\bhis\b/g, 'her').replace(/\bHis\b/g, 'Her')
+      .replace(/\bhim\b/g, 'her').replace(/\bHim\b/g, 'Her')
+      .replace(/\bhe\b/g, 'she').replace(/\bHe\b/g, 'She');
+  }
+  return t.replaceAll('Mario Damodei', f.name).replaceAll('Mario', f.first);
 }

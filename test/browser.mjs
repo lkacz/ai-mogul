@@ -46,7 +46,7 @@ await check('fresh boot: cosmic opening → founder choice → intro modal', asy
   await page.click('#opening-canvas');           // skip the fall to the garage
   await page.waitForSelector('[data-act=pickFounder]', { timeout: 6000 });
   const choice = await page.textContent('#modal-root .modal');
-  if (!choice.includes('Mario Damodei') || !choice.includes('Al Saltman'))
+  if (!choice.includes('Mario Damodei') || !choice.includes('Al Saltman') || !choice.includes('Mura Mirati'))
     throw new Error('founder choice missing a candidate');
   const first = await page.getAttribute('#modal-root [data-act=pickFounder]', 'data-arg');
   if (first !== 'mario') throw new Error('fresh game should lead with Mario, got ' + first);

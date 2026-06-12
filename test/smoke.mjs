@@ -345,6 +345,27 @@ check('quip decks: no repeats until a pool is exhausted, no boundary repeat', ()
   }
 });
 
+check('founders: three to choose from, quote decks stocked, pronouns flip safely', () => {
+  const { FOUNDERS, founderize } = awaitedData;
+  for (const [id, f] of Object.entries(FOUNDERS)) {
+    if (!f.name || !f.intro || !f.tagline || !f.sprite) throw new Error(`${id}: incomplete founder`);
+    if ((f.quotes || []).length < 40) throw new Error(`${id}: only ${(f.quotes || []).length} quotes (the quip deck wants 40)`);
+  }
+  if (!FOUNDERS.mura || !FOUNDERS.mura.she || !FOUNDERS.mura.sprite.longHair) {
+    throw new Error('mura is missing her flags');
+  }
+  // founder-voiced text flips name AND pronouns
+  const t = founderize('Mario kicks off his first training run. He is happy; investors call him.', 'mura');
+  if (t !== 'Mura kicks off her first training run. She is happy; investors call her.') {
+    throw new Error('pronoun flip wrong: ' + t);
+  }
+  // text about OTHER people (no Mario in it) is never touched
+  const u = founderize('The senator says what he really thinks; his base believes him.', 'mura');
+  if (u !== 'The senator says what he really thinks; his base believes him.') {
+    throw new Error('flipped a stranger\'s pronouns: ' + u);
+  }
+});
+
 check('facility construction: paid now, opens later, one at a time', () => {
   const { FACILITIES } = awaitedData;
   const s = defaultState();
