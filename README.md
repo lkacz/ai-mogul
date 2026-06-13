@@ -255,5 +255,9 @@ npm run test:browser
 
 Settings → Pages → deploy from branch → `main` / root. That's it (`.nojekyll` included).
 
+## About
+
+Developed with Fable 5 (Anthropic) by Lukasz D. Kaczmarek ([lkacz@amu.edu.pl](mailto:lkacz@amu.edu.pl)).
+
 ---
 *Made with Claude Code. Any resemblance to real lab founders, living or scaling, is affectionate parody.*

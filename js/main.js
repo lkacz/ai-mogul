@@ -181,6 +181,11 @@ ACTIONS.settings = () => {
     <div id="save-io" style="margin-top:10px"></div>
     <p class="faint" style="margin-top:12px">AI Mogul saves your game every 15 s. The numbers are squeezed to keep play fun,
     but the mechanics are real: Chinchilla scaling, MFU, PUE, batch-size limits, adoption curves.</p>
+    <div class="faint small" style="margin-top:12px; border-top:1px solid rgba(255,255,255,.12); padding-top:10px">
+      <b>About</b><br>
+      Developed with Fable 5 (Anthropic) by Lukasz D. Kaczmarek
+      (<a href="mailto:lkacz@amu.edu.pl" style="color:var(--accent)">lkacz@amu.edu.pl</a>).
+    </div>
     <div class="actions"><button class="act" data-act="closeModal">Close</button></div>`);
 };
 ACTIONS.saveNow = () => { save(); toast('Game saved.'); };
