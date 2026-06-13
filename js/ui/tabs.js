@@ -8,7 +8,7 @@ import { GPU_BY_ID, gpuPrice } from '../core/state.js';
 import * as E from '../core/engine.js';
 import { fmtMoney, fmtNum, fmtFlops, fmtFlop, fmtPower, fmtDur, fmtPct, fmtDate, clamp, log10 } from '../core/util.js';
 import { game, toast, showModal, closeModal, set, setBar, bar, esc, renderAll, switchTab, spawnFloat } from './ui.js';
-import { initScene } from './scene.js';
+import { initScene, drawFounderPortrait } from './scene.js';
 import { initModelViz, setModelViz } from './modelviz.js';
 import { mgHandlers, offerLrGame, offerDedup, offerCurveGame } from './minigames.js';
 import { dzHandlers } from './designer.js';
@@ -80,7 +80,7 @@ const labTab = {
           </div>
         </div>` : `<div class="card">
           <div class="row" style="gap:14px">
-            <div style="font-size:40px">${founderOf(s).emoji}</div>
+            <canvas id="lab-founder" style="width:40px; height:52px; image-rendering:pixelated; flex:none" title="${esc(founderOf(s).name)}"></canvas>
             <div>
               <b>${esc(founderOf(s).name)}</b> <span class="muted">· ${esc(founderOf(s).title)}</span>
               <div class="muted" style="font-style:italic; margin-top:3px" id="founder-quote">“${esc(founderOf(s).quotes[quoteIdx % founderOf(s).quotes.length])}”</div>
@@ -128,6 +128,8 @@ const labTab = {
   },
   afterBuild() {
     initScene(document.getElementById('scene-canvas'));
+    const fp = document.getElementById('lab-founder');
+    if (fp) drawFounderPortrait(fp, game.s.founder);
   },
   update(s, sel) {
     set('founder-quote', '“' + founderOf(s).quotes[quoteIdx % founderOf(s).quotes.length] + '”');
