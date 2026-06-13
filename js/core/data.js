@@ -199,7 +199,7 @@ export const MARIO_QUOTES = [
 // lab boss. Core text is written for Mario; founderize() re-voices it.
 export const FOUNDERS = {
   mario: {
-    id: 'mario', name: 'Mario Damodei', first: 'Mario', emoji: '🧑‍🔬',
+    id: 'mario', name: 'Mario Damodei', first: 'Mario',
     title: 'Founder, Mogul AI',
     tagline: 'The scaling laws aren\'t done.',
     intro: '<b>Mario Damodei</b> just quit his job at a big AI lab. Assets: <b>$1,500</b>, a gaming PC with a used BTX 1070, and a conviction the scaling laws aren\'t done. The garage is cold. The loss curves will warm it.',
@@ -207,7 +207,7 @@ export const FOUNDERS = {
     sprite: { top: '#46555f', pants: '#2c333d', hair: '#241a12', skin: '#e6b486', glasses: true, curls: true },
   },
   al: {
-    id: 'al', name: 'Al Saltman', first: 'Al', emoji: '🧢',
+    id: 'al', name: 'Al Saltman', first: 'Al',
     title: 'Founder, Mogul AI (again, somehow)',
     tagline: 'Absolute, unshakeable vibes.',
     intro: '<b>Al Saltman</b> just left a very famous AI lab, after a whirlwind weekend of boardroom plot twists everyone retells differently. Assets: <b>$1,500</b>, a gaming PC with a used BTX 1070, and absolute, unshakeable vibes. The garage is cold. He calls it "pre-warm".',
@@ -256,7 +256,7 @@ export const FOUNDERS = {
     sprite: { top: '#8d959e', pants: '#33415a', hair: '#7a5b3a', skin: '#e6b486', glasses: false, hoodie: true },
   },
   mura: {
-    id: 'mura', name: 'Mura Mirati', first: 'Mura', emoji: '🤍', she: true,
+    id: 'mura', name: 'Mura Mirati', first: 'Mura', she: true,
     title: 'Founder, Mogul AI (was running everything anyway)',
     tagline: 'Calm is a feature.',
     intro: '<b>Mura Mirati</b> just left the most famous AI lab on Earth — she was its CTO, and for one unforgettable weekend, its CEO. Assets: <b>$1,500</b>, a gaming PC with a used BTX 1070, and a calm that makes loss curves behave. The garage is cold. She has already measured exactly how cold.',
